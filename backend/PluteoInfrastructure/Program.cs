@@ -1,4 +1,4 @@
-using Pluteo.Infrastructure;;
+using Pluteo.Infrastructure;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
