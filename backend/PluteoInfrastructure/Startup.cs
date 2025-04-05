@@ -1,7 +1,7 @@
-using pluteo_domain.Models.Settings;
+using Pluteo.Domain.Models.Settings;
 using MongoDB.Driver;
 
-namespace pluteo_infrastructure;
+namespace Pluteo.Infrastructure;
 public class Startup(IConfiguration configuration)
 {
     public IConfiguration ConfigRoot

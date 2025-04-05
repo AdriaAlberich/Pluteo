@@ -1,4 +1,4 @@
-namespace pluteo_domain.Models.Settings;
+namespace Pluteo.Domain.Models.Settings;
 public sealed class DatabaseSettings
 {
     public required string ConnectionString { get; set; }
