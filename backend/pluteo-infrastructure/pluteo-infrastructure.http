@@ -1,0 +1,6 @@
+@pluteo_infrastructure_HostAddress = http://localhost:5299
+
+GET {{pluteo_infrastructure_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
