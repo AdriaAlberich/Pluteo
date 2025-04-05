@@ -1,3 +1,4 @@
+using pluteo_infrastructure;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +19,10 @@ builder.Services.AddSingleton(Log.Logger);
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
+
+Console.WriteLine($"Configuring services...");
+    var startup = new Startup(builder.Configuration);
+    startup.ConfigureServices(builder.Services);
 
 var app = builder.Build();
 
