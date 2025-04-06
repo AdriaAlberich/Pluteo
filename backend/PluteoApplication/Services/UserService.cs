@@ -6,6 +6,7 @@ using Pluteo.Domain.Models.Entities;
 using Pluteo.Domain.Static;
 using Pluteo.Domain.Exceptions;
 using System.Text.RegularExpressions;
+using Pluteo.Domain.Models.Dto.Users;
 
 namespace Pluteo.Application.Services;
 public class UserService(ApplicationSettings config, ILogger logger, IBaseRepository<User, Guid> userRepository, ITokenGenerator tokenGenerator, IPasswordValidator passwordValidator, IPasswordCipher passwordCipher) : IUserService
@@ -37,12 +38,32 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
 
     public async Task Update(User user)
     {
-        if(user == null || await GetById(user.Id) == null)
-            throw new ServiceException("USER_NOT_EXISTS");
-
         await _userRepository.Update(user);
 
         _logger.Information("User {Email} ({Id}) has been updated.", user.Email, user.Id);
+    }
+
+    public async Task UpdateFromRequest(Guid userId, UserUpdateRequest userUpdateRequest)
+    {
+        if(userUpdateRequest == null)
+            throw new ServiceException("USER_UPDATE_REQUEST_NULL");
+
+        User user = await GetById(userId);
+        if(user == null)
+            throw new ServiceException("USER_NOT_EXISTS");
+        
+        bool isUpdated = false;
+        if(!string.IsNullOrWhiteSpace(userUpdateRequest.Email) && userUpdateRequest.Email != user.Email)
+        {
+            await CheckEmail(userUpdateRequest.Email);
+            user.Email = userUpdateRequest.Email;
+            isUpdated = true;
+        }
+
+        if(isUpdated)
+            await Update(user);
+        else
+            _logger.Information("User {Email} ({Id}) has no changes to update.", user.Email, user.Id);
     }
 
     public async Task Delete(Guid userId)
