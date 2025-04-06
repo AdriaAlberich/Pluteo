@@ -3,5 +3,8 @@ public sealed class ApplicationSettings
 {
     public required string JwtKey { get; set; }
     public required int AccessTokenExpireMinutes { get; set; }
+    public required int PasswordIterations { get; set; }
+    public required int PasswordLimit { get; set; }
+    public required string PasswordPattern { get; set; }
 }
 
