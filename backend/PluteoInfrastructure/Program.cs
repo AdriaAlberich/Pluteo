@@ -3,10 +3,6 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-
 Console.WriteLine("Configuring logger...");
 Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
@@ -23,6 +19,10 @@ builder.Services.AddEndpointsApiExplorer();
 Console.WriteLine("Configuring services...");
 var startup = new Startup(builder.Configuration);
 startup.ConfigureServices(builder.Services);
+
+// Add services to the container.
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
