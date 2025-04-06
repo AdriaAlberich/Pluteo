@@ -185,17 +185,37 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
 
     public async Task ChangePassword(User user, string currentPassword, string newPassword, string newPasswordRepeat)
     {
-        throw new NotImplementedException();
+        if(string.IsNullOrWhiteSpace(user.Password))
+            throw new ServiceException("USER_PASSWORD_HASH_EMPTY");
+
+        (bool verified, bool needsUpgrade) = _passwordCipher.Check(user.Password, currentPassword);
+
+        if (!verified)
+            throw new ServiceException("USER_PASSWORD_INCORRECT");
+
+        if(!await CheckPasswordValid(newPassword))
+            throw new ServiceException("USER_NEW_PASSWORD_NOT_VALID");
+
+        if(newPassword != newPasswordRepeat)
+            throw new ServiceException("USER_NEW_PASSWORD_CONFIRMATION_NOT_MATCH");
+
+        user.Password = _passwordCipher.Encrypt(newPassword);
+
+        await Update(user);
+
+        _logger.Information("{Email} ({Id}) changed his password", user.Email, user.Id);
     }
 
     public async Task ChangePasswordByEmail(string email, string currentPassword, string newPassword, string newPasswordRepeat)
     {
-        throw new NotImplementedException();
+        var user = await GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_EXISTS");
+        await ChangePassword(user, currentPassword, newPassword, newPasswordRepeat);
     }
 
     public async Task ChangePasswordById(Guid userId, string currentPassword, string newPassword, string newPasswordRepeat)
     {
-        throw new NotImplementedException();
+        var user = await GetById(userId) ?? throw new ServiceException("USER_NOT_EXISTS");
+        await ChangePassword(user, currentPassword, newPassword, newPasswordRepeat);
     }
 
     public async Task ResetPassword(string token, string newPassword, string newPasswordRepeat)
