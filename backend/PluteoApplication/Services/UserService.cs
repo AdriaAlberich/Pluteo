@@ -153,14 +153,34 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
         throw new NotImplementedException();
     }
 
-    public async Task SetRole(Guid userId, string role)
+    public async Task AddRole(Guid userId, string role)
     {
-        throw new NotImplementedException();
+        if(!UserRoles.Roles.Contains(role))
+            throw new ServiceException("USER_ROLE_NOT_VALID");
+
+        User user = await GetById(userId) ?? throw new ServiceException("USER_NOT_EXISTS");
+        if (user.Roles.Contains(role))
+            throw new ServiceException("USER_ALREADY_HAS_ROLE");
+
+        user.Roles.Add(role);
+
+        await Update(user);
+        _logger.Information("User {Email} ({Id}) has been assigned role {Role}", user.Email, user.Id, role);
     }
 
     public async Task RemoveRole(Guid userId, string role)
     {
-        throw new NotImplementedException();
+        if(!UserRoles.Roles.Contains(role))
+            throw new ServiceException("USER_ROLE_NOT_VALID");
+
+        User user = await GetById(userId) ?? throw new ServiceException("USER_NOT_EXISTS");
+        if (!user.Roles.Contains(role))
+            throw new ServiceException("USER_DOES_NOT_HAVE_ROLE");
+
+        user.Roles.Remove(role);
+
+        await Update(user);
+        _logger.Information("User {Email} ({Id}) has been removed role {Role}", user.Email, user.Id, role);
     }
 
     public async Task ChangePassword(User user, string currentPassword, string newPassword, string newPasswordRepeat)
