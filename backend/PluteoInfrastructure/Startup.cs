@@ -1,4 +1,5 @@
 using Pluteo.Domain.Models.Settings;
+using Pluteo.Infrastructure.AutoMapperProfiles;
 using MongoDB.Driver;
 
 namespace Pluteo.Infrastructure;
@@ -22,5 +23,8 @@ public class Startup(IConfiguration configuration)
         services.AddSingleton<IMongoClient>(s => 
             new MongoClient(ConfigRoot.GetSection("DatabaseSettings").GetValue<string>("ConnectionString"))
         );
+
+        // Register AutoMapper profiles
+        services.AddAutoMapper(typeof(UserProfile));
     }
 }
