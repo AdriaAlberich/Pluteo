@@ -145,5 +145,43 @@ public class UserController(UserService userService, IWebHostEnvironment env, IL
         }
     }
 
+    [Authorize(Roles = "Admin")]
+    [HttpPost("{userId}/addrole/{role}")]
+    public async Task<ActionResult> AddRole(Guid userId, string role)
+    {
+        try
+        {
+            await _userService.AddRole(userId, role);
+            return Ok();
+        }
+        catch (ServiceException se)
+        {
+            return StatusCode(StatusCodes.Status406NotAcceptable, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+        }
+        catch (Exception e)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ExceptionControl.ProcessException(e, _logger, _env.IsDevelopment(), false));
+        }
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("{userId}/removerole/{role}")]
+    public async Task<ActionResult> RemoveRole(Guid userId, string role)
+    {
+        try
+        {
+            await _userService.RemoveRole(userId, role);
+            return Ok();
+        }
+        catch (ServiceException se)
+        {
+            return StatusCode(StatusCodes.Status406NotAcceptable, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+        }
+        catch (Exception e)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ExceptionControl.ProcessException(e, _logger, _env.IsDevelopment(), false));
+        }
+    }
+
     #endregion
 }
