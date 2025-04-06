@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using Pluteo.Domain.Dto;
+using Pluteo.Domain.Models.Dto;
 using ILogger = Serilog.ILogger;
 
 namespace Pluteo.Infrastructure.Utils;
