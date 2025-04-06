@@ -3,9 +3,9 @@ using Pluteo.Domain.Models.Entities;
 namespace Pluteo.Domain.Interfaces.Services;
 public interface IUserService : IBaseEntityService<User, Guid>
 {
-        Task<User> Create(string userName, string email, string password);
-        Task Register(string username, string email, string password, string passwordRepeat);
-        Task<(string userName, string accessToken)> Login(string email, string password);
+        Task<User> Create(string email, string password);
+        Task Register(string email, string password, string passwordRepeat);
+        Task<string> Login(string email, string password);
         Task SendUserActivation(string email);
         Task ActivateUser(string token);
         Task SetRole(Guid userId, string role);

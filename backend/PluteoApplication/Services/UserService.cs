@@ -3,53 +3,88 @@ using Pluteo.Domain.Interfaces.Services;
 using Pluteo.Domain.Models.Settings;
 using Pluteo.Domain.Interfaces;
 using Pluteo.Domain.Models.Entities;
+using Pluteo.Domain.Static;
+using Pluteo.Domain.Exceptions;
+using System.Text.RegularExpressions;
 
 namespace Pluteo.Application.Services;
-public class UserService(ApplicationSettings config, ILogger logger, IBaseRepository<User, Guid> userRepository, ITokenGenerator tokenGenerator) : IUserService
+public class UserService(ApplicationSettings config, ILogger logger, IBaseRepository<User, Guid> userRepository, ITokenGenerator tokenGenerator, IPasswordValidator passwordValidator, IPasswordCipher passwordCipher) : IUserService
 {
     private readonly ApplicationSettings _config = config;
-    
     private readonly ILogger _logger = logger;
-
     private readonly IBaseRepository<User, Guid> _userRepository = userRepository;
     private readonly ITokenGenerator _tokenGenerator = tokenGenerator;
+    private readonly IPasswordValidator _passwordValidator = passwordValidator;
+    private readonly IPasswordCipher _passwordCipher = passwordCipher;
 
-    public async Task<User> Create(string userName, string email, string password)
+    public async Task<User> Create(string email, string password)
     {
-        throw new NotImplementedException();
+        User newUser = new()
+        {
+            Id = Guid.NewGuid(),
+            Email = email,
+            Password = _passwordCipher.Encrypt(password),
+            //ActivationToken = _tokenGenerator.GenerateRandomToken(),
+            Roles = [UserRoles.Roles[0]], // Default role is User
+        };
+
+        await _userRepository.Create(newUser);
+
+        _logger.Information("New user {Email} ({Id}) has been registered.", newUser.Email, newUser.Id);
+
+        return newUser;
     }
 
     public async Task Update(User user)
     {
-        throw new NotImplementedException();
+        if(user == null || await GetById(user.Id) == null)
+            throw new ServiceException("USER_NOT_EXISTS");
+
+        await _userRepository.Update(user);
+
+        _logger.Information("User {Email} ({Id}) has been updated.", user.Email, user.Id);
     }
 
     public async Task Delete(Guid userId)
     {
-        throw new NotImplementedException();
+        await _userRepository.Delete(userId);
+
+        _logger.Information("User with ID ({Id}) has been deleted from database", userId);
     }
 
     public async Task<User> GetById(Guid userId)
     {
-        throw new NotImplementedException();
+        return await _userRepository.GetById(userId);
     }
 
     public async Task<List<User>> List()
     {
-        throw new NotImplementedException();
+        return await _userRepository.List();
     }
 
     public async Task<User?> GetUserByEmail(string email)
     {
-        throw new NotImplementedException();
+        List<User> users = await _userRepository.List();
+
+        return users.Find(x => x.Email == email);
     }
 
-    public async Task Register(string username, string email, string password, string passwordRepeat)
+    public async Task Register(string email, string password, string passwordRepeat)
     {
-        throw new NotImplementedException();
+        await CheckEmail(email);
+
+        if(!await CheckPasswordValid(password))
+            throw new ServiceException("USER_NEW_PASSWORD_NOT_VALID");
+
+        if(password != passwordRepeat)
+            throw new ServiceException("USER_NEW_PASSWORD_CONFIRMATION_NOT_MATCH");
+
+        User newUser = await Create(email, password);
+
+        //await SendUserActivation(newUser.Email);
     }
 
-    public async Task<(string userName, string accessToken)> Login(string email, string password)
+    public async Task<string> Login(string email, string password)
     {
         throw new NotImplementedException();
     }
@@ -101,16 +136,26 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
 
     public async Task CheckEmail(string email)
     {
-        throw new NotImplementedException();
+        if(!await CheckEmailValid(email))
+            throw new ServiceException("USER_EMAIL_NOT_VALID");
+
+        List<User> users = await _userRepository.List();
+
+        var user = users.Find(x => x.Email == email);
+
+        if(user != null)
+            throw new ServiceException("USER_EMAIL_EXISTS");
     }
 
     public async Task<bool> CheckEmailValid(string email)
     {
-        throw new NotImplementedException();
+        Regex pattern = new(_config.EmailPattern);
+
+        return await Task.Run(() => email.Length <= _config.EmailLimit && pattern.Match(email).Success);
     }
 
     public async Task<bool> CheckPasswordValid(string password)
     {
-        throw new NotImplementedException();
+        return await Task.Run(() => _passwordValidator.IsValid(password));
     }
 }
