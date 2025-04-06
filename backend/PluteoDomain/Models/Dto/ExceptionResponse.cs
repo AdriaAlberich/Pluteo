@@ -1,4 +1,4 @@
-namespace Pluteo.Domain.Dto;
+namespace Pluteo.Domain.Models.Dto;
 public class ExceptionResponse
 {
     public required string Name { get; set; }
