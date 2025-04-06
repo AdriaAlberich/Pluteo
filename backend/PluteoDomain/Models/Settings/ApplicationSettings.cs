@@ -6,5 +6,7 @@ public sealed class ApplicationSettings
     public required int PasswordIterations { get; set; }
     public required int PasswordLimit { get; set; }
     public required string PasswordPattern { get; set; }
+    public required int EmailLimit { get; set; }
+    public required string EmailPattern { get; set; }
 }
 
