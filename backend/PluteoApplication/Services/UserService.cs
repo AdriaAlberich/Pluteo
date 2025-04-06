@@ -86,7 +86,40 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
 
     public async Task<string> Login(string email, string password)
     {
-        throw new NotImplementedException();
+        if(!await CheckEmailValid(email))
+            throw new ServiceException("USER_EMAIL_NOT_VALID");
+
+        if(!await CheckPasswordValid(password))
+            throw new ServiceException("USER_PASSWORD_NOT_VALID");
+
+        List<User> users = await _userRepository.List();
+
+        var user = users.Find(x => x.Email == email);
+
+        if(user == null)
+            throw new ServiceException("USER_NOT_EXISTS");
+
+        if(string.IsNullOrWhiteSpace(user.Password))
+            throw new ServiceException("USER_PASSWORD_HASH_EMPTY");
+        
+        (bool verified, bool needsUpgrade) = _passwordCipher.Check(user.Password, password);
+
+        if (!verified)
+            throw new ServiceException("USER_PASSWORD_INCORRECT");
+
+        if(needsUpgrade)
+            throw new ServiceException("USER_PASSWORD_EXPIRED");
+
+        if(!string.IsNullOrWhiteSpace(user.ActivationToken)) 
+            throw new ServiceException("USER_NOT_ACTIVE");
+
+        if(string.IsNullOrWhiteSpace(user.Email) || user.Roles == null || user.Roles.Count == 0)
+            throw new ServiceException("USER_MISSING_DATA");
+
+        string accessToken = _tokenGenerator.GenerateAccessToken(user.Email, user.Roles);
+
+        _logger.Information("User {Email} ({Id}) logged in", user.Email, user.Id);
+        return accessToken;
     }
 
     public async Task SendUserActivation(string email)
