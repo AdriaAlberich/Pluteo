@@ -1,18 +1,16 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authorization;
-using MongoDB.Driver;
 using AutoMapper;
 using ILogger = Serilog.ILogger;
-using System.Security.Claims;
 using Pluteo.Application.Services;
 using Pluteo.Domain.Exceptions;
 using Pluteo.Infrastructure.Utils;
 using Pluteo.Domain.Models.Dto.Users;
 using Pluteo.Domain.Models.Settings;
-using Pluteo.Domain.Models.Entities;
 
 namespace Pluteo.Infrastructure.Controllers;
+[ApiController]
+[Produces("application/json")]
 [Route("api/users")]
 public class UserController(UserService userService, IWebHostEnvironment env, ILogger logger, IMapper mapper, ApplicationSettings config) : Controller
 {
