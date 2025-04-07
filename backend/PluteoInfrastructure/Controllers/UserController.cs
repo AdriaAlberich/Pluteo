@@ -67,7 +67,7 @@ public class UserController(UserService userService, IWebHostEnvironment env, IL
     }
 
     [AllowAnonymous]
-    [HttpPost("activate")]
+    [HttpPatch("activate")]
     public async Task<ActionResult> Activate([FromQuery] string token)
     {
         try
@@ -95,7 +95,7 @@ public class UserController(UserService userService, IWebHostEnvironment env, IL
     }
 
     [AllowAnonymous]
-    [HttpPost("lost-password")]
+    [HttpPatch("lost-password")]
     public async Task<ActionResult> LostPassword([FromQuery] string email)
     {
         try
@@ -115,7 +115,7 @@ public class UserController(UserService userService, IWebHostEnvironment env, IL
     }
 
     [AllowAnonymous]
-    [HttpPost("reset-password")]
+    [HttpPatch("reset-password")]
     public async Task<ActionResult> ResetPassword([FromQuery] string token, [FromBody] ResetPasswordRequest request)
     {
         try
@@ -143,7 +143,7 @@ public class UserController(UserService userService, IWebHostEnvironment env, IL
     }
 
     [Authorize(Roles = "User")]
-    [HttpPost("change-password")]
+    [HttpPatch("change-password")]
     public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
         try
@@ -194,7 +194,7 @@ public class UserController(UserService userService, IWebHostEnvironment env, IL
     }
 
     [Authorize(Roles = "User")]
-    [HttpPost("settings")]
+    [HttpPatch("settings")]
     public async Task<ActionResult> GetUserSettings([FromBody] UserSettingsUpdateRequest request)
     {
         try
