@@ -17,5 +17,9 @@ public sealed class ApplicationSettings
     public required bool DefaultNotifyLoan { get; set; }
     public required int DefaultNotifyLoanBeforeDays { get; set; }
     public required int DefaultNotifyLoanBeforeDaysFrequency { get; set; }
+    public required int MinNotifyLoanBeforeDays { get; set; }
+    public required int MaxNotifyLoanBeforeDays { get; set; }
+    public required int MinNotifyLoanBeforeDaysFrequency { get; set; }
+    public required int MaxNotifyLoanBeforeDaysFrequency { get; set; }
 }
 
