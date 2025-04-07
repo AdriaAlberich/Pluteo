@@ -170,6 +170,53 @@ public class UserController(UserService userService, IWebHostEnvironment env, IL
         }
     }
 
+    [Authorize(Roles = "User")]
+    [HttpGet("settings")]
+    public async Task<ActionResult> GetUserSettings()
+    {
+        try
+        {
+            var userEmail = GetUserEmail(User);
+
+            if (string.IsNullOrWhiteSpace(userEmail))
+                return BadRequest("USER_EMAIL_NULL");
+
+            return Ok(await _userService.GetUserSettings(userEmail));
+        }
+        catch (ServiceException se)
+        {
+            return StatusCode(StatusCodes.Status406NotAcceptable, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+        }
+        catch (Exception e)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ExceptionControl.ProcessException(e, _logger, _env.IsDevelopment(), false));
+        }
+    }
+
+    [Authorize(Roles = "User")]
+    [HttpPost("settings")]
+    public async Task<ActionResult> GetUserSettings([FromBody] UserSettingsUpdateRequest request)
+    {
+        try
+        {
+            var userEmail = GetUserEmail(User);
+
+            if (string.IsNullOrWhiteSpace(userEmail))
+                return BadRequest("USER_EMAIL_NULL");
+
+            await _userService.UpdateUserSettings(userEmail, request);
+
+            return Ok();
+        }
+        catch (ServiceException se)
+        {
+            return StatusCode(StatusCodes.Status406NotAcceptable, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+        }
+        catch (Exception e)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ExceptionControl.ProcessException(e, _logger, _env.IsDevelopment(), false));
+        }
+    }
     
     #endregion
 

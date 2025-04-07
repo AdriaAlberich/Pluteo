@@ -1,3 +1,4 @@
+using Pluteo.Domain.Models.Dto.Users;
 using Pluteo.Domain.Models.Entities;
 
 namespace Pluteo.Domain.Interfaces.Services;
@@ -19,4 +20,6 @@ public interface IUserService : IBaseEntityService<User, Guid>
         Task CheckEmail(string email);
         Task<bool> CheckEmailValid(string email);
         Task<User?> GetUserByEmail(string email);
+        Task<UserSettingsResponse> GetUserSettings(string email);
+        Task UpdateUserSettings(string email, UserSettingsUpdateRequest request);
 }

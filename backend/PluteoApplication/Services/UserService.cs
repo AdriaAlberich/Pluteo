@@ -314,4 +314,75 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
     {
         return await Task.Run(() => _passwordValidator.IsValid(password));
     }
+
+    public Task<UserSettingsResponse> GetUserSettings(string email)
+    {
+        var user = GetUserByEmail(email).Result ?? throw new ServiceException("USER_EMAIL_NOT_FOUND");
+
+        return Task.FromResult(new UserSettingsResponse
+        {
+            Email = user.Email,
+            NotifyByEmail = user.Settings.NotifyByEmail,
+            NotifyLoan = user.Settings.NotifyLoan,
+            NotifyLoanBeforeDays = user.Settings.NotifyLoanBeforeDays,
+            NotifyLoanBeforeDaysFrequency = user.Settings.NotifyLoanBeforeDaysFrequency,
+            Locale = user.Settings.Locale
+        });
+    }
+
+    public async Task UpdateUserSettings(string email, UserSettingsUpdateRequest request)
+    {
+        var user = GetUserByEmail(email).Result ?? throw new ServiceException("USER_EMAIL_NOT_FOUND");
+        bool isUpdated = false;
+
+        if(request.NotifyByEmail.HasValue && request.NotifyByEmail.Value && !user.Settings.NotifyByEmail)
+        {
+            user.Settings.NotifyByEmail = request.NotifyByEmail.Value;
+            isUpdated = true;
+        }
+
+        if(request.NotifyLoan.HasValue && request.NotifyLoan.Value && !user.Settings.NotifyLoan)
+        {
+            user.Settings.NotifyLoan = request.NotifyLoan.Value;
+            isUpdated = true;
+        }
+
+        if(request.NotifyLoanBeforeDays.HasValue)
+        {
+            if(request.NotifyLoanBeforeDays < _config.MinNotifyLoanBeforeDays || request.NotifyLoanBeforeDays > _config.MaxNotifyLoanBeforeDays)
+                throw new ServiceException("USER_NOTIFY_LOAN_BEFORE_DAYS_NOT_VALID");
+
+            user.Settings.NotifyLoanBeforeDays = request.NotifyLoanBeforeDays.Value;
+
+            isUpdated = true;
+        }
+
+        if(request.NotifyLoanBeforeDaysFrequency.HasValue)
+        {
+            if(request.NotifyLoanBeforeDaysFrequency < _config.MinNotifyLoanBeforeDaysFrequency || request.NotifyLoanBeforeDaysFrequency > _config.MaxNotifyLoanBeforeDaysFrequency)
+                throw new ServiceException("USER_NOTIFY_LOAN_BEFORE_DAYS_FREQUENCY_NOT_VALID");
+
+            user.Settings.NotifyLoanBeforeDaysFrequency = request.NotifyLoanBeforeDaysFrequency.Value;
+
+            isUpdated = true;
+        }
+            
+        if(!string.IsNullOrWhiteSpace(request.Locale))
+        {
+            if(!Localizations.Locales.Contains(request.Locale))
+                throw new ServiceException("USER_LOCALE_NOT_VALID");
+
+            user.Settings.Locale = request.Locale;
+
+            isUpdated = true;
+        }
+
+        if(isUpdated)
+        {
+            await Update(user);
+            _logger.Information("User {Email} ({Id}) updated his settings", user.Email, user.Id);
+        }
+        else
+            _logger.Information("User {Email} ({Id}) has no changes to update his settings", user.Email, user.Id);
+    }
 }
