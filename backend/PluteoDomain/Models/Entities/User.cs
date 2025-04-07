@@ -5,8 +5,8 @@ public class User
     public required string Email { get; set; }
     public required string Password { get; set; }
     public required List<string> Roles { get; set; }
+    public required List<Notification> Notifications { get; set; }
+    public required UserSettings Settings { get; set; }
     public string? ActivationToken { get; set; }
     public string? ResetPasswordToken { get; set; }
-    public List<Notification>? Notifications { get; set; }
-    public UserSettings? Settings { get; set; }
 }

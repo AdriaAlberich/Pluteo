@@ -9,5 +9,10 @@ public sealed class ApplicationSettings
     public required string PasswordPattern { get; set; }
     public required int EmailLimit { get; set; }
     public required string EmailPattern { get; set; }
+    public required int UserMaxNotifications { get; set; }
+    public required bool DefaultNotifyByEmail { get; set; }
+    public required bool DefaultNotifyLoan { get; set; }
+    public required int DefaultNotifyLoanBeforeDays { get; set; }
+    public required int DefaultNotifyLoanBeforeDaysFrequency { get; set; }
 }
 

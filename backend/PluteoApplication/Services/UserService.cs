@@ -27,6 +27,15 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
             Password = _passwordCipher.Encrypt(password),
             //ActivationToken = _tokenGenerator.GenerateRandomToken(),
             Roles = [UserRoles.Roles[0]], // Default role is User
+            Notifications = [],
+            Settings = new()
+            {
+                NotifyByEmail = _config.DefaultNotifyByEmail,
+                NotifyLoan = _config.DefaultNotifyLoan,
+                NotifyLoanBeforeDays = _config.DefaultNotifyLoanBeforeDays,
+                NotifyLoanBeforeDaysFrequency = _config.DefaultNotifyLoanBeforeDaysFrequency,
+                Locale = _config.DefaultLocale
+            }
         };
 
         await _userRepository.Create(newUser);
