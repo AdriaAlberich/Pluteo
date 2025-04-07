@@ -1,4 +1,5 @@
 using Pluteo.Application.Services;
+using Pluteo.Domain.Exceptions;
 using Pluteo.Domain.Interfaces;
 using Pluteo.Domain.Interfaces.Systems;
 using Pluteo.Domain.Models.Entities;
@@ -84,6 +85,40 @@ public class NotificationSystem(ApplicationSettings config, UserService userServ
                 _logger.Warning("User {Email} ({Id}) tried to remove a non-existing notification: {NotificationId}", user.Email, user.Id, notificationId);
             }
         });
+    }
+
+    public async Task<List<Notification>> GetUserNotifications(string email)
+    {
+        User? user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_FOUND");
+
+        return await GetNotificationList(user);
+    }
+
+    public async Task NotificationUserClick(string email, Guid notificationId)
+    {
+        User? user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_FOUND");
+
+        await NotificationClick(user, notificationId);
+    }
+
+    public async Task RemoveUserNotification(string email, Guid notificationId)
+    {
+        User? user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_FOUND");
+
+        await RemoveNotification(user, notificationId);
+    }
+
+    public async Task RemoveUserNotifications(string email)
+    {
+        User? user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_FOUND");
+
+        await RemoveAllNotifications(user);
+    }
+    
+    public async Task RemoveAllNotifications(User user)
+    {
+        user.Notifications.Clear(); 
+        await _userService.Update(user);
     }
 
     public async Task SortNotifications(User user)
