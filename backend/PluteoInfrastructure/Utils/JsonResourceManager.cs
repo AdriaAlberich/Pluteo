@@ -35,6 +35,16 @@ public class JsonResourceManager : IResourceManager
         return resources;
     }
 
+    public string GetStringFormatted(string locale, string key, params object[] args)
+    {
+        if (args.Length > 0)
+        {
+            return string.Format(GetString(locale, key), args);
+        }
+
+        return GetString(locale, key);
+    }
+
     public string GetString(string locale, string key)
     {
         if (_resources[locale].TryGetValue(key, out string? value))

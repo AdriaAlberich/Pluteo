@@ -42,7 +42,7 @@ public class NotificationSystem(ApplicationSettings config, UserService userServ
                 { "notification_content", content }
             };
 
-            await _emailSender.SendEmail(_localizationManager.GetString(user.Settings.Locale, "UserNotificationEmailSubject"), $"notification_{user.Settings.Locale}", user.Email, dynamicFields);
+            await _emailSender.SendEmail(_localizationManager.GetStringFormatted(user.Settings.Locale, "UserNotificationEmailSubject", _config.ApplicationName), $"notification_{user.Settings.Locale}", user.Email, dynamicFields);
         }
 
         _logger.Information("User {Email} ({Id}) has received a new notification: {Title}", user.Email, user.Id, title);

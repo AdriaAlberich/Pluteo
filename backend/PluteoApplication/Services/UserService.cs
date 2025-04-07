@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 using Pluteo.Domain.Models.Dto.Users;
 
 namespace Pluteo.Application.Services;
-public class UserService(ApplicationSettings config, ILogger logger, IBaseRepository<User, Guid> userRepository, ITokenGenerator tokenGenerator, IPasswordValidator passwordValidator, IPasswordCipher passwordCipher, IResourceManager localizationManager) : IUserService
+public class UserService(ApplicationSettings config, ILogger logger, IBaseRepository<User, Guid> userRepository, ITokenGenerator tokenGenerator, IPasswordValidator passwordValidator, IPasswordCipher passwordCipher, IResourceManager localizationManager, IEmailSender emailSender) : IUserService
 {
     private readonly ApplicationSettings _config = config;
     private readonly ILogger _logger = logger;
@@ -18,6 +18,7 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
     private readonly IPasswordValidator _passwordValidator = passwordValidator;
     private readonly IPasswordCipher _passwordCipher = passwordCipher;
     private readonly IResourceManager _localizationManager = localizationManager;
+    private readonly IEmailSender _emailSender = emailSender;
 
     public async Task<User> Create(string email, string password)
     {
@@ -26,7 +27,6 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
             Id = Guid.NewGuid(),
             Email = email,
             Password = _passwordCipher.Encrypt(password),
-            //ActivationToken = _tokenGenerator.GenerateRandomToken(),
             Roles = [UserRoles.Roles[0]], // Default role is User
             Notifications = [],
             Settings = new()
@@ -112,7 +112,7 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
 
         User newUser = await Create(email, password);
 
-        //await SendUserActivation(newUser.Email);
+        await SendUserActivation(newUser.Email);
     }
 
     public async Task<string> Login(string email, string password)
@@ -155,7 +155,20 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
 
     public async Task SendUserActivation(string email)
     {
-        throw new NotImplementedException();
+        var user = await GetUserByEmail(email) ?? throw new ServiceException("USER_EMAIL_NOT_FOUND");
+
+        user.ActivationToken = _tokenGenerator.GenerateRandomToken();
+
+        await Update(user);
+
+        Dictionary<string,string> dynamicFields = new()
+        {
+            { "activation_url", $"{_config.ApplicationUrl}/users/activate?email={Uri.EscapeDataString(user.Email)}&token={Uri.EscapeDataString(user.ActivationToken)}" }
+        };
+
+        await _emailSender.SendEmail(_localizationManager.GetStringFormatted(user.Settings.Locale, "UserActivationEmailSubject", _config.ApplicationName), $"notification_{user.Settings.Locale}", user.Email, dynamicFields);
+
+        _logger.Information("Sent activation email to {Email} ({Id})", user.Email, user.Id);
     }
 
     public async Task ActivateUser(string token)

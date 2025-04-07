@@ -11,6 +11,8 @@ using Pluteo.Infrastructure.Utils;
 using Pluteo.Application.Services;
 using ILogger = Serilog.ILogger;
 using Pluteo.Domain.Interfaces;
+using Pluteo.Infrastructure.Integrations;
+using Pluteo.Application.Systems;
 
 namespace Pluteo.Infrastructure;
 public class Startup(IConfiguration configuration)
@@ -76,6 +78,7 @@ public class Startup(IConfiguration configuration)
         {
             var applicationSettings = s.GetRequiredService<IOptions<ApplicationSettings>>();
             var databaseSettings = s.GetRequiredService<IOptions<DatabaseSettings>>();
+            var emailSettings = s.GetRequiredService<IOptions<EmailSettings>>();
             var mongoClient = s.GetRequiredService<IMongoClient>();
             var mapper = s.GetRequiredService<IMapper>();
             var logger = s.GetRequiredService<ILogger>();
@@ -85,10 +88,28 @@ public class Startup(IConfiguration configuration)
             TokenGenerator tokenGenerator = new(applicationSettings.Value);
             PasswordValidator passwordValidator = new(applicationSettings.Value);
             PasswordCipher passwordCipher = new(applicationSettings.Value);
+            EmailSender emailSender = new(emailSettings.Value);
 
-            UserService service = new(applicationSettings.Value, logger, repository, tokenGenerator, passwordValidator, passwordCipher, localizationManager);
+            UserService service = new(applicationSettings.Value, logger, repository, tokenGenerator, passwordValidator, passwordCipher, localizationManager, emailSender);
 
             return service;
+        });
+
+        // Register NotificationSystem as Scoped
+        Console.WriteLine($"Adding NotificationSystem...");
+        services.AddScoped(s => 
+        {
+            var applicationSettings = s.GetRequiredService<IOptions<ApplicationSettings>>();
+            var emailSettings = s.GetRequiredService<IOptions<EmailSettings>>();
+            var userService = s.GetRequiredService<UserService>();
+            var logger = s.GetRequiredService<ILogger>();
+            var localizationManager = s.GetRequiredService<IResourceManager>();
+
+            EmailSender emailSender = new(emailSettings.Value);
+
+            NotificationSystem notificationSystem = new(applicationSettings.Value, userService, logger, emailSender, localizationManager);
+
+            return notificationSystem;
         });
     }
 }
