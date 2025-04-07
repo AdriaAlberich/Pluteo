@@ -163,17 +163,26 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
 
         Dictionary<string,string> dynamicFields = new()
         {
-            { "activation_url", $"{_config.ApplicationUrl}/users/activate?email={Uri.EscapeDataString(user.Email)}&token={Uri.EscapeDataString(user.ActivationToken)}" }
+            { "activation_url", $"{_config.ApplicationUrl}/users/activate?token={Uri.EscapeDataString(user.ActivationToken)}" }
         };
 
-        await _emailSender.SendEmail(_localizationManager.GetStringFormatted(user.Settings.Locale, "UserActivationEmailSubject", _config.ApplicationName), $"notification_{user.Settings.Locale}", user.Email, dynamicFields);
+        await _emailSender.SendEmail(_localizationManager.GetStringFormatted(user.Settings.Locale, "UserActivationEmailSubject", _config.ApplicationName), $"activation_{user.Settings.Locale}", user.Email, dynamicFields);
 
         _logger.Information("Sent activation email to {Email} ({Id})", user.Email, user.Id);
     }
 
-    public async Task ActivateUser(string token)
+    public async Task ActivateUser(string email, string token)
     {
-        throw new NotImplementedException();
+        User user = await GetUserByEmail(email) ?? throw new ServiceException("USER_EMAIL_NOT_FOUND");
+
+        if(user.ActivationToken != token)
+            throw new ServiceException("USER_ACTIVATION_TOKEN_NOT_VALID");
+
+        user.ActivationToken = string.Empty;
+
+        await Update(user);
+
+        _logger.Information("User {Email} ({Id}) has been activated by token", user.Email, user.Id);
     }
 
     public async Task AddRole(Guid userId, string role)
@@ -241,14 +250,44 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
         await ChangePassword(user, currentPassword, newPassword, newPasswordRepeat);
     }
 
-    public async Task ResetPassword(string token, string newPassword, string newPasswordRepeat)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task SendUserResetPassword(string email)
     {
-        throw new NotImplementedException();
+        var user = await GetUserByEmail(email) ?? throw new ServiceException("USER_EMAIL_NOT_FOUND");
+
+        user.ResetPasswordToken = _tokenGenerator.GenerateRandomToken();
+
+        await Update(user);
+
+        Dictionary<string,string> dynamicFields = new()
+        {
+            { "resetpassword_url", $"{_config.ApplicationUrl}/users/resetpassword?token={Uri.EscapeDataString(user.ResetPasswordToken)}" }
+        };
+
+        await _emailSender.SendEmail(_localizationManager.GetStringFormatted(user.Settings.Locale, "UserResetPasswordEmailSubject", _config.ApplicationName), $"resetpassword_{user.Settings.Locale}", user.Email, dynamicFields);
+
+        _logger.Information("Sent password reset email to {Email} ({Id})", user.Email, user.Id);
+    }
+
+    public async Task ResetPassword(string email, string token, string newPassword, string newPasswordRepeat)
+    {
+        User user = await GetUserByEmail(email) ?? throw new ServiceException("USER_EMAIL_NOT_FOUND");
+
+        if(user.ResetPasswordToken != token)
+            throw new ServiceException("USER_RESET_PASSWORD_TOKEN_NOT_VALID");
+
+        if(!await CheckPasswordValid(newPassword))
+            throw new ServiceException("USER_NEW_PASSWORD_NOT_VALID");
+
+        if(newPassword != newPasswordRepeat)
+            throw new ServiceException("USER_NEW_PASSWORD_CONFIRMATION_NOT_MATCH");
+
+        user.Password = _passwordCipher.Encrypt(newPassword);
+
+        user.ResetPasswordToken = string.Empty;
+
+        await Update(user);
+
+        _logger.Information("Password reset for user {Email} ({Id})", user.Email, user.Id);
     }
 
     public async Task CheckEmail(string email)
