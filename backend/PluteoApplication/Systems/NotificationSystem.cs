@@ -6,12 +6,13 @@ using Pluteo.Domain.Models.Settings;
 using ILogger = Serilog.ILogger;
 
 namespace Pluteo.Application.Systems;
-public class NotificationSystem(ApplicationSettings config, UserService userService, ILogger logger, IEmailSender emailSender) : INotificationSystem
+public class NotificationSystem(ApplicationSettings config, UserService userService, ILogger logger, IEmailSender emailSender, IResourceManager localizationManager) : INotificationSystem
 {
     private readonly ApplicationSettings _config = config;
     private readonly UserService _userService = userService;
     private readonly ILogger _logger = logger;
     private readonly IEmailSender _emailSender = emailSender;
+    private readonly IResourceManager _localizationManager = localizationManager;
 
     public async Task AddNotification(User user, string title, string content, bool markAsRead = false)
     {
@@ -32,6 +33,19 @@ public class NotificationSystem(ApplicationSettings config, UserService userServ
         await SortNotifications(user);
 
         await _userService.Update(user);
+
+        if(user.Settings.NotifyByEmail && !markAsRead)
+        {
+            Dictionary<string,string> dynamicFields = new()
+            {
+                { "notification_title", title },
+                { "notification_content", content }
+            };
+
+            await _emailSender.SendEmail(_localizationManager.GetString(user.Settings.Locale, "UserNotificationEmailSubject"), $"notification_{user.Settings.Locale}", user.Email, dynamicFields);
+        }
+
+        _logger.Information("User {Email} ({Id}) has received a new notification: {Title}", user.Email, user.Id, title);
     }
 
     public async Task<List<Notification>> GetNotificationList(User user)
@@ -51,6 +65,8 @@ public class NotificationSystem(ApplicationSettings config, UserService userServ
         notification.MarkedAsRead = true;
 
         await _userService.Update(user);
+
+        _logger.Information("User {Email} ({Id}) has clicked on notification: {Title}", user.Email, user.Id, notification.Title);
     }
 
     public async Task RemoveNotification(User user, Guid notificationId)
@@ -59,7 +75,14 @@ public class NotificationSystem(ApplicationSettings config, UserService userServ
             Notification? notification = user.Notifications.Find(x => x.NotificationId == notificationId);
 
             if(notification != null)
+            {
                 user.Notifications.Remove(notification);
+                _logger.Information("User {Email} ({Id}) has removed notification: {Title}", user.Email, user.Id, notification.Title);
+            }
+            else
+            {
+                _logger.Warning("User {Email} ({Id}) tried to remove a non-existing notification: {NotificationId}", user.Email, user.Id, notificationId);
+            }
         });
     }
 
