@@ -1,6 +1,7 @@
 namespace Pluteo.Domain.Models.Settings;
 public sealed class ApplicationSettings
 {
+    public required string DefaultLocale { get; set; }
     public required string JwtKey { get; set; }
     public required int AccessTokenExpireMinutes { get; set; }
     public required int PasswordIterations { get; set; }

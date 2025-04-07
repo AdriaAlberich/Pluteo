@@ -26,6 +26,7 @@ public class Startup(IConfiguration configuration)
         Console.WriteLine($"Registering config files...");
         services.Configure<ApplicationSettings>(ConfigRoot.GetSection("ApplicationSettings"));
         services.Configure<DatabaseSettings>(ConfigRoot.GetSection("DatabaseSettings"));
+        services.Configure<EmailSettings>(ConfigRoot.GetSection("EmailSettings"));
 
         // MongoDB Service configuration
         Console.WriteLine($"Configuring MongoDB Service...");
