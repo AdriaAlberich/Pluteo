@@ -1,0 +1,5 @@
+{
+    "UserActivationEmailSubject": "Activació del compte de Pluteo",
+    "UserResetPasswordEmailSubject": "Recuperació del compte de Pluteo",
+    "UserNotificationEmailSubject": "Notificació de Pluteo"
+}

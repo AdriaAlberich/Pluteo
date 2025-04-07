@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 using Pluteo.Domain.Models.Dto.Users;
 
 namespace Pluteo.Application.Services;
-public class UserService(ApplicationSettings config, ILogger logger, IBaseRepository<User, Guid> userRepository, ITokenGenerator tokenGenerator, IPasswordValidator passwordValidator, IPasswordCipher passwordCipher) : IUserService
+public class UserService(ApplicationSettings config, ILogger logger, IBaseRepository<User, Guid> userRepository, ITokenGenerator tokenGenerator, IPasswordValidator passwordValidator, IPasswordCipher passwordCipher, IResourceManager localizationManager) : IUserService
 {
     private readonly ApplicationSettings _config = config;
     private readonly ILogger _logger = logger;
@@ -17,6 +17,7 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
     private readonly ITokenGenerator _tokenGenerator = tokenGenerator;
     private readonly IPasswordValidator _passwordValidator = passwordValidator;
     private readonly IPasswordCipher _passwordCipher = passwordCipher;
+    private readonly IResourceManager _localizationManager = localizationManager;
 
     public async Task<User> Create(string email, string password)
     {

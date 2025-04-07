@@ -10,6 +10,7 @@ using Pluteo.Infrastructure.Repositories;
 using Pluteo.Infrastructure.Utils;
 using Pluteo.Application.Services;
 using ILogger = Serilog.ILogger;
+using Pluteo.Domain.Interfaces;
 
 namespace Pluteo.Infrastructure;
 public class Startup(IConfiguration configuration)
@@ -23,16 +24,24 @@ public class Startup(IConfiguration configuration)
     {
 
         // Register config files
-        Console.WriteLine($"Registering config files...");
+        Console.WriteLine($"Registering Config Files...");
         services.Configure<ApplicationSettings>(ConfigRoot.GetSection("ApplicationSettings"));
         services.Configure<DatabaseSettings>(ConfigRoot.GetSection("DatabaseSettings"));
         services.Configure<EmailSettings>(ConfigRoot.GetSection("EmailSettings"));
 
         // MongoDB Service configuration
-        Console.WriteLine($"Configuring MongoDB Service...");
+        Console.WriteLine($"Configuring MongoDB Client...");
         services.AddSingleton<IMongoClient>(s => 
             new MongoClient(ConfigRoot.GetSection("DatabaseSettings").GetValue<string>("ConnectionString"))
         );
+
+        // Localization manager
+        Console.WriteLine($"Initializing Localization Manager...");
+        services.AddSingleton<IResourceManager>(s =>
+        {
+            var lang = ConfigRoot.GetSection("ApplicationSettings").GetValue<string>("DefaultLocale");
+            return new JsonResourceManager($"Resources/locale_{lang}.json");
+        });
 
         // Register AutoMapper profiles
         services.AddAutoMapper(typeof(UserProfile));
@@ -70,13 +79,14 @@ public class Startup(IConfiguration configuration)
             var mongoClient = s.GetRequiredService<IMongoClient>();
             var mapper = s.GetRequiredService<IMapper>();
             var logger = s.GetRequiredService<ILogger>();
+            var localizationManager = s.GetRequiredService<IResourceManager>();
 
             UserRepository repository = new(databaseSettings.Value, mongoClient, mapper);
             TokenGenerator tokenGenerator = new(applicationSettings.Value);
             PasswordValidator passwordValidator = new(applicationSettings.Value);
             PasswordCipher passwordCipher = new(applicationSettings.Value);
 
-            UserService service = new(applicationSettings.Value, logger, repository, tokenGenerator, passwordValidator, passwordCipher);
+            UserService service = new(applicationSettings.Value, logger, repository, tokenGenerator, passwordValidator, passwordCipher, localizationManager);
 
             return service;
         });

@@ -1,0 +1,5 @@
+{
+    "UserActivationEmailSubject": "Pluteo Account Activation",
+    "UserResetPasswordEmailSubject": "Pluteo Account Recovery",
+    "UserNotificationEmailSubject": "Pluteo Notification"
+}
