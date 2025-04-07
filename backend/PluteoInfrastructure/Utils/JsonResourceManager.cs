@@ -1,28 +1,43 @@
 using Newtonsoft.Json;
 using Pluteo.Domain.Interfaces;
+using Pluteo.Domain.Static;
+using ILogger = Serilog.ILogger;
 
 namespace Pluteo.Infrastructure.Utils;
-public class JsonResourceManager(string filePath) : IResourceManager
+public class JsonResourceManager : IResourceManager
 {
+    private readonly ILogger _logger;
+    private readonly Dictionary<string, Dictionary<string, string>> _resources;
 
-    private readonly Dictionary<string, string> _resources = LoadResources(filePath) ?? [];
-
-    private static Dictionary<string,string>? LoadResources(string filePath)
+    public JsonResourceManager(ILogger logger)
     {
-        if (File.Exists(filePath))
-        {
-            var json = File.ReadAllText(filePath);
-            return JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
-        }
-        else
-        {
-            throw new FileNotFoundException($"File not found: {filePath}");
-        }
+        _logger = logger;
+        _resources = LoadResources() ?? [];
     }
 
-    public string GetString(string key)
+    private Dictionary<string, Dictionary<string, string>> LoadResources()
     {
-        if (_resources.TryGetValue(key, out string? value))
+        Dictionary<string, Dictionary<string,string>> resources = [];
+        foreach (var locale in Localizations.Locales)
+        {
+            var filePath = Path.Combine("Resources", $"locale_{locale}.json");
+            if (File.Exists(filePath))
+            {
+                var json = File.ReadAllText(filePath);
+                resources.Add(locale, JsonConvert.DeserializeObject<Dictionary<string, string>>(json) ?? []);
+            }
+            else
+            {
+                _logger.Error("Resource file '{FilePath}' not found.", filePath);
+            }
+        }
+
+        return resources;
+    }
+
+    public string GetString(string locale, string key)
+    {
+        if (_resources[locale].TryGetValue(key, out string? value))
         {
             return value;
         }

@@ -39,8 +39,8 @@ public class Startup(IConfiguration configuration)
         Console.WriteLine($"Initializing Localization Manager...");
         services.AddSingleton<IResourceManager>(s =>
         {
-            var lang = ConfigRoot.GetSection("ApplicationSettings").GetValue<string>("DefaultLocale");
-            return new JsonResourceManager($"Resources/locale_{lang}.json");
+            var logger = s.GetRequiredService<ILogger>();
+            return new JsonResourceManager(logger);
         });
 
         // Register AutoMapper profiles

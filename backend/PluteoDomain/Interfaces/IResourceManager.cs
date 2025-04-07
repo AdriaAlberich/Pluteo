@@ -1,5 +1,5 @@
 namespace Pluteo.Domain.Interfaces;
 public interface IResourceManager
 {
-    string GetString(string key);
+    string GetString(string locale, string key);
 }
