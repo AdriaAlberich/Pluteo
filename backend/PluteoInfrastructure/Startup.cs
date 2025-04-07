@@ -10,6 +10,9 @@ using Pluteo.Infrastructure.Repositories;
 using Pluteo.Infrastructure.Utils;
 using Pluteo.Application.Services;
 using ILogger = Serilog.ILogger;
+using Pluteo.Domain.Interfaces;
+using Pluteo.Infrastructure.Integrations;
+using Pluteo.Application.Systems;
 
 namespace Pluteo.Infrastructure;
 public class Startup(IConfiguration configuration)
@@ -23,15 +26,24 @@ public class Startup(IConfiguration configuration)
     {
 
         // Register config files
-        Console.WriteLine($"Registering config files...");
+        Console.WriteLine($"Registering Config Files...");
         services.Configure<ApplicationSettings>(ConfigRoot.GetSection("ApplicationSettings"));
         services.Configure<DatabaseSettings>(ConfigRoot.GetSection("DatabaseSettings"));
+        services.Configure<EmailSettings>(ConfigRoot.GetSection("EmailSettings"));
 
         // MongoDB Service configuration
-        Console.WriteLine($"Configuring MongoDB Service...");
+        Console.WriteLine($"Configuring MongoDB Client...");
         services.AddSingleton<IMongoClient>(s => 
             new MongoClient(ConfigRoot.GetSection("DatabaseSettings").GetValue<string>("ConnectionString"))
         );
+
+        // Localization manager
+        Console.WriteLine($"Initializing Localization Manager...");
+        services.AddSingleton<IResourceManager>(s =>
+        {
+            var logger = s.GetRequiredService<ILogger>();
+            return new JsonResourceManager(logger);
+        });
 
         // Register AutoMapper profiles
         services.AddAutoMapper(typeof(UserProfile));
@@ -66,18 +78,38 @@ public class Startup(IConfiguration configuration)
         {
             var applicationSettings = s.GetRequiredService<IOptions<ApplicationSettings>>();
             var databaseSettings = s.GetRequiredService<IOptions<DatabaseSettings>>();
+            var emailSettings = s.GetRequiredService<IOptions<EmailSettings>>();
             var mongoClient = s.GetRequiredService<IMongoClient>();
             var mapper = s.GetRequiredService<IMapper>();
             var logger = s.GetRequiredService<ILogger>();
+            var localizationManager = s.GetRequiredService<IResourceManager>();
 
             UserRepository repository = new(databaseSettings.Value, mongoClient, mapper);
             TokenGenerator tokenGenerator = new(applicationSettings.Value);
             PasswordValidator passwordValidator = new(applicationSettings.Value);
             PasswordCipher passwordCipher = new(applicationSettings.Value);
+            EmailSender emailSender = new(emailSettings.Value);
 
-            UserService service = new(applicationSettings.Value, logger, repository, tokenGenerator, passwordValidator, passwordCipher);
+            UserService service = new(applicationSettings.Value, logger, repository, tokenGenerator, passwordValidator, passwordCipher, localizationManager, emailSender);
 
             return service;
+        });
+
+        // Register NotificationSystem as Scoped
+        Console.WriteLine($"Adding NotificationSystem...");
+        services.AddScoped(s => 
+        {
+            var applicationSettings = s.GetRequiredService<IOptions<ApplicationSettings>>();
+            var emailSettings = s.GetRequiredService<IOptions<EmailSettings>>();
+            var userService = s.GetRequiredService<UserService>();
+            var logger = s.GetRequiredService<ILogger>();
+            var localizationManager = s.GetRequiredService<IResourceManager>();
+
+            EmailSender emailSender = new(emailSettings.Value);
+
+            NotificationSystem notificationSystem = new(applicationSettings.Value, userService, logger, emailSender, localizationManager);
+
+            return notificationSystem;
         });
     }
 }

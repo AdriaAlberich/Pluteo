@@ -1,0 +1,5 @@
+{
+    "UserActivationEmailSubject": "Activació del compte de {0}",
+    "UserResetPasswordEmailSubject": "Recuperació del compte de {0}",
+    "UserNotificationEmailSubject": "Notificació de {0}"
+}
