@@ -7,4 +7,6 @@ public class User
     public required List<string> Roles { get; set; }
     public string? ActivationToken { get; set; }
     public string? ResetPasswordToken { get; set; }
+    public List<Notification>? Notifications { get; set; }
+    public UserSettings? Settings { get; set; }
 }
