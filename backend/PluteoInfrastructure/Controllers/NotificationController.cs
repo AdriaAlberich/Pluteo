@@ -8,18 +8,19 @@ using Pluteo.Domain.Models.Dto.Users;
 using Pluteo.Domain.Models.Settings;
 using System.Security.Claims;
 using Pluteo.Application.Systems;
+using Microsoft.Extensions.Options;
 
 namespace Pluteo.Infrastructure.Controllers;
 [ApiController]
 [Produces("application/json")]
 [Route("api/notifications")]
-public class NotificationController(NotificationSystem notificationSystem, IWebHostEnvironment env, ILogger logger, IMapper mapper, ApplicationSettings config) : Controller
+public class NotificationController(NotificationSystem notificationSystem, IWebHostEnvironment env, ILogger logger, IMapper mapper, IOptions<ApplicationSettings> config) : Controller
 {
     private readonly NotificationSystem _notificationSystem = notificationSystem;
     private readonly ILogger _logger = logger;
     private readonly IWebHostEnvironment _env = env;
     private readonly IMapper _mapper = mapper;
-    private readonly ApplicationSettings _config = config;
+    private readonly ApplicationSettings _config = config.Value;
 
     #region User Endpoints
 
