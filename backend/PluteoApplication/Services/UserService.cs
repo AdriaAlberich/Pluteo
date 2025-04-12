@@ -157,6 +157,9 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
     {
         var user = await GetUserByEmail(email) ?? throw new ServiceException("USER_EMAIL_NOT_FOUND");
 
+        if(!string.IsNullOrWhiteSpace(user.ActivationToken))
+            throw new ServiceException("USER_ALREADY_ACTIVATED");
+
         user.ActivationToken = _tokenGenerator.GenerateRandomToken();
 
         await Update(user);
@@ -171,14 +174,11 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
         _logger.Information("Sent activation email to {Email} ({Id})", user.Email, user.Id);
     }
 
-    public async Task ActivateUser(string email, string token)
+    public async Task ActivateUser(string token)
     {
-        User user = await GetUserByEmail(email) ?? throw new ServiceException("USER_EMAIL_NOT_FOUND");
+        User user = List().Result.Find(x => x.ActivationToken == Uri.UnescapeDataString(token)) ?? throw new ServiceException("USER_ACTIVATION_TOKEN_NOT_FOUND");
 
-        if(user.ActivationToken != token)
-            throw new ServiceException("USER_ACTIVATION_TOKEN_NOT_VALID");
-
-        user.ActivationToken = string.Empty;
+        user.ActivationToken = null;
 
         await Update(user);
 

@@ -8,7 +8,7 @@ public interface IUserService : IBaseEntityService<User, Guid>
         Task Register(string email, string password, string passwordRepeat);
         Task<string> Login(string email, string password);
         Task SendUserActivation(string email);
-        Task ActivateUser(string email, string token);
+        Task ActivateUser(string token);
         Task AddRole(Guid userId, string role);
         Task RemoveRole(Guid userId, string role);
         Task ChangePasswordById(Guid userId, string currentPassword, string newPassword, string newPasswordRepeat);

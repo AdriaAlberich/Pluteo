@@ -8,18 +8,19 @@ using Pluteo.Infrastructure.Utils;
 using Pluteo.Domain.Models.Dto.Users;
 using Pluteo.Domain.Models.Settings;
 using System.Security.Claims;
+using Microsoft.Extensions.Options;
 
 namespace Pluteo.Infrastructure.Controllers;
 [ApiController]
 [Produces("application/json")]
 [Route("api/users")]
-public class UserController(UserService userService, IWebHostEnvironment env, ILogger logger, IMapper mapper, ApplicationSettings config) : Controller
+public class UserController(UserService userService, IWebHostEnvironment env, ILogger logger, IMapper mapper, IOptions<ApplicationSettings> config) : Controller
 {
     private readonly UserService _userService = userService;
     private readonly ILogger _logger = logger;
     private readonly IWebHostEnvironment _env = env;
     private readonly IMapper _mapper = mapper;
-    private readonly ApplicationSettings _config = config;
+    private readonly ApplicationSettings _config = config.Value;
 
     #region User Endpoints
 
@@ -75,12 +76,30 @@ public class UserController(UserService userService, IWebHostEnvironment env, IL
             if (string.IsNullOrWhiteSpace(token))
                 return BadRequest("TOKEN_NULL");
             
-            var userEmail = GetUserEmail(User);
+            await _userService.ActivateUser(token);
 
-            if (string.IsNullOrWhiteSpace(userEmail))
-                return BadRequest("USER_EMAIL_NULL");
+            return Ok();
+        }
+        catch (ServiceException se)
+        {
+            return StatusCode(StatusCodes.Status406NotAcceptable, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+        }
+        catch (Exception e)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ExceptionControl.ProcessException(e, _logger, _env.IsDevelopment(), false));
+        }
+    }
 
-            await _userService.ActivateUser(userEmail, token);
+    [AllowAnonymous]
+    [HttpPatch("resend-activation")]
+    public async Task<ActionResult> ResendActivation([FromQuery] string email)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return BadRequest("EMAIL_NULL");
+
+            await _userService.SendUserActivation(email);
 
             return Ok();
         }
