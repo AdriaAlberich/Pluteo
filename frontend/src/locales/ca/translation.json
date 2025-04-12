@@ -1,4 +1,25 @@
 {
-    "subtitle": "Gestor de biblioteca personal",
-    "language": "Català"
+    "auth_login_title": "Accedeix al teu compte",
+    "auth_register_title": "Crear nou compte",
+    "auth_email_label": "Correu electrònic",
+    "auth_email_placeholder": "Correu electrònic",
+    "auth_password_label": "Contrasenya",
+    "auth_password_placeholder": "Contrasenya",
+    "auth_password_confirm_label": "Confirma la contrasenya",
+    "auth_password_confirm_placeholder": "Confirma la contrasenya",
+    "auth_login_button": "Accedir",
+    "auth_register_button": "Registrar-se",
+    "auth_login_link": "Ja tens un compte? Accedeix",
+    "auth_register_link": "Encara no tens un compte? Registra't!",
+    "auth_email_error": "El correu electrònic és obligatori",
+    "auth_email_format_error": "El correu electrònic no és vàlid",
+    "auth_password_error": "La contrasenya és obligatòria",
+    "auth_password_confirm_error": "La confirmació de la contrasenya és obligatòria",
+    "auth_password_match_error": "Les contrasenyes no coincideixen",
+    "auth_resend_activation_link": "Reenviar correu d'activació",
+    "auth_resend_activation_title": "Reenviar correu d'activació",
+    "auth_resend_activation_button": "Reenviar",
+    "auth_forgot_password_link": "Has oblidat la contrasenya?",
+    "auth_forgot_password_title": "Recuperar contrasenya",
+    "auth_forgot_password_button": "Recuperar"
 }
