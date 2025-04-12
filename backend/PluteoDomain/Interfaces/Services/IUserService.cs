@@ -14,7 +14,7 @@ public interface IUserService : IBaseEntityService<User, Guid>
         Task ChangePasswordById(Guid userId, string currentPassword, string newPassword, string newPasswordRepeat);
         Task ChangePasswordByEmail(string email, string currentPassword, string newPassword, string newPasswordRepeat);
         Task ChangePassword(User user, string currentPassword, string newPassword, string newPasswordRepeat);
-        Task ResetPassword(string email, string token, string newPassword, string newPasswordRepeat);
+        Task ResetPassword(string token, string newPassword, string newPasswordRepeat);
         Task SendUserResetPassword(string email);
         Task<bool> CheckPasswordValid(string password);
         Task CheckEmail(string email);

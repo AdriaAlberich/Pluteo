@@ -25,7 +25,9 @@ public class UserModel
     [BsonRequired]
     public required UserSettings Settings { get; set; }
     [BsonElement("ActivationToken")]
+    [BsonRequired]
     public string? ActivationToken { get; set; }
     [BsonElement("ResetPasswordToken")]
+    [BsonRequired]
     public string? ResetPasswordToken { get; set; }
 }

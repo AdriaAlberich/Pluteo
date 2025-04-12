@@ -36,7 +36,9 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
                 NotifyLoanBeforeDays = _config.DefaultNotifyLoanBeforeDays,
                 NotifyLoanBeforeDaysFrequency = _config.DefaultNotifyLoanBeforeDaysFrequency,
                 Locale = _config.DefaultLocale
-            }
+            },
+            ActivationToken = _tokenGenerator.GenerateRandomToken(),
+            ResetPasswordToken = string.Empty
         };
 
         await _userRepository.Create(newUser);
@@ -157,7 +159,7 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
     {
         var user = await GetUserByEmail(email) ?? throw new ServiceException("USER_EMAIL_NOT_FOUND");
 
-        if(!string.IsNullOrWhiteSpace(user.ActivationToken))
+        if(string.IsNullOrWhiteSpace(user.ActivationToken))
             throw new ServiceException("USER_ALREADY_ACTIVATED");
 
         user.ActivationToken = _tokenGenerator.GenerateRandomToken();
@@ -178,7 +180,7 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
     {
         User user = List().Result.Find(x => x.ActivationToken == Uri.UnescapeDataString(token)) ?? throw new ServiceException("USER_ACTIVATION_TOKEN_NOT_FOUND");
 
-        user.ActivationToken = null;
+        user.ActivationToken = string.Empty;
 
         await Update(user);
 
@@ -268,12 +270,9 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
         _logger.Information("Sent password reset email to {Email} ({Id})", user.Email, user.Id);
     }
 
-    public async Task ResetPassword(string email, string token, string newPassword, string newPasswordRepeat)
+    public async Task ResetPassword(string token, string newPassword, string newPasswordRepeat)
     {
-        User user = await GetUserByEmail(email) ?? throw new ServiceException("USER_EMAIL_NOT_FOUND");
-
-        if(user.ResetPasswordToken != token)
-            throw new ServiceException("USER_RESET_PASSWORD_TOKEN_NOT_VALID");
+        var user = List().Result.Find(x => x.ResetPasswordToken == Uri.UnescapeDataString(token)) ?? throw new ServiceException("USER_RESET_PASSWORD_TOKEN_NOT_FOUND");
 
         if(!await CheckPasswordValid(newPassword))
             throw new ServiceException("USER_NEW_PASSWORD_NOT_VALID");
@@ -315,11 +314,11 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
         return await Task.Run(() => _passwordValidator.IsValid(password));
     }
 
-    public Task<UserSettingsResponse> GetUserSettings(string email)
+    public async Task<UserSettingsResponse> GetUserSettings(string email)
     {
-        var user = GetUserByEmail(email).Result ?? throw new ServiceException("USER_EMAIL_NOT_FOUND");
+        var user = await GetUserByEmail(email) ?? throw new ServiceException("USER_EMAIL_NOT_FOUND");
 
-        return Task.FromResult(new UserSettingsResponse
+        return new UserSettingsResponse
         {
             Email = user.Email,
             NotifyByEmail = user.Settings.NotifyByEmail,
@@ -327,21 +326,21 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
             NotifyLoanBeforeDays = user.Settings.NotifyLoanBeforeDays,
             NotifyLoanBeforeDaysFrequency = user.Settings.NotifyLoanBeforeDaysFrequency,
             Locale = user.Settings.Locale
-        });
+        };
     }
 
     public async Task UpdateUserSettings(string email, UserSettingsUpdateRequest request)
     {
-        var user = GetUserByEmail(email).Result ?? throw new ServiceException("USER_EMAIL_NOT_FOUND");
+        var user = await GetUserByEmail(email) ?? throw new ServiceException("USER_EMAIL_NOT_FOUND");
         bool isUpdated = false;
 
-        if(request.NotifyByEmail.HasValue && request.NotifyByEmail.Value && !user.Settings.NotifyByEmail)
+        if(request.NotifyByEmail.HasValue)
         {
             user.Settings.NotifyByEmail = request.NotifyByEmail.Value;
             isUpdated = true;
         }
 
-        if(request.NotifyLoan.HasValue && request.NotifyLoan.Value && !user.Settings.NotifyLoan)
+        if(request.NotifyLoan.HasValue)
         {
             user.Settings.NotifyLoan = request.NotifyLoan.Value;
             isUpdated = true;

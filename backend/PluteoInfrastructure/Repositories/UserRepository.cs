@@ -34,17 +34,11 @@ public class UserRepository : IBaseRepository<User, Guid>
 
         updateDefinitions.Add(Builders<UserModel>.Update.Set(x => x.Password, model.Password));
         updateDefinitions.Add(Builders<UserModel>.Update.Set(x => x.Roles, model.Roles));
-
-        if (model.ActivationToken != null)
-        {
-            updateDefinitions.Add(Builders<UserModel>.Update.Set(x => x.ActivationToken, model.ActivationToken));
-        }
-
-        if (model.ResetPasswordToken != null)
-        {
-            updateDefinitions.Add(Builders<UserModel>.Update.Set(x => x.ResetPasswordToken, model.ResetPasswordToken));
-        }
-
+        updateDefinitions.Add(Builders<UserModel>.Update.Set(x => x.Notifications, model.Notifications));
+        updateDefinitions.Add(Builders<UserModel>.Update.Set(x => x.Settings, model.Settings));
+        updateDefinitions.Add(Builders<UserModel>.Update.Set(x => x.ActivationToken, model.ActivationToken));
+        updateDefinitions.Add(Builders<UserModel>.Update.Set(x => x.ResetPasswordToken, model.ResetPasswordToken));
+        
         if (updateDefinitions.Count > 0)
         {
             var updateDefinition = Builders<UserModel>.Update.Combine(updateDefinitions);

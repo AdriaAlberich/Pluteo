@@ -142,12 +142,7 @@ public class UserController(UserService userService, IWebHostEnvironment env, IL
             if (request == null || string.IsNullOrWhiteSpace(request.NewPassword) || string.IsNullOrWhiteSpace(request.NewPasswordRepeat))
                 return BadRequest("PASSWORD_REQUEST_NOT_VALID");
 
-            var userEmail = GetUserEmail(User);
-
-            if (string.IsNullOrWhiteSpace(userEmail))
-                return BadRequest("USER_EMAIL_NULL");
-
-            await _userService.ResetPassword(userEmail, token, request.NewPassword, request.NewPasswordRepeat);
+            await _userService.ResetPassword(token, request.NewPassword, request.NewPasswordRepeat);
 
             return Ok();
         }
