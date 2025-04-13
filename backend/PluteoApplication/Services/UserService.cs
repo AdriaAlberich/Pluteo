@@ -120,12 +120,6 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
 
     public async Task<string> Login(string email, string password)
     {
-        if(!await CheckEmailValid(email))
-            throw new ServiceException("USER_EMAIL_NOT_VALID");
-
-        if(!await CheckPasswordValid(password))
-            throw new ServiceException("USER_PASSWORD_NOT_VALID");
-
         List<User> users = await _userRepository.List();
 
         var user = users.Find(x => x.Email == email) ?? throw new ServiceException("USER_NOT_EXISTS");
@@ -168,7 +162,7 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
 
         Dictionary<string,string> dynamicFields = new()
         {
-            { "activation_url", $"{_config.ApplicationUrl}/users/activate?token={Uri.EscapeDataString(user.ActivationToken)}" }
+            { "activation_url", $"{_config.ApplicationUrl}/activate/{Uri.EscapeDataString(user.ActivationToken)}" }
         };
 
         await _emailSender.SendEmail(_localizationManager.GetStringFormatted(user.Settings.Locale, "UserActivationEmailSubject", _config.ApplicationName), $"activation_{user.Settings.Locale}", user.Email, dynamicFields);
@@ -264,7 +258,7 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
 
         Dictionary<string,string> dynamicFields = new()
         {
-            { "resetpassword_url", $"{_config.ApplicationUrl}/users/resetpassword?token={Uri.EscapeDataString(user.ResetPasswordToken)}" }
+            { "resetpassword_url", $"{_config.ApplicationUrl}/resetpassword/{Uri.EscapeDataString(user.ResetPasswordToken)}" }
         };
 
         await _emailSender.SendEmail(_localizationManager.GetStringFormatted(user.Settings.Locale, "UserResetPasswordEmailSubject", _config.ApplicationName), $"resetpassword_{user.Settings.Locale}", user.Email, dynamicFields);

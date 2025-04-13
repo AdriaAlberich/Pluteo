@@ -31,6 +31,9 @@
     "auth_forgot_password_title": "Recuperar contrasenya",
     "auth_forgot_password_button": "Recuperar",
     "auth_forgot_password_success": "Si el correu existeix, s'ha enviat un correu electrònic de recuperació.",
+    "auth_reset_password_title": "Restablir contrasenya",
+    "auth_reset_password_button": "Restablir",
+    "auth_reset_password_success": "La contrasenya s'ha restablert amb èxit.",
     "auth_generic_error": "S'ha produït un error. Si us plau, torna-ho a intentar més tard.",
     
     "usermenu_settings": "Configuració",

@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { useEffect } from 'react';
 import { useAppStore } from '../context/appContext';
 import { useAuth } from '../hooks/useAuth';
 import { LanguageSelector } from './LanguageSelector';
@@ -7,49 +9,69 @@ import { CircleAlert, Info } from 'lucide-react';
 
 export function Auth() {
   const { setIsAuthenticated } = useAppStore();
-  const { register, login, forgotPassword, resendActivationEmail, isLoading, isError, isSuccess, response } = useAuth();
+  const { register, login, forgotPassword, resetPassword, resendActivationEmail, isLoading, isError, isSuccess, error } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [isReActivation, setIsReActivation] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [isResetPassword, setIsResetPassword] = useState(false);
   const [emailShowError, setEmailShowError] = useState(false);
   const [emailBadFormatError, setEmailBadFormatError] = useState(false);
   const [passwordShowError, setPasswordShowError] = useState(false);
   const [passwordConfirmShowError, setPasswordConfirmShowError] = useState(false);
   const [passwordMatchError, setPasswordMatchError] = useState(false);
-  const [formData, setFormData] = useState({ email: '', password: '', repeatPassword: '' });
+  const [formData, setFormData] = useState({ email: '', password: '', passwordRepeat: '' });
+  const { activationToken, resetPasswordToken } = useParams();
+  const { activateUser } = useAuth();
+
   const { t } = useTranslation();
+
+  useEffect(() => {
+    if (activationToken) {
+      activateUser(activationToken);
+    }
+    if (resetPasswordToken) {
+      setIsResetPassword(true);
+      setIsLogin(false);
+      setIsForgotPassword(false);
+      setIsReActivation(false);
+    }
+  }, [activationToken, activateUser]);
 
   const formValidation = () => {
 
-    if (formData.email == ''){
-      setEmailShowError(true);
-      return false;
-    }else{
-      setEmailShowError(false);
+    if(!isResetPassword){
+      if (formData.email == ''){
+        setEmailShowError(true);
+        return false;
+      }else{
+        setEmailShowError(false);
+      }
     }
 
-    if (!formData.email.includes('@')){
-      setEmailBadFormatError(true);
-      return false;
-    }else{
-      setEmailBadFormatError(false);
+    if(!isResetPassword){
+      if (!formData.email.includes('@')){
+        setEmailBadFormatError(true);
+        return false;
+      }else{
+        setEmailBadFormatError(false);
+      }
     }
 
-    if (!isForgotPassword && formData.password == ''){
+    if (!isForgotPassword && !isReActivation && formData.password == ''){
       setPasswordShowError(true);
       return false;
     }else{
       setPasswordShowError(false);
     }
 
-    if (!isLogin && !isForgotPassword && formData.repeatPassword == ''){
+    if (!isLogin && !isForgotPassword && !isReActivation && formData.passwordRepeat == ''){
       setPasswordConfirmShowError(true);
       return false;
     }else{
       setPasswordConfirmShowError(false);
     }
 
-    if (!isLogin && !isForgotPassword && formData.password != formData.repeatPassword){
+    if (!isLogin && !isForgotPassword && !isReActivation && formData.password != formData.passwordRepeat){
       setPasswordMatchError(true);
       return false;
     }else{
@@ -73,38 +95,46 @@ export function Auth() {
     else if(isReActivation){
       resendActivationEmail(formData.email);
     }
+    else if(isResetPassword){
+      if(resetPasswordToken !== undefined){
+        resetPassword({token: resetPasswordToken, newPassword: formData.password, newPasswordRepeat: formData.passwordRepeat});
+      }else{
+        console.error('Reset password token is undefined');
+      }
+    }
     else{
       register(formData);
     }
   };
 
   const handleErrors = () => {
-    let errorMessage = '';
-    if (response?.status === 406) {
-      if (response.data.Message === 'USER_NEW_PASSWORD_NOT_VALID' || response.data.Message === 'USER_PASSWORD_NOT_VALID') {
+    const status = (error as any)?.response?.status;
+    let errorMessage = (error as any)?.response?.data?.message || 'An unknown error occurred';
+    console.log('Error:', status, errorMessage);
+    if (status === 400) {
+      if (errorMessage === 'USER_NEW_PASSWORD_NOT_VALID' || errorMessage === 'USER_PASSWORD_NOT_VALID') {
         errorMessage = t('auth_password_not_valid_error');
-      } else if (response.data.Message === 'USER_NEW_PASSWORD_CONFIRMATION_NOT_MATCH') {
+      } else if (errorMessage === 'USER_NEW_PASSWORD_CONFIRMATION_NOT_MATCH') {
         errorMessage = t('auth_password_match_error');
-      } else if (response.data.Message === 'USER_EMAIL_NOT_VALID') {
+      } else if (errorMessage === 'USER_EMAIL_NOT_VALID') {
         errorMessage = t('auth_email_format_error');
-      } else if (response.data.Message === 'USER_PASSWORD_INCORRECT' || response.data.Message === 'USER_NOT_EXISTS') {
+      } else if (errorMessage === 'USER_PASSWORD_INCORRECT' || errorMessage === 'USER_NOT_EXISTS') {
         errorMessage = t('auth_password_incorrect_error');
-      } else if (response.data.Message === 'USER_PASSWORD_EXPIRED') {
+      } else if (errorMessage === 'USER_PASSWORD_EXPIRED') {
         errorMessage = t('auth_password_expired_error');
-      } else if (response.data.Message === 'USER_NOT_ACTIVE') {
+      } else if (errorMessage === 'USER_NOT_ACTIVE') {
         errorMessage = t('auth_user_not_active_error');
-      } else if (response.data.Message === 'USER_ALREADY_ACTIVATED') {
+      } else if (errorMessage === 'USER_ALREADY_ACTIVATED') {
         errorMessage = t('auth_user_already_activated_error');
-      } else if (response.data.Message === 'USER_EMAIL_EXISTS') {
+      } else if (errorMessage === 'USER_EMAIL_EXISTS') {
         errorMessage = t('auth_user_exists_error');
       } else {
         errorMessage = t('auth_generic_error');
       }
-    }else if (response?.status === 500) {
+    }else if (status === 500) {
       errorMessage = t('auth_server_error');
     }
 
-    console.log('Error:', response?.status, response?.data);
     return errorMessage;
   };
 
@@ -116,13 +146,13 @@ export function Auth() {
       <div className="max-w-md w-full space-y-8 bg-gray-800 p-8 rounded-xl bg-opacity-90">
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-bold text-white">
-            {isLogin ? t('auth_login_title') : isForgotPassword ? t('auth_forgot_password_title') : isReActivation ? t('auth_resend_activation_title') : t('auth_register_title') }
+            {isLogin ? t('auth_login_title') : isForgotPassword ? t('auth_forgot_password_title') : isReActivation ? t('auth_resend_activation_title') : isResetPassword ? t('auth_reset_password_title') : t('auth_register_title') }
           </h2>
         </div>
-        {isSuccess && (
+        {!isLogin && isSuccess && (
         <div className="flex items-center bg-blue-500 text-white text-sm font-bold px-4 py-3" role="alert">
           <Info className="w-4 h-4 mr-2" />
-          <p> {isLogin ? '' : isForgotPassword ? t('auth_forgot_password_success') : isReActivation ? t('auth_resend_activation_success') : t('auth_register_success')} </p>
+          <p> {isForgotPassword ? t('auth_forgot_password_success') : isReActivation ? t('auth_resend_activation_success') : isResetPassword ? t('auth_reset_password_success') : t('auth_register_success')} </p>
         </div>
         )}
         {isError && (
@@ -132,6 +162,7 @@ export function Auth() {
         </div>
         )}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {!isResetPassword && (
           <div>
             <label htmlFor="email" className="sr-only">
               {t('auth_email_label')}
@@ -158,6 +189,7 @@ export function Auth() {
               </p>
             )}
           </div>
+          )}
           {!isForgotPassword && !isReActivation && (
           <div>
             <label htmlFor="password" className="sr-only">
@@ -197,9 +229,9 @@ export function Auth() {
               type="password"
               className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               placeholder={t('auth_password_confirm_placeholder')}
-              value={formData.repeatPassword}
+              value={formData.passwordRepeat}
               onChange={(e) =>
-                setFormData({ ...formData, repeatPassword: e.target.value })
+                setFormData({ ...formData, passwordRepeat: e.target.value })
               }
             />
             {passwordConfirmShowError && (
@@ -219,12 +251,12 @@ export function Auth() {
               type="submit"
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              {isLogin ? t('auth_login_button') : isForgotPassword ? t('auth_forgot_password_button') : isReActivation ? t('auth_resend_activation_button') : t('auth_register_button')}
+              {isLogin ? t('auth_login_button') : isForgotPassword ? t('auth_forgot_password_button') : isReActivation ? t('auth_resend_activation_button') : isResetPassword ? t('auth_reset_password_button') : t('auth_register_button')}
             </button>
           </div>
         </form>
-
-        {((isLogin || isReActivation) && !isForgotPassword) && (
+        
+        {(!isResetPassword && ((isLogin || isReActivation) && !isForgotPassword)) && (
         <div className="text-center">
           <button
             className="text-blue-500 hover:text-blue-400"
@@ -245,7 +277,7 @@ export function Auth() {
         </div>
         )}
         
-        {((isLogin || isForgotPassword) && !isReActivation) && (
+        {(!isResetPassword && ((isLogin || isForgotPassword) && !isReActivation)) && (
         <div className="text-center">
           <button
             className="text-blue-500 hover:text-blue-400"
@@ -277,6 +309,7 @@ export function Auth() {
               setPasswordConfirmShowError(false);
               setPasswordMatchError(false);
               setIsLogin(!isLogin);
+              setIsResetPassword(false);
             }}
           >
             {isLogin

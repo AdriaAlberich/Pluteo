@@ -69,6 +69,6 @@ export function useAuth() {
     isLoading: loginMutation.isPending || registerMutation.isPending || activateUserMutation.isPending || resendActivationEmailMutation.isPending || forgotPasswordMutation.isPending || resetPasswordMutation.isPending || changePasswordMutation.isPending,
     isError: loginMutation.isError || registerMutation.isError || activateUserMutation.isError || resendActivationEmailMutation.isError || forgotPasswordMutation.isError || resetPasswordMutation.isError || changePasswordMutation.isError,
     isSuccess: loginMutation.isSuccess || registerMutation.isSuccess || activateUserMutation.isSuccess || resendActivationEmailMutation.isSuccess || forgotPasswordMutation.isSuccess || resetPasswordMutation.isSuccess || changePasswordMutation.isSuccess,
-    response: loginMutation.data || registerMutation.data || activateUserMutation.data || resendActivationEmailMutation.data || forgotPasswordMutation.data || resetPasswordMutation.data || changePasswordMutation.data,
+    error: loginMutation.error || registerMutation.error || activateUserMutation.error || resendActivationEmailMutation.error || forgotPasswordMutation.error || resetPasswordMutation.error || changePasswordMutation.error,
   };
 }

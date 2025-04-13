@@ -11,7 +11,7 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('pluteo-token');
-  if (token) {
+  if (token !== undefined) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
@@ -30,7 +30,7 @@ api.interceptors.response.use(
 
 // User authentication related endpoints
 export const authApi = {
-  register: (data: { email: string; password: string; repeatPassword: string; }) =>
+  register: (data: { email: string; password: string; passwordRepeat: string; }) =>
     api.post('/users', data),
   login: (credentials: { email: string; password: string }) =>
     api.post('/users/login', credentials),
