@@ -53,7 +53,7 @@ export function useAuth() {
   });
 
   const logout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('pluteo-token');
     setIsAuthenticated(false);
   };
 
@@ -67,7 +67,8 @@ export function useAuth() {
     changePassword: changePasswordMutation.mutate,
     logout,
     isLoading: loginMutation.isPending || registerMutation.isPending || activateUserMutation.isPending || resendActivationEmailMutation.isPending || forgotPasswordMutation.isPending || resetPasswordMutation.isPending || changePasswordMutation.isPending,
-    error: loginMutation.error || registerMutation.error || activateUserMutation.error || resendActivationEmailMutation.error || forgotPasswordMutation.error || resetPasswordMutation.error || changePasswordMutation.error,
-    success: loginMutation.isSuccess || registerMutation.isSuccess || activateUserMutation.isSuccess || resendActivationEmailMutation.isSuccess || forgotPasswordMutation.isSuccess || resetPasswordMutation.isSuccess || changePasswordMutation.isSuccess,
+    isError: loginMutation.isError || registerMutation.isError || activateUserMutation.isError || resendActivationEmailMutation.isError || forgotPasswordMutation.isError || resetPasswordMutation.isError || changePasswordMutation.isError,
+    isSuccess: loginMutation.isSuccess || registerMutation.isSuccess || activateUserMutation.isSuccess || resendActivationEmailMutation.isSuccess || forgotPasswordMutation.isSuccess || resetPasswordMutation.isSuccess || changePasswordMutation.isSuccess,
+    response: loginMutation.data || registerMutation.data || activateUserMutation.data || resendActivationEmailMutation.data || forgotPasswordMutation.data || resetPasswordMutation.data || changePasswordMutation.data,
   };
 }

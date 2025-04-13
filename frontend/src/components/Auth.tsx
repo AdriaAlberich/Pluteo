@@ -7,7 +7,7 @@ import { CircleAlert, Info } from 'lucide-react';
 
 export function Auth() {
   const { setIsAuthenticated } = useAppStore();
-  const { register, login, forgotPassword, resendActivationEmail, isLoading, error, success } = useAuth();
+  const { register, login, forgotPassword, resendActivationEmail, isLoading, isError, isSuccess, response } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [isReActivation, setIsReActivation] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
@@ -78,6 +78,36 @@ export function Auth() {
     }
   };
 
+  const handleErrors = () => {
+    let errorMessage = '';
+    if (response?.status === 406) {
+      if (response.data.Message === 'USER_NEW_PASSWORD_NOT_VALID' || response.data.Message === 'USER_PASSWORD_NOT_VALID') {
+        errorMessage = t('auth_password_not_valid_error');
+      } else if (response.data.Message === 'USER_NEW_PASSWORD_CONFIRMATION_NOT_MATCH') {
+        errorMessage = t('auth_password_match_error');
+      } else if (response.data.Message === 'USER_EMAIL_NOT_VALID') {
+        errorMessage = t('auth_email_format_error');
+      } else if (response.data.Message === 'USER_PASSWORD_INCORRECT' || response.data.Message === 'USER_NOT_EXISTS') {
+        errorMessage = t('auth_password_incorrect_error');
+      } else if (response.data.Message === 'USER_PASSWORD_EXPIRED') {
+        errorMessage = t('auth_password_expired_error');
+      } else if (response.data.Message === 'USER_NOT_ACTIVE') {
+        errorMessage = t('auth_user_not_active_error');
+      } else if (response.data.Message === 'USER_ALREADY_ACTIVATED') {
+        errorMessage = t('auth_user_already_activated_error');
+      } else if (response.data.Message === 'USER_EMAIL_EXISTS') {
+        errorMessage = t('auth_user_exists_error');
+      } else {
+        errorMessage = t('auth_generic_error');
+      }
+    }else if (response?.status === 500) {
+      errorMessage = t('auth_server_error');
+    }
+
+    console.log('Error:', response?.status, response?.data);
+    return errorMessage;
+  };
+
   return (
     <div className="bg-custom-bg bg-cover bg-center min-h-screen flex items-center justify-center px-4">
       <div className="absolute top-4 left-4">
@@ -89,16 +119,16 @@ export function Auth() {
             {isLogin ? t('auth_login_title') : isForgotPassword ? t('auth_forgot_password_title') : isReActivation ? t('auth_resend_activation_title') : t('auth_register_title') }
           </h2>
         </div>
-        {success && (
+        {isSuccess && (
         <div className="flex items-center bg-blue-500 text-white text-sm font-bold px-4 py-3" role="alert">
           <Info className="w-4 h-4 mr-2" />
           <p> {isLogin ? '' : isForgotPassword ? t('auth_forgot_password_success') : isReActivation ? t('auth_resend_activation_success') : t('auth_register_success')} </p>
         </div>
         )}
-        {error && (
+        {isError && (
         <div className="flex items-center bg-red-500 text-white text-sm font-bold px-4 py-3" role="alert">
           <CircleAlert className="w-4 h-4 mr-2" />
-          <p>{error.message}</p>
+          <p>{handleErrors()}</p>
         </div>
         )}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>

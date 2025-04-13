@@ -7,6 +7,7 @@ using Pluteo.Domain.Static;
 using Pluteo.Domain.Exceptions;
 using System.Text.RegularExpressions;
 using Pluteo.Domain.Models.Dto.Users;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Pluteo.Application.Services;
 public class UserService(ApplicationSettings config, ILogger logger, IBaseRepository<User, Guid> userRepository, ITokenGenerator tokenGenerator, IPasswordValidator passwordValidator, IPasswordCipher passwordCipher, IResourceManager localizationManager, IEmailSender emailSender) : IUserService
@@ -127,12 +128,9 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
 
         List<User> users = await _userRepository.List();
 
-        var user = users.Find(x => x.Email == email);
-
-        if(user == null)
-            throw new ServiceException("USER_NOT_EXISTS");
-
-        if(string.IsNullOrWhiteSpace(user.Password))
+        var user = users.Find(x => x.Email == email) ?? throw new ServiceException("USER_NOT_EXISTS");
+        
+        if (string.IsNullOrWhiteSpace(user.Password))
             throw new ServiceException("USER_PASSWORD_HASH_EMPTY");
         
         (bool verified, bool needsUpgrade) = _passwordCipher.Check(user.Password, password);
@@ -157,7 +155,9 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
 
     public async Task SendUserActivation(string email)
     {
-        var user = await GetUserByEmail(email) ?? throw new ServiceException("USER_EMAIL_NOT_FOUND");
+        var user = await GetUserByEmail(email);
+        if(user == null)
+            return;
 
         if(string.IsNullOrWhiteSpace(user.ActivationToken))
             throw new ServiceException("USER_ALREADY_ACTIVATED");
@@ -254,8 +254,10 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
 
     public async Task SendUserResetPassword(string email)
     {
-        var user = await GetUserByEmail(email) ?? throw new ServiceException("USER_EMAIL_NOT_FOUND");
-
+        var user = await GetUserByEmail(email);
+        if(user == null)
+            return;
+            
         user.ResetPasswordToken = _tokenGenerator.GenerateRandomToken();
 
         await Update(user);
@@ -316,7 +318,7 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
 
     public async Task<UserSettingsResponse> GetUserSettings(string email)
     {
-        var user = await GetUserByEmail(email) ?? throw new ServiceException("USER_EMAIL_NOT_FOUND");
+        var user = await GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_EXISTS");
 
         return new UserSettingsResponse
         {
@@ -331,7 +333,7 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
 
     public async Task UpdateUserSettings(string email, UserSettingsUpdateRequest request)
     {
-        var user = await GetUserByEmail(email) ?? throw new ServiceException("USER_EMAIL_NOT_FOUND");
+        var user = await GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_EXISTS");
         bool isUpdated = false;
 
         if(request.NotifyByEmail.HasValue)

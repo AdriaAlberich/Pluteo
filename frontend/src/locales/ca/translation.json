@@ -14,9 +14,15 @@
     "auth_register_success": "El registre s'ha completat amb èxit. Comprova el teu correu electrònic per activar el compte.",
     "auth_email_error": "El correu electrònic és obligatori",
     "auth_email_format_error": "El correu electrònic no és vàlid",
+    "auth_user_exists_error": "Ja existeix un compte amb aquest correu electrònic",
     "auth_password_error": "La contrasenya és obligatòria",
     "auth_password_confirm_error": "La confirmació de la contrasenya és obligatòria",
     "auth_password_match_error": "Les contrasenyes no coincideixen",
+    "auth_password_not_valid_error": "La contrasenya no és vàlida (mínim 8 caràcters, 1 majúscula, 1 minúscula, 1 número i 1 caràcter especial)",
+    "auth_password_incorrect_error": "La contrasenya és incorrecta",
+    "auth_password_expired_error": "La contrasenya ha caducat. Si us plau, restableix-la.",
+    "auth_user_not_active_error": "El compte no està actiu. Si us plau, activa'l.",
+    "auth_user_already_activated_error": "El compte ja està activat.",
     "auth_resend_activation_link": "Reenviar correu d'activació",
     "auth_resend_activation_title": "Reenviar correu d'activació",
     "auth_resend_activation_button": "Reenviar",
@@ -25,7 +31,8 @@
     "auth_forgot_password_title": "Recuperar contrasenya",
     "auth_forgot_password_button": "Recuperar",
     "auth_forgot_password_success": "Si el correu existeix, s'ha enviat un correu electrònic de recuperació.",
-
+    "auth_generic_error": "S'ha produït un error. Si us plau, torna-ho a intentar més tard.",
+    
     "usermenu_settings": "Configuració",
     "usermenu_logout": "Sortir",
 
