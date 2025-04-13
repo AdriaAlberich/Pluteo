@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useAppStore } from '../context/appContext';
 import { useAuth } from '../hooks/useAuth';
+import { LanguageSelector } from './LanguageSelector';
 import { useTranslation } from 'react-i18next';
+import { CircleAlert, Info } from 'lucide-react';
 
 export function Auth() {
   const { setIsAuthenticated } = useAppStore();
@@ -78,6 +80,9 @@ export function Auth() {
 
   return (
     <div className="bg-custom-bg bg-cover bg-center min-h-screen flex items-center justify-center px-4">
+      <div className="absolute top-4 left-4">
+        <LanguageSelector />
+      </div>
       <div className="max-w-md w-full space-y-8 bg-gray-800 p-8 rounded-xl bg-opacity-90">
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-bold text-white">
@@ -86,13 +91,13 @@ export function Auth() {
         </div>
         {success && (
         <div className="flex items-center bg-blue-500 text-white text-sm font-bold px-4 py-3" role="alert">
-          <svg className="fill-current w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M12.432 0c1.34 0 2.01.912 2.01 1.957 0 1.305-1.164 2.512-2.679 2.512-1.269 0-2.009-.75-1.974-1.99C9.789 1.436 10.67 0 12.432 0zM8.309 20c-1.058 0-1.833-.652-1.093-3.524l1.214-5.092c.211-.814.246-1.141 0-1.141-.317 0-1.689.562-2.502 1.117l-.528-.88c2.572-2.186 5.531-3.467 6.801-3.467 1.057 0 1.233 1.273.705 3.23l-1.391 5.352c-.246.945-.141 1.271.106 1.271.317 0 1.357-.392 2.379-1.207l.6.814C12.098 19.02 9.365 20 8.309 20z"/></svg>
-          <p> {!isLogin ? t('auth_register_success') : isForgotPassword ? t('auth_forgot_password_success') : isReActivation ? t('auth_resend_activation_success') : ''} </p>
+          <Info className="w-4 h-4 mr-2" />
+          <p> {isLogin ? '' : isForgotPassword ? t('auth_forgot_password_success') : isReActivation ? t('auth_resend_activation_success') : t('auth_register_success')} </p>
         </div>
         )}
         {error && (
         <div className="flex items-center bg-red-500 text-white text-sm font-bold px-4 py-3" role="alert">
-          <svg className="fill-current w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M10 0a10 10 0 1 0 0 20A10 10 0 0 0 10 0zm1.414 14.586L10 13.172l-1.414 1.414L7.172 14l1.414-1.414L8.586 12l1.414-1.414L12 8.586l1.414-1.414L14 7.172l-1.414 1.414L12 10l1.414 1.414z"/></svg>
+          <CircleAlert className="w-4 h-4 mr-2" />
           <p>{error.message}</p>
         </div>
         )}

@@ -21,5 +21,12 @@
   "auth_resend_activation_button": "Send",
   "auth_forgot_password_link": "Forgot your password?",
   "auth_forgot_password_title": "Recover password",
-  "auth_forgot_password_button": "Recover"
+  "auth_forgot_password_button": "Recover",
+
+  "usermenu_settings": "Settings",
+  "usermenu_logout": "Logout",
+
+  "languageselector_catalan": "Catalan",
+  "languageselector_spanish": "Spanish",
+  "languageselector_english": "English"
 }

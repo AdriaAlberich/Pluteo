@@ -11,6 +11,7 @@
     "auth_register_button": "Registrar-se",
     "auth_login_link": "Ja tens un compte? Accedeix",
     "auth_register_link": "Encara no tens un compte? Registra't!",
+    "auth_register_success": "El registre s'ha completat amb èxit. Comprova el teu correu electrònic per activar el compte.",
     "auth_email_error": "El correu electrònic és obligatori",
     "auth_email_format_error": "El correu electrònic no és vàlid",
     "auth_password_error": "La contrasenya és obligatòria",
@@ -19,7 +20,16 @@
     "auth_resend_activation_link": "Reenviar correu d'activació",
     "auth_resend_activation_title": "Reenviar correu d'activació",
     "auth_resend_activation_button": "Reenviar",
+    "auth_resend_activation_success": "Si el correu existeix, s'ha enviat un correu electrònic d'activació.",
     "auth_forgot_password_link": "Has oblidat la contrasenya?",
     "auth_forgot_password_title": "Recuperar contrasenya",
-    "auth_forgot_password_button": "Recuperar"
+    "auth_forgot_password_button": "Recuperar",
+    "auth_forgot_password_success": "Si el correu existeix, s'ha enviat un correu electrònic de recuperació.",
+
+    "usermenu_settings": "Configuració",
+    "usermenu_logout": "Sortir",
+
+    "languageselector_catalan": "Català",
+    "languageselector_spanish": "Castellà",
+    "languageselector_english": "Anglès"
 }
