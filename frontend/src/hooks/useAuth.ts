@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { authApi } from '../services/api';
-import { useAppStore } from '../context/AppContext';
+import { useAppStore } from '../context/appContext';
 
 export function useAuth() {
   const { setIsAuthenticated } = useAppStore();
@@ -68,5 +68,6 @@ export function useAuth() {
     logout,
     isLoading: loginMutation.isPending || registerMutation.isPending || activateUserMutation.isPending || resendActivationEmailMutation.isPending || forgotPasswordMutation.isPending || resetPasswordMutation.isPending || changePasswordMutation.isPending,
     error: loginMutation.error || registerMutation.error || activateUserMutation.error || resendActivationEmailMutation.error || forgotPasswordMutation.error || resetPasswordMutation.error || changePasswordMutation.error,
+    success: loginMutation.isSuccess || registerMutation.isSuccess || activateUserMutation.isSuccess || resendActivationEmailMutation.isSuccess || forgotPasswordMutation.isSuccess || resetPasswordMutation.isSuccess || changePasswordMutation.isSuccess,
   };
 }

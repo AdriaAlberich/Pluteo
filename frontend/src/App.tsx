@@ -1,5 +1,5 @@
 import { BrowserRouter as Router } from 'react-router-dom';
-import { useAppStore } from './context/AppContext';
+import { useAppStore } from './context/appContext';
 import { Auth } from './components/Auth';
 import { UserMain } from './components/UserMain';
 
