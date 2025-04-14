@@ -1,9 +1,11 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { userApi } from '../services/api';
 import { useAppStore, UserSettings } from '../context/appStore';
+import { useTranslation } from 'react-i18next';
 
 export function useProfile() {
   const { isAuthenticated, setUserSettings } = useAppStore();
+  const { i18n } = useTranslation();
 
   const getSettings = useQuery<UserSettings>({
     queryKey: ['userSettings'],

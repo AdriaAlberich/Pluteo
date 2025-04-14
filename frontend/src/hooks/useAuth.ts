@@ -3,7 +3,7 @@ import { authApi } from '../services/api';
 import { useAppStore } from '../context/appStore';
 
 export function useAuth() {
-  const { setIsAuthenticated } = useAppStore();
+  const { setIsAuthenticated, setUserSettings, setNotifications } = useAppStore();
 
   const registerMutation = useMutation({
     mutationFn: authApi.register
@@ -12,7 +12,7 @@ export function useAuth() {
   const loginMutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: (response) => {
-      localStorage.setItem('pluteo-token', response.data.accessToken);
+      localStorage.setItem('token', response.data.accessToken);
       setIsAuthenticated(true);
     },
   });
@@ -35,7 +35,9 @@ export function useAuth() {
 
   const logout = () => {
     setIsAuthenticated(false);
-    localStorage.removeItem('pluteo-token');
+    setUserSettings(null);
+    setNotifications([]);
+    localStorage.removeItem('token');
   };
 
   return {

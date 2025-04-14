@@ -11,7 +11,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('pluteo-token');
+  const token = localStorage.getItem('token');
   if (token !== undefined) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -22,7 +22,7 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('pluteo-token');
+      localStorage.removeItem('token');
       window.location.href = '/';
     }
     return Promise.reject(error);

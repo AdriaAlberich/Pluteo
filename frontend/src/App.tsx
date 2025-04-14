@@ -11,7 +11,7 @@ export default function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('pluteo-token');
+    const token = localStorage.getItem('token');
     if (token && !isAuthenticated) {
       setIsAuthenticated(true);
       navigate('/mylibrary');

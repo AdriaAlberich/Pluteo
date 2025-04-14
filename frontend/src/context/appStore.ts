@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import i18n from '../i18n';
 
 interface AppState {
   isAuthenticated: boolean;
@@ -23,5 +24,10 @@ export const useAppStore = create<AppState>((set) => ({
   notifications: [],
   setNotifications: (notifications) => set({ notifications }),
   userSettings: {} as UserSettings,
-  setUserSettings: (settings) => set({ userSettings: settings }),
+  setUserSettings: (settings) => {
+    set({ userSettings: settings })
+    if (settings && settings.locale) {
+      i18n.changeLanguage(settings.locale);
+    }
+  }
 }));
