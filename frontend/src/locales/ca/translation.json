@@ -9,7 +9,7 @@
     "auth_password_confirm_placeholder": "Confirma la contrasenya",
     "auth_login_button": "Accedir",
     "auth_register_button": "Registrar-se",
-    "auth_login_link": "Ja tens un compte? Accedeix",
+    "auth_login_link": "Iniciar sessió",
     "auth_register_link": "Encara no tens un compte? Registra't!",
     "auth_register_success": "El registre s'ha completat amb èxit. Comprova el teu correu electrònic per activar el compte.",
     "auth_email_error": "El correu electrònic és obligatori",
@@ -34,6 +34,7 @@
     "auth_reset_password_title": "Restablir contrasenya",
     "auth_reset_password_button": "Restablir",
     "auth_reset_password_success": "La contrasenya s'ha restablert amb èxit.",
+    "auth_reset_password_token_not_found_error": "El token de restabliment no és vàlid o ha caducat.",
     "auth_generic_error": "S'ha produït un error. Si us plau, torna-ho a intentar més tard.",
     
     "usermenu_settings": "Configuració",
