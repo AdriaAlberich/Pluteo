@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { UserSettings } from '../context/appStore';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5299/api';
 
@@ -50,8 +51,8 @@ export const authApi = {
 // User profile related endpoints
 export const userApi = {
   getSettings: () =>
-    api.get('/users/settings'),
-  updateSettings: (data: { notifyByEmail: boolean; notifyLoan: string; notifyLoanBeforeDays: number; notifyLoanBeforeDaysFrequency: number; locale: string }) =>
+    api.get<UserSettings>('/users/settings'),
+  updateSettings: (data: Partial<UserSettings>) =>
     api.patch('/users/settings', data),
   updateLanguage: (data: { locale: string }) =>
     api.patch('/users/settings', data),

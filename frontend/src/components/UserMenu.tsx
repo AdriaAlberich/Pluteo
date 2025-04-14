@@ -3,12 +3,14 @@ import { UserCircle2, Settings, LogOut } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const { logout } = useAuth();
   const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -22,6 +24,11 @@ export function UserMenu() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <div className="relative" ref={menuRef}>
@@ -45,7 +52,7 @@ export function UserMenu() {
           </button>
 
           <button
-            onClick={logout}
+            onClick={handleLogout}
             className="w-full px-4 py-2 text-left text-red-400 hover:bg-gray-700 flex items-center gap-2"
           >
             <LogOut className="w-4 h-4" />

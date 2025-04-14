@@ -9,17 +9,16 @@ export function Notifications() {
   const [isOpen, setIsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const { notifications, setNotifications } = useAppStore();
-  const { getNotifications, markAsRead, deleteOne, clearAll, isLoading, isError, error } = useNotifications();
+  const { markAsRead, deleteOne, clearAll, isLoading, isError, error } = useNotifications();
   const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (getNotifications) {
-      setNotifications(getNotifications.data);
-      const unread = getNotifications.data.filter((notification: { markedAsRead: any; }) => !notification.markedAsRead);
+    if (notifications) {
+      const unread = notifications.filter((notification: { markedAsRead: any; }) => !notification.markedAsRead);
       setUnreadCount(unread.length);
     }
-  }, [getNotifications, setNotifications]);
+  }, [notifications, setNotifications]);
 
   const handleNotificationClick = (notificationId: string) => {
     const notification = notifications.find((n) => n.id === notificationId);

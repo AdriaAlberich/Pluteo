@@ -12,7 +12,7 @@ export default function App() {
 
   useEffect(() => {
     const token = localStorage.getItem('pluteo-token');
-    if (token) {
+    if (token && !isAuthenticated) {
       setIsAuthenticated(true);
       navigate('/mylibrary');
     }

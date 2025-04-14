@@ -1,11 +1,22 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { notificationsApi } from '../services/api';
+import { useAppStore } from '../context/appStore';
 
 export function useNotifications() {
+  const { isAuthenticated, setNotifications } = useAppStore();
 
   const getNotifications = useQuery({
     queryKey: ['notifications'],
-    queryFn: notificationsApi.getNotifications,
+    queryFn: async () => {
+      const response = await notificationsApi.getNotifications();
+      setNotifications(response.data);
+      return response.data;
+    },
+    enabled: isAuthenticated,
+    retry: 1,
+    retryDelay: 1000,
+    refetchInterval: 10000,
+    refetchOnWindowFocus: true
   });
 
   const markAsRead = useMutation({

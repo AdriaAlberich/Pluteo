@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { authApi } from '../services/api';
 import { useAppStore } from '../context/appStore';
 
@@ -34,8 +34,8 @@ export function useAuth() {
   });
 
   const logout = () => {
-    localStorage.removeItem('pluteo-token');
     setIsAuthenticated(false);
+    localStorage.removeItem('pluteo-token');
   };
 
   return {

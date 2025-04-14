@@ -1,8 +1,5 @@
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../context/appStore';
 import { useAuth } from '../hooks/useAuth';
 import { LanguageSelector } from './LanguageSelector';
@@ -14,6 +11,7 @@ export function Auth() {
   const { 
     register, 
     login, 
+    activateUser,
     forgotPassword, 
     resetPassword, 
     resendActivationEmail,
@@ -39,7 +37,6 @@ export function Auth() {
   const [currentError, setCurrentError] = useState<Error>(new Error(''));
   const [formData, setFormData] = useState({ email: '', password: '', passwordRepeat: '' });
   const { activationToken, resetPasswordToken } = useParams();
-  const { activateUser } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 

@@ -1,11 +1,20 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { userApi } from '../services/api';
+import { useAppStore, UserSettings } from '../context/appStore';
 
 export function useProfile() {
+  const { isAuthenticated, setUserSettings } = useAppStore();
 
-  const getSettings = useQuery({
-    queryKey: ['settings'],
-    queryFn: userApi.getSettings,
+  const getSettings = useQuery<UserSettings>({
+    queryKey: ['userSettings'],
+    queryFn: async () => {
+      const response = await userApi.getSettings();
+      setUserSettings(response.data);
+      return response.data;
+    },
+    enabled: isAuthenticated,
+    retry: 1,
+    retryDelay: 1000
   });
 
   const updateSettings = useMutation({

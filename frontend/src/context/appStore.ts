@@ -5,6 +5,16 @@ interface AppState {
   setIsAuthenticated: (auth: boolean) => void;
   notifications: any[];
   setNotifications: (notifications: any[]) => void;
+  userSettings: any;
+  setUserSettings: (settings: any) => void;
+}
+
+export interface UserSettings {
+  notifyByEmail: boolean;
+  notifyLoan: string;
+  notifyLoanBeforeDays: number;
+  notifyLoanBeforeDaysFrequency: number;
+  locale: string;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -12,4 +22,6 @@ export const useAppStore = create<AppState>((set) => ({
   setIsAuthenticated: (auth) => set({ isAuthenticated: auth }),
   notifications: [],
   setNotifications: (notifications) => set({ notifications }),
+  userSettings: {} as UserSettings,
+  setUserSettings: (settings) => set({ userSettings: settings }),
 }));
