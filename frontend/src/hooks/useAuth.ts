@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { authApi } from '../services/api';
-import { useAppStore } from '../context/appContext';
+import { useAppStore } from '../context/appStore';
 
 export function useAuth() {
   const { setIsAuthenticated } = useAppStore();
@@ -15,7 +15,8 @@ export function useAuth() {
   const loginMutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: (response) => {
-      localStorage.setItem('pluteo-token', response.data.token);
+      console.log('User logged in:', response);
+      localStorage.setItem('pluteo-token', response.data.accessToken);
       setIsAuthenticated(true);
     },
   });

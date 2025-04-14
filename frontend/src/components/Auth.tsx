@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
-import { useAppStore } from '../context/appContext';
+import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import { useAppStore } from '../context/appStore';
 import { useAuth } from '../hooks/useAuth';
 import { LanguageSelector } from './LanguageSelector';
 import { useTranslation } from 'react-i18next';
@@ -19,9 +21,12 @@ export function Auth() {
   const [passwordShowError, setPasswordShowError] = useState(false);
   const [passwordConfirmShowError, setPasswordConfirmShowError] = useState(false);
   const [passwordMatchError, setPasswordMatchError] = useState(false);
+  const [clearAlerts, setClearAlerts] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '', passwordRepeat: '' });
   const { activationToken, resetPasswordToken } = useParams();
   const { activateUser } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const { t } = useTranslation();
 
@@ -35,7 +40,7 @@ export function Auth() {
       setIsForgotPassword(false);
       setIsReActivation(false);
     }
-  }, [activationToken, activateUser]);
+  }, [activationToken, activateUser, resetPasswordToken, setIsResetPassword]);
 
   const formValidation = () => {
 
@@ -87,7 +92,12 @@ export function Auth() {
       return;
 
     if(isLogin){
-      login(formData);
+      login(formData, {
+        onSuccess: () => {
+          const redirectPath = location.state?.from || '/mylibrary';
+          navigate(redirectPath);
+        },
+      });
     }
     else if(isForgotPassword){
       forgotPassword(formData.email);
