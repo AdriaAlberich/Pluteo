@@ -2,17 +2,32 @@ import { useState } from 'react';
 import { UserCircle2, Settings, LogOut } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from 'react-i18next';
+import { useEffect, useRef } from 'react';
 
 export function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const { logout } = useAuth();
   const { t } = useTranslation();
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
-    <div className="relative">
+    <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 text-gray-300"
+        className="relative p-2 text-gray-400 hover:text-white transition-colors"
       >
         <UserCircle2 className="w-6 h-6" />
       </button>

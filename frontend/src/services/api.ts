@@ -45,8 +45,30 @@ export const authApi = {
       newPassword: data.newPassword, 
       newPasswordRepeat: data.newPasswordRepeat 
     }),
+};
+
+// User profile related endpoints
+export const userApi = {
+  getSettings: () =>
+    api.get('/users/settings'),
+  updateSettings: (data: { notifyByEmail: boolean; notifyLoan: string; notifyLoanBeforeDays: number; notifyLoanBeforeDaysFrequency: number; locale: string }) =>
+    api.patch('/users/settings', data),
+  updateLanguage: (data: { locale: string }) =>
+    api.patch('/users/settings', data),
   changePassword: (data: { currentPassword: string; newPassword: string; newPasswordRepeat: string }) =>
     api.patch('/users/change-password', data),
+};
+
+// Notification related endpoints
+export const notificationsApi = {
+  getNotifications: () =>
+    api.get('/notifications'),
+  markAsRead: (notificationId: string) =>
+    api.patch(`/notifications/${notificationId}`),
+  deleteOne: (notificationId: string) =>
+    api.delete(`/notifications/${notificationId}`),
+  clearAll: () =>
+    api.delete('/notifications'),
 };
 
 export default api;

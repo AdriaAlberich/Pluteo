@@ -42,5 +42,9 @@
 
     "languageselector_catalan": "Català",
     "languageselector_spanish": "Castellà",
-    "languageselector_english": "Anglès"
+    "languageselector_english": "Anglès",
+
+    "notifications_title": "Notificacions",
+    "notifications_clear_all": "Esborrar tot",
+    "notifications_no_notifications": "No hi ha notificacions"
 }

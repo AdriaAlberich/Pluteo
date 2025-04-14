@@ -33,10 +33,6 @@ export function useAuth() {
     mutationFn: authApi.resetPassword
   });
 
-  const changePasswordMutation = useMutation({
-    mutationFn: authApi.changePassword
-  });
-
   const logout = () => {
     localStorage.removeItem('pluteo-token');
     setIsAuthenticated(false);
@@ -49,7 +45,6 @@ export function useAuth() {
     resendActivationEmail: resendActivationEmailMutation.mutate,
     forgotPassword: forgotPasswordMutation.mutate,
     resetPassword: resetPasswordMutation.mutate,
-    changePassword: changePasswordMutation.mutate,
     logout,
     loginErrorReset: loginMutation.reset,
     registerErrorReset: registerMutation.reset,
@@ -57,9 +52,8 @@ export function useAuth() {
     resendActivationEmailErrorReset: resendActivationEmailMutation.reset,
     forgotPasswordErrorReset: forgotPasswordMutation.reset,
     resetPasswordErrorReset: resetPasswordMutation.reset,
-    changePasswordErrorReset: changePasswordMutation.reset,
-    isLoading: loginMutation.isPending || registerMutation.isPending || activateUserMutation.isPending || resendActivationEmailMutation.isPending || forgotPasswordMutation.isPending || resetPasswordMutation.isPending || changePasswordMutation.isPending,
-    isError: loginMutation.isError || registerMutation.isError || activateUserMutation.isError || resendActivationEmailMutation.isError || forgotPasswordMutation.isError || resetPasswordMutation.isError || changePasswordMutation.isError,
-    isSuccess: loginMutation.isSuccess || registerMutation.isSuccess || activateUserMutation.isSuccess || resendActivationEmailMutation.isSuccess || forgotPasswordMutation.isSuccess || resetPasswordMutation.isSuccess || changePasswordMutation.isSuccess
+    isLoading: loginMutation.isPending || registerMutation.isPending || activateUserMutation.isPending || resendActivationEmailMutation.isPending || forgotPasswordMutation.isPending || resetPasswordMutation.isPending,
+    isError: loginMutation.isError || registerMutation.isError || activateUserMutation.isError || resendActivationEmailMutation.isError || forgotPasswordMutation.isError || resetPasswordMutation.isError,
+    isSuccess: loginMutation.isSuccess || registerMutation.isSuccess || activateUserMutation.isSuccess || resendActivationEmailMutation.isSuccess || forgotPasswordMutation.isSuccess || resetPasswordMutation.isSuccess,
   };
 }

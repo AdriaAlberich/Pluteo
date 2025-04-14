@@ -240,7 +240,7 @@ export function Auth() {
 
   return (
     <div className="bg-custom-bg bg-cover bg-center min-h-screen flex items-center justify-center px-4">
-      <div className="absolute top-4 left-4">
+      <div className="absolute top-4 right-4">
         <LanguageSelector />
       </div>
       <div className="max-w-md w-full space-y-8 bg-gray-800 p-8 rounded-xl bg-opacity-90">
