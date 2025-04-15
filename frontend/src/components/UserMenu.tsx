@@ -4,9 +4,11 @@ import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { UserProfile } from './UserProfile';
 
 export function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
   const { logout } = useAuth();
   const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement | null>(null);
@@ -25,41 +27,47 @@ export function UserMenu() {
     };
   }, []);
 
+  const handleSettings = () => {
+    setShowProfile(true);
+    setIsOpen(false);
+  };
+
   const handleLogout = () => {
     logout();
     navigate('/');
   };
 
   return (
-    <div className="relative" ref={menuRef}>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-gray-400 hover:text-white transition-colors"
-      >
-        <UserCircle2 className="w-6 h-6" />
-      </button>
+    <>
+      <div className="relative" ref={menuRef}>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="relative p-2 text-gray-400 hover:text-white transition-colors"
+        >
+          <UserCircle2 className="w-6 h-6" />
+        </button>
 
-      {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg overflow-hidden z-50">
-          <button
-            onClick={() => {
-              setIsOpen(false);
-            }}
-            className="w-full px-4 py-2 text-left text-gray-300 hover:bg-gray-700 flex items-center gap-2"
-          >
-            <Settings className="w-4 h-4" />
-            {t('usermenu_settings')}
-          </button>
+        {isOpen && (
+          <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg overflow-hidden z-50">
+            <button
+              onClick={handleSettings}
+              className="w-full px-4 py-2 text-left text-gray-300 hover:bg-gray-700 flex items-center gap-2"
+            >
+              <Settings className="w-4 h-4" />
+              {t('usermenu_settings')}
+            </button>
 
-          <button
-            onClick={handleLogout}
-            className="w-full px-4 py-2 text-left text-red-400 hover:bg-gray-700 flex items-center gap-2"
-          >
-            <LogOut className="w-4 h-4" />
-            {t('usermenu_logout')}
-          </button>
-        </div>
-      )}
-    </div>
+            <button
+              onClick={handleLogout}
+              className="w-full px-4 py-2 text-left text-red-400 hover:bg-gray-700 flex items-center gap-2"
+            >
+              <LogOut className="w-4 h-4" />
+              {t('usermenu_logout')}
+            </button>
+          </div>
+        )}
+      </div>
+    {showProfile && <UserProfile onClose={() => setShowProfile(false)} />}
+    </>
   );
 }

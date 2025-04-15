@@ -46,5 +46,22 @@
 
     "notifications_title": "Notificacions",
     "notifications_clear_all": "Esborrar tot",
-    "notifications_no_notifications": "No hi ha notificacions"
+    "notifications_no_notifications": "No hi ha notificacions",
+
+    "userprofile_title": "Perfil d'usuari",
+    "userprofile_info_title": "Informació",
+    "userprofile_email_label": "Correu electrònic",
+    "userprofile_settings_title": "Configuració",
+    "userprofile_language_label": "Idioma",
+    "userprofile_notify_email_label": "Rebre notificacions per correu",
+    "userprofile_notify_loan_label": "Rebre notificacions de préstec",
+    "userprofile_notify_loan_before_days_label": "Rebre notificacions de préstec abans de (dies)",
+    "userprofile_notify_loan_before_days_frequency_label": "Freqüència de notificació (dies)",
+    "userprofile_change_password": "Canviar contrasenya",
+    "userprofile_current_password": "Contrasenya actual",
+    "userprofile_new_password": "Nova contrasenya",
+    "userprofile_confirm_new_password": "Confirma la nova contrasenya",
+    "userprofile_change_password_button": "Canviar",
+    "userprofile_change_password_cancel_button": "Cancel·lar",
+    "userprofile_change_password_success": "La contrasenya s'ha canviat amb èxit"
 }
