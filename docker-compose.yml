@@ -1,0 +1,31 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5299:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DatabaseSettings__ConnectionString=mongodb://database:27017
+    depends_on:
+      - database
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
+
+  database:
+    image: mongo:7.0
+    container_name: pluteo-mongo
+    ports:
+      - "27018:27017"
+    command: ["mongod", "--noauth"]
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:

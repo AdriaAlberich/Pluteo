@@ -1,4 +1,32 @@
 {
-  "subtitle": "Personal library manager",
-  "language": "English"
+  "auth_login_title": "Sign in to your account",
+  "auth_register_title": "Create new account",
+  "auth_email_label": "Email address",
+  "auth_email_placeholder": "Enter your email address",
+  "auth_password_label": "Password",
+  "auth_password_placeholder": "Enter your password",
+  "auth_password_confirm_label": "Confirm password",
+  "auth_password_confirm_placeholder": "Confirm your password",
+  "auth_login_button": "Sign in",
+  "auth_register_button": "Sign up",
+  "auth_login_link": "Already have an account? Sign in",
+  "auth_register_link": "Don't have an account? Sign up",
+  "auth_email_error": "Email is required",
+  "auth_email_format_error": "Email is not valid",
+  "auth_password_error": "Password is required",
+  "auth_password_confirm_error": "Password confirmation is required",
+  "auth_password_match_error": "Passwords do not match",
+  "auth_resend_activation_link": "Send activation email again",
+  "auth_resend_activation_title": "Send activation email again",
+  "auth_resend_activation_button": "Send",
+  "auth_forgot_password_link": "Forgot your password?",
+  "auth_forgot_password_title": "Recover password",
+  "auth_forgot_password_button": "Recover",
+
+  "usermenu_settings": "Settings",
+  "usermenu_logout": "Logout",
+
+  "languageselector_catalan": "Catalan",
+  "languageselector_spanish": "Spanish",
+  "languageselector_english": "English"
 }
