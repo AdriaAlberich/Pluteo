@@ -7,18 +7,20 @@ using Pluteo.Domain.Exceptions;
 using Pluteo.Infrastructure.Utils;
 using Pluteo.Domain.Models.Dto.Users;
 using Pluteo.Domain.Models.Settings;
+using System.Security.Claims;
+using Microsoft.Extensions.Options;
 
 namespace Pluteo.Infrastructure.Controllers;
 [ApiController]
 [Produces("application/json")]
 [Route("api/users")]
-public class UserController(UserService userService, IWebHostEnvironment env, ILogger logger, IMapper mapper, ApplicationSettings config) : Controller
+public class UserController(UserService userService, IWebHostEnvironment env, ILogger logger, IMapper mapper, IOptions<ApplicationSettings> config) : Controller
 {
     private readonly UserService _userService = userService;
     private readonly ILogger _logger = logger;
     private readonly IWebHostEnvironment _env = env;
     private readonly IMapper _mapper = mapper;
-    private readonly ApplicationSettings _config = config;
+    private readonly ApplicationSettings _config = config.Value;
 
     #region User Endpoints
 
@@ -57,7 +59,172 @@ public class UserController(UserService userService, IWebHostEnvironment env, IL
         }
         catch (ServiceException se)
         {
-            return StatusCode(StatusCodes.Status406NotAcceptable, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+            return StatusCode(StatusCodes.Status400BadRequest, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+        }
+        catch (Exception e)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ExceptionControl.ProcessException(e, _logger, _env.IsDevelopment(), false));
+        }
+    }
+
+    [AllowAnonymous]
+    [HttpPatch("activate")]
+    public async Task<ActionResult> Activate([FromQuery] string token)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(token))
+                return BadRequest("TOKEN_NULL");
+            
+            await _userService.ActivateUser(token);
+
+            return Ok();
+        }
+        catch (ServiceException se)
+        {
+            return StatusCode(StatusCodes.Status400BadRequest, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+        }
+        catch (Exception e)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ExceptionControl.ProcessException(e, _logger, _env.IsDevelopment(), false));
+        }
+    }
+
+    [AllowAnonymous]
+    [HttpPatch("resend-activation")]
+    public async Task<ActionResult> ResendActivation([FromQuery] string email)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return BadRequest("EMAIL_NULL");
+
+            await _userService.SendUserActivation(email);
+
+            return Ok();
+        }
+        catch (ServiceException se)
+        {
+            return StatusCode(StatusCodes.Status400BadRequest, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+        }
+        catch (Exception e)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ExceptionControl.ProcessException(e, _logger, _env.IsDevelopment(), false));
+        }
+    }
+
+    [AllowAnonymous]
+    [HttpPatch("lost-password")]
+    public async Task<ActionResult> LostPassword([FromQuery] string email)
+    {
+        try
+        {
+            await _userService.SendUserResetPassword(email);
+
+            return Ok();
+        }
+        catch (ServiceException se)
+        {
+            return StatusCode(StatusCodes.Status400BadRequest, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+        }
+        catch (Exception e)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ExceptionControl.ProcessException(e, _logger, _env.IsDevelopment(), false));
+        }
+    }
+
+    [AllowAnonymous]
+    [HttpPatch("reset-password")]
+    public async Task<ActionResult> ResetPassword([FromQuery] string token, [FromBody] ResetPasswordRequest request)
+    {
+        try
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.NewPassword) || string.IsNullOrWhiteSpace(request.NewPasswordRepeat))
+                return BadRequest("PASSWORD_REQUEST_NOT_VALID");
+
+            await _userService.ResetPassword(token, request.NewPassword, request.NewPasswordRepeat);
+
+            return Ok();
+        }
+        catch (ServiceException se)
+        {
+            return StatusCode(StatusCodes.Status400BadRequest, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+        }
+        catch (Exception e)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ExceptionControl.ProcessException(e, _logger, _env.IsDevelopment(), false));
+        }
+    }
+
+    [Authorize(Roles = "User")]
+    [HttpPatch("change-password")]
+    public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        try
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.CurrentPassword) || string.IsNullOrWhiteSpace(request.NewPassword) || string.IsNullOrWhiteSpace(request.NewPasswordRepeat))
+                return BadRequest("PASSWORD_REQUEST_NOT_VALID");
+
+            var userEmail = GetUserEmail(User);
+
+            if (string.IsNullOrWhiteSpace(userEmail))
+                return BadRequest("USER_EMAIL_NULL");
+
+            await _userService.ChangePasswordByEmail(userEmail, request.CurrentPassword, request.NewPassword, request.NewPasswordRepeat);
+
+            return Ok();
+        }
+        catch (ServiceException se)
+        {
+            return StatusCode(StatusCodes.Status400BadRequest, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+        }
+        catch (Exception e)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ExceptionControl.ProcessException(e, _logger, _env.IsDevelopment(), false));
+        }
+    }
+
+    [Authorize(Roles = "User")]
+    [HttpGet("settings")]
+    public async Task<ActionResult> GetUserSettings()
+    {
+        try
+        {
+            var userEmail = GetUserEmail(User);
+
+            if (string.IsNullOrWhiteSpace(userEmail))
+                return BadRequest("USER_EMAIL_NULL");
+
+            return Ok(await _userService.GetUserSettings(userEmail));
+        }
+        catch (ServiceException se)
+        {
+            return StatusCode(StatusCodes.Status400BadRequest, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+        }
+        catch (Exception e)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ExceptionControl.ProcessException(e, _logger, _env.IsDevelopment(), false));
+        }
+    }
+
+    [Authorize(Roles = "User")]
+    [HttpPatch("settings")]
+    public async Task<ActionResult> GetUserSettings([FromBody] UserSettingsUpdateRequest request)
+    {
+        try
+        {
+            var userEmail = GetUserEmail(User);
+
+            if (string.IsNullOrWhiteSpace(userEmail))
+                return BadRequest("USER_EMAIL_NULL");
+
+            await _userService.UpdateUserSettings(userEmail, request);
+
+            return Ok();
+        }
+        catch (ServiceException se)
+        {
+            return StatusCode(StatusCodes.Status400BadRequest, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
         }
         catch (Exception e)
         {
@@ -79,7 +246,7 @@ public class UserController(UserService userService, IWebHostEnvironment env, IL
         }
         catch (ServiceException se)
         {
-            return StatusCode(StatusCodes.Status406NotAcceptable, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+            return StatusCode(StatusCodes.Status400BadRequest, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
         }
         catch (Exception e)
         {
@@ -97,7 +264,7 @@ public class UserController(UserService userService, IWebHostEnvironment env, IL
         }
         catch (ServiceException se)
         {
-            return StatusCode(StatusCodes.Status406NotAcceptable, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+            return StatusCode(StatusCodes.Status400BadRequest, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
         }
         catch (Exception e)
         {
@@ -116,7 +283,7 @@ public class UserController(UserService userService, IWebHostEnvironment env, IL
         }
         catch (ServiceException se)
         {
-            return StatusCode(StatusCodes.Status406NotAcceptable, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+            return StatusCode(StatusCodes.Status400BadRequest, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
         }
         catch (Exception e)
         {
@@ -135,7 +302,7 @@ public class UserController(UserService userService, IWebHostEnvironment env, IL
         }
         catch (ServiceException se)
         {
-            return StatusCode(StatusCodes.Status406NotAcceptable, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+            return StatusCode(StatusCodes.Status400BadRequest, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
         }
         catch (Exception e)
         {
@@ -154,7 +321,7 @@ public class UserController(UserService userService, IWebHostEnvironment env, IL
         }
         catch (ServiceException se)
         {
-            return StatusCode(StatusCodes.Status406NotAcceptable, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+            return StatusCode(StatusCodes.Status400BadRequest, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
         }
         catch (Exception e)
         {
@@ -173,7 +340,7 @@ public class UserController(UserService userService, IWebHostEnvironment env, IL
         }
         catch (ServiceException se)
         {
-            return StatusCode(StatusCodes.Status406NotAcceptable, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+            return StatusCode(StatusCodes.Status400BadRequest, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
         }
         catch (Exception e)
         {
@@ -182,4 +349,16 @@ public class UserController(UserService userService, IWebHostEnvironment env, IL
     }
 
     #endregion
+
+    #region Private methods
+
+        private static string? GetUserEmail(ClaimsPrincipal? user)
+        {
+            ArgumentNullException.ThrowIfNull(user);
+
+            var emailClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
+            return emailClaim?.Value;
+        }
+
+        #endregion
 }
