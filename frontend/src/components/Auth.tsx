@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { useAppStore } from '../context/appStore';
 import { useAuth } from '../hooks/useAuth';
 import { LanguageSelector } from './LanguageSelector';
 import { useTranslation } from 'react-i18next';
 import { CircleAlert, Info } from 'lucide-react';
 
 export function Auth() {
-  const { setIsAuthenticated } = useAppStore();
   const { 
     register, 
     login, 

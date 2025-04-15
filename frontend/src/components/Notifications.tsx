@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { Bell } from 'lucide-react';
-import { formatDistanceToNow, set } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
 import { useAppStore } from '../context/appStore';
 import { useNotifications } from '../hooks/useNotifications';
 import { useTranslation } from 'react-i18next';
@@ -9,7 +9,7 @@ export function Notifications() {
   const [isOpen, setIsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const { notifications, setNotifications } = useAppStore();
-  const { markAsRead, deleteOne, clearAll, isLoading, isError, error } = useNotifications();
+  const { markAsRead, clearAll } = useNotifications();
   const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement | null>(null);
 

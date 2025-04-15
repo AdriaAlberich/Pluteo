@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import { useAppStore } from './context/appStore';
 import { Auth } from './components/Auth';
 import { UserMain } from './components/UserMain';
