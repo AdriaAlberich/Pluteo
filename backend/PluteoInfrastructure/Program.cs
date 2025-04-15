@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+using Pluteo.Domain.Models.Settings;
 using Pluteo.Infrastructure;
 using Serilog;
 
@@ -24,6 +26,19 @@ startup.ConfigureServices(builder.Services);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+// CORS policy
+builder.Services.AddCors(options =>
+{
+    ApplicationSettings? config = builder.Configuration.GetSection("ApplicationSettings").Get<ApplicationSettings>() ?? throw new MissingFieldException("ApplicationSettings is not present");
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins(config.ApplicationUrl)
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -33,6 +48,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowFrontend");
 Console.WriteLine("Starting Routing...");
 app.UseRouting();
 Console.WriteLine("Starting Authentication...");

@@ -39,7 +39,7 @@ public class NotificationController(NotificationSystem notificationSystem, IWebH
         }
         catch (ServiceException se)
         {
-            return StatusCode(StatusCodes.Status406NotAcceptable, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+            return StatusCode(StatusCodes.Status400BadRequest, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
         }
         catch (Exception e)
         {
@@ -64,7 +64,7 @@ public class NotificationController(NotificationSystem notificationSystem, IWebH
         }
         catch (ServiceException se)
         {
-            return StatusCode(StatusCodes.Status406NotAcceptable, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+            return StatusCode(StatusCodes.Status400BadRequest, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
         }
         catch (Exception e)
         {
@@ -89,7 +89,7 @@ public class NotificationController(NotificationSystem notificationSystem, IWebH
         }
         catch (ServiceException se)
         {
-            return StatusCode(StatusCodes.Status406NotAcceptable, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+            return StatusCode(StatusCodes.Status400BadRequest, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
         }
         catch (Exception e)
         {
@@ -114,7 +114,7 @@ public class NotificationController(NotificationSystem notificationSystem, IWebH
         }
         catch (ServiceException se)
         {
-            return StatusCode(StatusCodes.Status406NotAcceptable, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+            return StatusCode(StatusCodes.Status400BadRequest, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
         }
         catch (Exception e)
         {
