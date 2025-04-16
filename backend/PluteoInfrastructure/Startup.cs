@@ -47,6 +47,7 @@ public class Startup(IConfiguration configuration)
 
         // Register AutoMapper profiles
         services.AddAutoMapper(typeof(UserProfile));
+        services.AddAutoMapper(typeof(BookProfile));
 
         // Configure Authentication
         Console.WriteLine($"Configuring Authentication...");

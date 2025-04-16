@@ -7,7 +7,6 @@ using Pluteo.Domain.Static;
 using Pluteo.Domain.Exceptions;
 using System.Text.RegularExpressions;
 using Pluteo.Domain.Models.Dto.Users;
-using System.Reflection.Metadata.Ecma335;
 
 namespace Pluteo.Application.Services;
 public class UserService(ApplicationSettings config, ILogger logger, IBaseRepository<User, Guid> userRepository, ITokenGenerator tokenGenerator, IPasswordValidator passwordValidator, IPasswordCipher passwordCipher, IResourceManager localizationManager, IEmailSender emailSender) : IUserService
@@ -38,6 +37,7 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
                 NotifyLoanBeforeDaysFrequency = _config.DefaultNotifyLoanBeforeDaysFrequency,
                 Locale = _config.DefaultLocale
             },
+            Shelves = [], // TODO: Add default shelves
             ActivationToken = _tokenGenerator.GenerateRandomToken(),
             ResetPasswordToken = string.Empty
         };
