@@ -15,7 +15,7 @@ public class OpenLibrary(OpenLibrarySettings openLibrarySettings) : ILibraryInte
     private readonly string _apiUrl = openLibrarySettings.ApiUrl;
     private readonly string _coverApiUrl = openLibrarySettings.CoverApiUrl;
 
-    public async Task<List<BookSearchResult>> Search(List<string> searchTerms, int page = 1, int pageSize = 10)
+    public async Task<BookSearchResults> Search(List<string> searchTerms, int page = 1, int pageSize = 10)
     {
         RestClient client = new(_apiUrl + "/search.json");
 
@@ -29,18 +29,34 @@ public class OpenLibrary(OpenLibrarySettings openLibrarySettings) : ILibraryInte
         if (response.IsSuccessful)
         {
             var result = JsonConvert.DeserializeObject<OpenLibrarySearchResults>(response.Content ?? string.Empty);
-            return result?.docs?.Select(d => new BookSearchResult
+
+            var books = result?.docs?.Select(doc => new BookSearchResult
             {
-                Title = d.title ?? string.Empty,
-                ISBN = d.isbn ?? [],
-                SearchCoverUrl = $"{_coverApiUrl}/b/id/{d.isbn?.FirstOrDefault()}-M.jpg",
-                Authors = d.author_name ?? [],
-                Publishers = d.publisher ?? [],
-                PublishPlaces = d.publish_place ?? [],
-                FirstPublishYear = d.first_publish_year?.ToString() ?? string.Empty,
-                NumPages = d.number_of_pages_median ?? 0,
-                AvailableLanguages = d.language ?? []
+                Title = doc.title ?? string.Empty,
+                ISBN = doc.isbn ?? [],
+                Authors = doc.author_name ?? [],
+                SearchCoverUrl = $"{_coverApiUrl}/b/id/{doc.isbn?.FirstOrDefault()}-M.jpg",
+                Publishers = doc.publisher ?? [],
+                PublishPlaces = doc.publish_place ?? [],
+                FirstPublishYear = doc.first_publish_year.ToString() ?? string.Empty,
+                NumPages = doc.number_of_pages_median ?? 0,
+                AvailableLanguages = doc.language ?? []
             }).ToList() ?? [];
+
+            var totalCount = result?.numFound ?? 0;
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+            var paginatedBooks = books.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            BookSearchResults searchResults = new()
+            {
+                TotalResults = totalCount,
+                TotalPages = totalPages,
+                Page = page,
+                Results = paginatedBooks
+            };
+
+            return searchResults;
         }
 
         throw new Exception("Error fetching data from Open Library API.");

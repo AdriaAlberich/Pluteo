@@ -6,6 +6,7 @@ using Pluteo.Domain.Models.Entities;
 using Pluteo.Domain.Exceptions;
 using System.Text.RegularExpressions;
 using Pluteo.Domain.Models.Dto.Books;
+using System.Linq;
 
 namespace Pluteo.Application.Services;
 public class BookService(ApplicationSettings config, ILogger logger, IBaseRepository<Book, Guid> bookRepository) : IBookService
@@ -135,10 +136,10 @@ public class BookService(ApplicationSettings config, ILogger logger, IBaseReposi
         return await _bookRepository.List();
     }
 
-    public async Task<List<Book>> Search(List<string> searchTerms, int page = 1, int pageSize = 10)
+    public async Task<BookSearchResults> Search(List<string> searchTerms, int page = 1, int pageSize = 10)
     {
         if(searchTerms == null || searchTerms.Count == 0)
-            return [];
+            throw new ServiceException("SEARCH_TERMS_NULL_OR_EMPTY");
 
         List<Book> books = await _bookRepository.List();
         List<Book> filteredBooks = [];
@@ -149,6 +150,33 @@ public class BookService(ApplicationSettings config, ILogger logger, IBaseReposi
             filteredBooks.AddRange(books.Where(book => regex.IsMatch(book.Title) || regex.IsMatch(book.ISBN.FirstOrDefault() ?? string.Empty)));
         }
 
-        return [.. filteredBooks.Distinct().ToList().Skip((page - 1) * pageSize).Take(pageSize)];
+        int totalCount = filteredBooks.Count;
+        int totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+        int skip = (page - 1) * pageSize;
+        List<Book> paginatedBooks = [.. filteredBooks.Skip(skip).Take(pageSize)];
+
+        BookSearchResults results = new()
+        {
+            TotalResults = totalCount,
+            TotalPages = totalPages,
+            Page = page,
+            Results = [.. paginatedBooks
+                .Select(book => new BookSearchResult
+                {
+                    Title = book.Title,
+                    ISBN = book.ISBN,
+                    SearchCoverUrl = book.CoverSmall,
+                    Authors = book.Authors,
+                    Publishers = book.Publishers,
+                    PublishPlaces = book.PublishPlaces,
+                    FirstPublishYear = book.FirstPublishYear,
+                    NumPages = book.NumPages,
+                    AvailableLanguages = book.AvailableLanguages
+                })]
+        };
+
+        _logger.Information("Search for books with terms {SearchTerms} returned {TotalResults} results.", string.Join(", ", searchTerms), totalCount);
+        
+        return results;
     }
 }

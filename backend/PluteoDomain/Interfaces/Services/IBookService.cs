@@ -6,5 +6,5 @@ public interface IBookService : IBaseEntityService<Book, Guid>
 {
         Task<Book> Create(CreateBookRequest request);
         Task UpdateFromRequest(Guid id, UpdateBookRequest request);
-        Task<List<Book>> Search(List<string> searchTerms, int page, int pageSize);
+        Task<BookSearchResults> Search(List<string> searchTerms, int page, int pageSize);
 }
