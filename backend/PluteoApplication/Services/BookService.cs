@@ -3,10 +3,8 @@ using Pluteo.Domain.Interfaces.Services;
 using Pluteo.Domain.Models.Settings;
 using Pluteo.Domain.Interfaces;
 using Pluteo.Domain.Models.Entities;
-using Pluteo.Domain.Static;
 using Pluteo.Domain.Exceptions;
 using System.Text.RegularExpressions;
-using Pluteo.Domain.Models.Dto.Users;
 using Pluteo.Domain.Models.Dto.Books;
 
 namespace Pluteo.Application.Services;
@@ -23,13 +21,14 @@ public class BookService(ApplicationSettings config, ILogger logger, IBaseReposi
             Id = Guid.NewGuid(),
             Title = request.Title,
             ISBN = request.ISBN,
-            Cover = request.Cover,
+            CoverBig = request.CoverBig,
+            CoverSmall = request.CoverSmall,
             Authors = request.Authors,
-            Tags = request.Tags,
             Publishers = request.Publishers,
-            PublishDate = request.PublishDate,
+            PublishPlaces = request.PublishPlaces,
+            FirstPublishYear = request.FirstPublishYear,
             NumPages = request.NumPages,
-            HasEbook = request.HasEbook
+            AvailableLanguages = request.AvailableLanguages
         };
 
         await _bookRepository.Create(newBook);
@@ -59,15 +58,9 @@ public class BookService(ApplicationSettings config, ILogger logger, IBaseReposi
             isUpdated = true;
         }
 
-        if(!string.IsNullOrWhiteSpace(updateBookRequest.ISBN))
+        if(updateBookRequest.ISBN != null && updateBookRequest.ISBN.Count > 0)
         {
             book.ISBN = updateBookRequest.ISBN;
-            isUpdated = true;
-        }
-
-        if(!string.IsNullOrWhiteSpace(updateBookRequest.Cover))
-        {
-            book.Cover = updateBookRequest.Cover;
             isUpdated = true;
         }
 
@@ -77,9 +70,15 @@ public class BookService(ApplicationSettings config, ILogger logger, IBaseReposi
             isUpdated = true;
         }
 
-        if(updateBookRequest.Tags != null && updateBookRequest.Tags.Count > 0)
+        if(!string.IsNullOrWhiteSpace(updateBookRequest.CoverBig))
         {
-            book.Tags = updateBookRequest.Tags;
+            book.CoverBig = updateBookRequest.CoverBig;
+            isUpdated = true;
+        }
+
+        if(!string.IsNullOrWhiteSpace(updateBookRequest.CoverSmall))
+        {
+            book.CoverSmall = updateBookRequest.CoverSmall;
             isUpdated = true;
         }
 
@@ -89,21 +88,27 @@ public class BookService(ApplicationSettings config, ILogger logger, IBaseReposi
             isUpdated = true;
         }
 
-        if(updateBookRequest.PublishDate != null)
+        if(updateBookRequest.PublishPlaces != null && updateBookRequest.PublishPlaces.Count > 0)
         {
-            book.PublishDate = updateBookRequest.PublishDate.Value;
+            book.PublishPlaces = updateBookRequest.PublishPlaces;
             isUpdated = true;
         }
 
-        if(updateBookRequest.NumPages != null)
+        if(!string.IsNullOrWhiteSpace(updateBookRequest.FirstPublishYear))
         {
-            book.NumPages = updateBookRequest.NumPages.Value;
+            book.FirstPublishYear = updateBookRequest.FirstPublishYear;
             isUpdated = true;
         }
 
-        if(updateBookRequest.HasEbook != null)
+        if(updateBookRequest.NumPages > 0)
         {
-            book.HasEbook = updateBookRequest.HasEbook.Value;
+            book.NumPages = updateBookRequest.NumPages;
+            isUpdated = true;
+        }
+
+        if(updateBookRequest.AvailableLanguages != null && updateBookRequest.AvailableLanguages.Count > 0)
+        {
+            book.AvailableLanguages = updateBookRequest.AvailableLanguages;
             isUpdated = true;
         }
 
@@ -133,7 +138,7 @@ public class BookService(ApplicationSettings config, ILogger logger, IBaseReposi
     public async Task<List<Book>> Search(List<string> searchTerms, int page = 1, int pageSize = 10)
     {
         if(searchTerms == null || searchTerms.Count == 0)
-            return await List();
+            return [];
 
         List<Book> books = await _bookRepository.List();
         List<Book> filteredBooks = [];
@@ -141,7 +146,7 @@ public class BookService(ApplicationSettings config, ILogger logger, IBaseReposi
         foreach(string term in searchTerms)
         {
             Regex regex = new(term, RegexOptions.IgnoreCase);
-            filteredBooks.AddRange(books.Where(book => regex.IsMatch(book.Title) || regex.IsMatch(book.ISBN) || regex.IsMatch(book.Tags.FirstOrDefault() ?? string.Empty)));
+            filteredBooks.AddRange(books.Where(book => regex.IsMatch(book.Title) || regex.IsMatch(book.ISBN.FirstOrDefault() ?? string.Empty)));
         }
 
         return [.. filteredBooks.Distinct().ToList().Skip((page - 1) * pageSize).Take(pageSize)];
