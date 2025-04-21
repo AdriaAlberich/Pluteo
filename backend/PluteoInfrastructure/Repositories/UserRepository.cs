@@ -39,11 +39,8 @@ public class UserRepository : IBaseRepository<User, Guid>
         updateDefinitions.Add(Builders<UserModel>.Update.Set(x => x.ActivationToken, model.ActivationToken));
         updateDefinitions.Add(Builders<UserModel>.Update.Set(x => x.ResetPasswordToken, model.ResetPasswordToken));
         
-        if (updateDefinitions.Count > 0)
-        {
-            var updateDefinition = Builders<UserModel>.Update.Combine(updateDefinitions);
-            await _collection.UpdateOneAsync(x => x.Id == model.Id, updateDefinition);
-        }
+        var updateDefinition = Builders<UserModel>.Update.Combine(updateDefinitions);
+        await _collection.UpdateOneAsync(x => x.Id == model.Id, updateDefinition);
     }
 
     public async Task Delete(Guid userId)

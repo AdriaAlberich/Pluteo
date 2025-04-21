@@ -30,6 +30,7 @@ public class Startup(IConfiguration configuration)
         services.Configure<ApplicationSettings>(ConfigRoot.GetSection("ApplicationSettings"));
         services.Configure<DatabaseSettings>(ConfigRoot.GetSection("DatabaseSettings"));
         services.Configure<EmailSettings>(ConfigRoot.GetSection("EmailSettings"));
+        services.Configure<OpenLibrarySettings>(ConfigRoot.GetSection("OpenLibrarySettings"));
 
         // MongoDB Service configuration
         Console.WriteLine($"Configuring MongoDB Client...");
@@ -47,6 +48,7 @@ public class Startup(IConfiguration configuration)
 
         // Register AutoMapper profiles
         services.AddAutoMapper(typeof(UserProfile));
+        services.AddAutoMapper(typeof(BookProfile));
 
         // Configure Authentication
         Console.WriteLine($"Configuring Authentication...");
@@ -110,6 +112,65 @@ public class Startup(IConfiguration configuration)
             NotificationSystem notificationSystem = new(applicationSettings.Value, userService, logger, emailSender, localizationManager);
 
             return notificationSystem;
+        });
+
+        // Register BookService as Scoped
+        Console.WriteLine($"Adding BookService...");
+        services.AddScoped(s => 
+        {
+            var applicationSettings = s.GetRequiredService<IOptions<ApplicationSettings>>();
+            var logger = s.GetRequiredService<ILogger>();
+            var mongoClient = s.GetRequiredService<IMongoClient>();
+            var databaseSettings = s.GetRequiredService<IOptions<DatabaseSettings>>();
+            var mapper = s.GetRequiredService<IMapper>();
+
+            BookRepository repository = new(databaseSettings.Value, mongoClient, mapper);
+            BookService service = new(applicationSettings.Value, logger, repository);
+
+            return service;
+        });
+
+        // Register ShelfSystem as Scoped
+        Console.WriteLine($"Adding ShelfSystem...");
+        services.AddScoped(s => 
+        {
+            var applicationSettings = s.GetRequiredService<IOptions<ApplicationSettings>>();
+            var userService = s.GetRequiredService<UserService>();
+            var logger = s.GetRequiredService<ILogger>();
+
+            ShelfSystem shelfSystem = new(applicationSettings.Value, userService, logger);
+
+            return shelfSystem;
+        });
+
+        // Register ShelfBookSystem as Scoped
+        Console.WriteLine($"Adding ShelfBookSystem...");
+        services.AddScoped(s => 
+        {
+            var applicationSettings = s.GetRequiredService<IOptions<ApplicationSettings>>();
+            var userService = s.GetRequiredService<UserService>();
+            var logger = s.GetRequiredService<ILogger>();
+
+            ShelfBookSystem shelfBookSystem = new(applicationSettings.Value, userService, logger);
+
+            return shelfBookSystem;
+        });
+
+        // Register LibrarySystem as Scoped
+        Console.WriteLine($"Adding LibrarySystem...");
+        services.AddScoped(s => 
+        {
+            var applicationSettings = s.GetRequiredService<IOptions<ApplicationSettings>>();
+            var userService = s.GetRequiredService<UserService>();
+            var bookService = s.GetRequiredService<BookService>();
+            var logger = s.GetRequiredService<ILogger>();
+            var externalLibrarySettings = s.GetRequiredService<IOptions<OpenLibrarySettings>>();
+
+            OpenLibrary externalLibrary = new(externalLibrarySettings.Value);
+
+            LibrarySystem librarySystem = new(applicationSettings.Value, userService, bookService, externalLibrary, logger);
+
+            return librarySystem;
         });
     }
 }

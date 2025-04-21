@@ -21,5 +21,7 @@ public sealed class ApplicationSettings
     public required int MaxNotifyLoanBeforeDays { get; set; }
     public required int MinNotifyLoanBeforeDaysFrequency { get; set; }
     public required int MaxNotifyLoanBeforeDaysFrequency { get; set; }
+    public required string DefaultShelfName { get; set; }
+    public required string DefaultReadQueueName { get; set; }
 }
 
