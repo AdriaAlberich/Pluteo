@@ -149,9 +149,11 @@ public class Startup(IConfiguration configuration)
         {
             var applicationSettings = s.GetRequiredService<IOptions<ApplicationSettings>>();
             var userService = s.GetRequiredService<UserService>();
+            var notificationSystem = s.GetRequiredService<NotificationSystem>();
+            var localizationManager = s.GetRequiredService<IResourceManager>();
             var logger = s.GetRequiredService<ILogger>();
 
-            ShelfBookSystem shelfBookSystem = new(applicationSettings.Value, userService, logger);
+            ShelfBookSystem shelfBookSystem = new(applicationSettings.Value, userService, notificationSystem, localizationManager, logger);
 
             return shelfBookSystem;
         });

@@ -1,5 +1,9 @@
 {
     "UserActivationEmailSubject": "Activació del compte de {0}",
     "UserResetPasswordEmailSubject": "Recuperació del compte de {0}",
-    "UserNotificationEmailSubject": "Notificació de {0}"
+    "UserNotificationEmailSubject": "Notificació de {0}",
+    "LoanNotificationTitle": "Notificació del préstec de {0}",
+    "LoanInitialNotificationMessage": "Activades notificacions de préstec per al llibre {0}.",
+    "LoanOverdueNotificationMessage": "El préstec del llibre <strong>{0}</strong> <strong>ha vençut</strong>.<br/><br/>Si us plau, torna'l al més aviat possible.",
+    "LoanNotificationMessage": "El llibre <strong>{0}</strong> que has pres en préstec venç el <strong>{1}</strong>.<br/><br/>Si us plau, torna'l al més aviat possible."
 }

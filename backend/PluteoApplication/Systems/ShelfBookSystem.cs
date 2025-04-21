@@ -8,10 +8,12 @@ using Pluteo.Domain.Models.Settings;
 using ILogger = Serilog.ILogger;
 
 namespace Pluteo.Application.Systems;
-public class ShelfBookSystem(ApplicationSettings config, UserService userService, ILogger logger) : IShelfBookSystem
+public class ShelfBookSystem(ApplicationSettings config, UserService userService, NotificationSystem notificationSystem, IResourceManager localizationManager, ILogger logger) : IShelfBookSystem
 {
     private readonly ApplicationSettings _config = config;
     private readonly UserService _userService = userService;
+    private readonly NotificationSystem _notificationSystem = notificationSystem;
+    private readonly IResourceManager _localizationManager = localizationManager;
     private readonly ILogger _logger = logger;
 
     public async Task AddShelfBook(string email, Guid shelfId, ShelfBook shelfBook)
@@ -220,5 +222,113 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
         }
         else
             _logger.Information("No changes were made to shelf book {Name} ({Id}) in shelf {ShelfName} ({ShelfId}) for user {Email} ({Id}).", shelfBook.Title, shelfBook.Id, shelf.Name, shelf.Id, user.Email, user.Id);
+    }
+
+    public async Task ActivateShelfBookLoan(string email, Guid shelfId, Guid shelfBookId, string library, DateTime dueDate)
+    {
+        if(shelfId == Guid.Empty)
+            throw new ServiceException("SHELF_CANNOT_BE_NULL");
+
+        if(shelfBookId == Guid.Empty)
+            throw new ServiceException("SHELF_BOOK_CANNOT_BE_NULL_OR_EMPTY");
+
+        var user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_EXISTS");
+        var shelf = user.Shelves.FirstOrDefault(s => s.Id == shelfId) ?? throw new ServiceException("SHELF_NOT_EXISTS");
+        var shelfBook = shelf.Books.FirstOrDefault(sb => sb.Id == shelfBookId) ?? throw new ServiceException("SHELF_BOOK_NOT_EXISTS");
+
+        shelfBook.Loan = new LibraryLoan
+        {
+            Library = library,
+            LoanDate = DateTime.UtcNow,
+            DueDate = dueDate,
+            Notify = true,
+            LastNotificationDate = DateTime.UtcNow,
+        };
+
+        string message = _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanInitialNotificationMessage", shelfBook.Title, user.Settings.NotifyLoanBeforeDays, user.Settings.NotifyLoanBeforeDaysFrequency);
+        await _notificationSystem.AddNotification(user, _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanNotificationTitle", shelfBook.Title), message);
+
+        await _userService.Update(user);
+        _logger.Information("Shelf book {Name} ({Id}) has loan notifications activated for user {Email} ({Id}).", shelfBook.Title, shelfBook.Id, shelf.Name, shelf.Id, user.Email, user.Id);
+    }
+
+    public async Task DeactivateShelfBookLoan(string email, Guid shelfId, Guid shelfBookId)
+    {
+        if(shelfId == Guid.Empty)
+            throw new ServiceException("SHELF_CANNOT_BE_NULL");
+
+        if(shelfBookId == Guid.Empty)
+            throw new ServiceException("SHELF_BOOK_CANNOT_BE_NULL_OR_EMPTY");
+
+        var user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_EXISTS");
+        var shelf = user.Shelves.FirstOrDefault(s => s.Id == shelfId) ?? throw new ServiceException("SHELF_NOT_EXISTS");
+        var shelfBook = shelf.Books.FirstOrDefault(sb => sb.Id == shelfBookId) ?? throw new ServiceException("SHELF_BOOK_NOT_EXISTS");
+
+        shelfBook.Loan = null;
+
+        await _userService.Update(user);
+        _logger.Information("Shelf book {Name} ({Id}) has loan notifications deactivated for user {Email} ({Id}).", shelfBook.Title, shelfBook.Id, shelf.Name, shelf.Id, user.Email, user.Id);
+    }
+
+    public async Task<bool> IsShelfBookLoanActive(string email, Guid shelfId, Guid shelfBookId)
+    {
+        if(shelfId == Guid.Empty)
+            throw new ServiceException("SHELF_CANNOT_BE_NULL");
+
+        if(shelfBookId == Guid.Empty)
+            throw new ServiceException("SHELF_BOOK_CANNOT_BE_NULL_OR_EMPTY");
+
+        var user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_EXISTS");
+        var shelf = user.Shelves.FirstOrDefault(s => s.Id == shelfId) ?? throw new ServiceException("SHELF_NOT_EXISTS");
+        var shelfBook = shelf.Books.FirstOrDefault(sb => sb.Id == shelfBookId) ?? throw new ServiceException("SHELF_BOOK_NOT_EXISTS");
+
+        return shelfBook.Loan != null;
+    }
+
+    public async Task SendLoanNotifications()
+    {
+        // Change this to a more efficient way to get users with loans
+        var users = await _userService.List();
+
+        foreach(var user in users)
+        {
+            foreach(var shelf in user.Shelves)
+            {
+                foreach(var shelfBook in shelf.Books)
+                {
+                    if(shelfBook.Loan != null && shelfBook.Loan.Notify)
+                    {
+                        await SendLoanNotification(user, shelfBook);
+                    }
+                }
+            }
+        }
+    }
+
+    public async Task SendLoanNotification(User user, ShelfBook shelfBook)
+    {
+        if(shelfBook.Loan == null)
+            return;
+            
+        // Loan is active and overdue
+        if(shelfBook.Loan.DueDate > DateTime.UtcNow && shelfBook.Loan.LastNotificationDate <= DateTime.UtcNow.AddDays(-user.Settings.NotifyLoanBeforeDaysFrequency))
+        {
+            string message = _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanOverdueNotificationMessage", shelfBook.Title);
+            await _notificationSystem.AddNotification(user, _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanNotificationTitle", shelfBook.Title), message);
+
+            shelfBook.Loan.LastNotificationDate = DateTime.UtcNow;
+
+            await _userService.Update(user);
+        }
+        // Loan is active and not overdue, notify before days
+        else if(shelfBook.Loan.DueDate <= DateTime.UtcNow.AddDays(user.Settings.NotifyLoanBeforeDays) && shelfBook.Loan.LastNotificationDate <= DateTime.UtcNow.AddDays(-user.Settings.NotifyLoanBeforeDaysFrequency))
+        {
+            string message = _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanNotificationMessage", shelfBook.Title, shelfBook.Loan.DueDate.ToString("dd/MM/yyyy"));
+            await _notificationSystem.AddNotification(user, _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanNotificationTitle", shelfBook.Title), message);
+
+            shelfBook.Loan.LastNotificationDate = DateTime.UtcNow;
+
+            await _userService.Update(user);
+        }
     }
 }
