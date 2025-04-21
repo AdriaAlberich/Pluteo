@@ -131,6 +131,14 @@ public class BookService(ApplicationSettings config, ILogger logger, IBaseReposi
         return await _bookRepository.GetById(bookId);
     }
 
+    public async Task<Book> GetByISBN(string isbn)
+    {
+        var books = await _bookRepository.List();
+        var book = books.FirstOrDefault(b => b.ISBN.Contains(isbn)) ?? throw new ServiceException("BOOK_NOT_EXISTS");
+        
+        return book;
+    }
+
     public async Task<List<Book>> List()
     {
         return await _bookRepository.List();

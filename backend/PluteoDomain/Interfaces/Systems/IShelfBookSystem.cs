@@ -1,3 +1,4 @@
+using Pluteo.Domain.Models.Dto.ShelfBooks;
 using Pluteo.Domain.Models.Entities;
 
 namespace Pluteo.Domain.Interfaces.Systems;
@@ -8,5 +9,5 @@ public interface IShelfBookSystem
     Task<ShelfBook> GetShelfBook(string email, Guid shelfId, Guid shelfBookId);
     Task ReOrderShelfBook(string email, Guid shelfId, Guid shelfBookId, int newOrder);
     Task MoveShelfBook(string email, Guid shelfId, Guid shelfBookId, Guid newShelfId);
-    Task UpdateShelfBook(string email, ShelfBook shelfBook);
+    Task UpdateShelfBook(string email, Guid shelfId, Guid shelfBookId, CreateUpdateShelfBook request);
 }

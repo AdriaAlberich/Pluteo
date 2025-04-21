@@ -1,3 +1,5 @@
+using Pluteo.Domain.Enums;
+
 namespace Pluteo.Domain.Models.Dto.ShelfBooks;
 public class CreateUpdateShelfBook
 {
@@ -12,4 +14,5 @@ public class CreateUpdateShelfBook
     public string? AvailableLanguages { get; set; }
     public string? Notes { get; set; }
     public string? PhysicalLocation { get; set; }
+    public ShelfBookStatus? Status { get; set; }
 }
