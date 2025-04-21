@@ -191,7 +191,7 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
         };
     }
 
-    public async Task<BookSearchResults> SearchNewBooks(bool external, string searchTerm, int page, int pageSize)
+    public async Task<BookSearchResults> SearchNewBooks(string searchTerm, int page, int pageSize, bool external = false)
     {
         List<string> searchTerms = [];
         if (string.IsNullOrEmpty(searchTerm))
@@ -200,7 +200,7 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
         }
         else
         {
-            searchTerms = [.. searchTerm.Split(' ')];
+            searchTerms = [.. searchTerm.Split('+')];
         }
 
         if (external)
