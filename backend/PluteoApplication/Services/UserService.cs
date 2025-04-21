@@ -37,7 +37,26 @@ public class UserService(ApplicationSettings config, ILogger logger, IBaseReposi
                 NotifyLoanBeforeDaysFrequency = _config.DefaultNotifyLoanBeforeDaysFrequency,
                 Locale = _config.DefaultLocale
             },
-            Shelves = [], // TODO: Add default shelves
+            Shelves = [
+                new Shelf
+                {
+                    Id = Guid.NewGuid(),
+                    Name = _config.DefaultShelfName,
+                    IsDefault = true,
+                    IsReadQueue = false,
+                    Books = [],
+                    Order = 1
+                },
+                new Shelf
+                {
+                    Id = Guid.NewGuid(),
+                    Name = _config.DefaultReadQueueName,
+                    IsDefault = false,
+                    IsReadQueue = true,
+                    Books = [],
+                    Order = 2
+                }
+            ],
             ActivationToken = _tokenGenerator.GenerateRandomToken(),
             ResetPasswordToken = string.Empty
         };
