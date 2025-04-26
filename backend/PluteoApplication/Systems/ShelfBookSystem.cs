@@ -189,9 +189,9 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
             isUpdated = true;
         }
 
-        if(request.NumPages > 0)
+        if(request.NumPages.HasValue)
         {
-            shelfBook.NumPages = request.NumPages;
+            shelfBook.NumPages = request.NumPages.Value;
             isUpdated = true;
         }
 
