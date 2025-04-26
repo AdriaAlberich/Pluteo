@@ -101,7 +101,7 @@ public class ShelfBookController(ShelfBookSystem shelfBookSystem, IWebHostEnviro
 
     [Authorize(Roles = "User")]
     [HttpPatch("{shelfId}/{shelfBookId}/new-order")]
-    public async Task<ActionResult> ReOrderShelfBook(Guid shelfId, Guid shelfBookId, [FromBody] int newOrder)
+    public async Task<ActionResult> ReOrderShelfBook(Guid shelfId, Guid shelfBookId, [FromBody] ReOrderShelfBookRequest request)
     {
         try
         {
@@ -110,7 +110,7 @@ public class ShelfBookController(ShelfBookSystem shelfBookSystem, IWebHostEnviro
             if (string.IsNullOrWhiteSpace(userEmail))
                 return BadRequest("USER_EMAIL_NULL");
 
-            await _shelfBookSystem.ReOrderShelfBook(userEmail, shelfId, shelfBookId, newOrder);
+            await _shelfBookSystem.ReOrderShelfBook(userEmail, shelfId, shelfBookId, request.Order);
 
             return Ok();
         }
@@ -230,13 +230,13 @@ public class ShelfBookController(ShelfBookSystem shelfBookSystem, IWebHostEnviro
 
     #region Private methods
 
-        private static string? GetUserEmail(ClaimsPrincipal? user)
-        {
-            ArgumentNullException.ThrowIfNull(user);
+    private static string? GetUserEmail(ClaimsPrincipal? user)
+    {
+        ArgumentNullException.ThrowIfNull(user);
 
-            var emailClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
-            return emailClaim?.Value;
-        }
+        var emailClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
+        return emailClaim?.Value;
+    }
 
     #endregion
 }

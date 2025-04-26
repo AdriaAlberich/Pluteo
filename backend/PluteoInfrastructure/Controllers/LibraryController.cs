@@ -10,6 +10,7 @@ using System.Security.Claims;
 using Pluteo.Application.Systems;
 using Microsoft.Extensions.Options;
 using Pluteo.Domain.Models.Dto.ShelfBooks;
+using Pluteo.Domain.Models.Dto.Library;
 
 namespace Pluteo.Infrastructure.Controllers;
 [ApiController]
@@ -72,8 +73,8 @@ public class LibraryController(LibrarySystem librarySystem, IWebHostEnvironment 
     }
 
     [Authorize(Roles = "User")]
-    [HttpPost("add/{shelfId}")]
-    public async Task<ActionResult> AddBook([FromBody] string isbn, Guid? shelfId)
+    [HttpPost("add")]
+    public async Task<ActionResult> AddBook([FromBody] AddBookRequest request)
     {
         try
         {
@@ -82,7 +83,7 @@ public class LibraryController(LibrarySystem librarySystem, IWebHostEnvironment 
             if (string.IsNullOrWhiteSpace(userEmail))
                 return BadRequest("USER_EMAIL_NULL");
 
-            await _librarySystem.AddBook(userEmail, isbn, shelfId);
+            await _librarySystem.AddBook(userEmail, request.ISBN, request.ShelfId);
 
             return Ok();
         }
@@ -97,8 +98,8 @@ public class LibraryController(LibrarySystem librarySystem, IWebHostEnvironment 
     }
 
     [Authorize(Roles = "User")]
-    [HttpPost("add-manually/{shelfId}")]
-    public async Task<ActionResult> AddBookManually([FromBody] CreateUpdateShelfBook request, Guid? shelfId)
+    [HttpPost("add-manually")]
+    public async Task<ActionResult> AddBookManually([FromBody] AddBookManuallyRequest request)
     {
         try
         {
@@ -107,7 +108,7 @@ public class LibraryController(LibrarySystem librarySystem, IWebHostEnvironment 
             if (string.IsNullOrWhiteSpace(userEmail))
                 return BadRequest("USER_EMAIL_NULL");
 
-            await _librarySystem.AddBookManually(userEmail, request, shelfId);
+            await _librarySystem.AddBookManually(userEmail, request.Book, request.ShelfId);
 
             return Ok();
         }
@@ -125,13 +126,13 @@ public class LibraryController(LibrarySystem librarySystem, IWebHostEnvironment 
 
     #region Private methods
 
-        private static string? GetUserEmail(ClaimsPrincipal? user)
-        {
-            ArgumentNullException.ThrowIfNull(user);
+    private static string? GetUserEmail(ClaimsPrincipal? user)
+    {
+        ArgumentNullException.ThrowIfNull(user);
 
-            var emailClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
-            return emailClaim?.Value;
-        }
+        var emailClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
+        return emailClaim?.Value;
+    }
 
     #endregion
 }
