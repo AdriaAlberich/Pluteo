@@ -2,7 +2,7 @@
 
 using Newtonsoft.Json;
 using Pluteo.Domain.Exceptions;
-using Pluteo.Domain.Interfaces;
+using Pluteo.Domain.Interfaces.Integrations;
 using Pluteo.Domain.Models.Dto.Books;
 using Pluteo.Domain.Models.Dto.Integrations.OpenLibrary;
 using Pluteo.Domain.Models.Settings;

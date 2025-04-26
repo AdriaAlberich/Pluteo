@@ -1,4 +1,4 @@
-using Pluteo.Domain.Interfaces;
+using Pluteo.Domain.Interfaces.Repositories;
 using Pluteo.Domain.Models.Entities;
 using Pluteo.Domain.Models.Settings;
 using Pluteo.Infrastructure.Repositories.Models;

@@ -1,7 +1,7 @@
 
 
 using Pluteo.Domain.Exceptions;
-using Pluteo.Domain.Interfaces;
+using Pluteo.Domain.Interfaces.Integrations;
 using Pluteo.Domain.Models.Settings;
 using RestSharp;
 using RestSharp.Authenticators;
