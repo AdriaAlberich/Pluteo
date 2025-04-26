@@ -1,15 +1,17 @@
 using ILogger = Serilog.ILogger;
 using Pluteo.Domain.Interfaces.Services;
 using Pluteo.Domain.Models.Settings;
-using Pluteo.Domain.Interfaces;
+using Pluteo.Domain.Interfaces.Utils;
+using Pluteo.Domain.Interfaces.Integrations;
 using Pluteo.Domain.Models.Entities;
 using Pluteo.Domain.Static;
 using Pluteo.Domain.Exceptions;
 using System.Text.RegularExpressions;
 using Pluteo.Domain.Models.Dto.Users;
+using Pluteo.Domain.Interfaces.Repositories;
 
 namespace Pluteo.Application.Services;
-public class UserService(ApplicationSettings config, ILogger logger, IBaseRepository<User, Guid> userRepository, ITokenGenerator tokenGenerator, IPasswordValidator passwordValidator, IPasswordCipher passwordCipher, IResourceManager localizationManager, IEmailSender emailSender) : IUserService
+public class UserService(ApplicationSettings config, ILogger logger, IUserRepository<User, Guid> userRepository, ITokenGenerator tokenGenerator, IPasswordValidator passwordValidator, IPasswordCipher passwordCipher, IResourceManager localizationManager, IEmailSender emailSender) : IUserService
 {
     private readonly ApplicationSettings _config = config;
     private readonly ILogger _logger = logger;

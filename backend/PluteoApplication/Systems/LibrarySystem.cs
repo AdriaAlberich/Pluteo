@@ -1,7 +1,7 @@
 using Pluteo.Application.Services;
 using Pluteo.Domain.Enums;
 using Pluteo.Domain.Exceptions;
-using Pluteo.Domain.Interfaces;
+using Pluteo.Domain.Interfaces.Integrations;
 using Pluteo.Domain.Interfaces.Systems;
 using Pluteo.Domain.Models.Dto.Books;
 using Pluteo.Domain.Models.Dto.Library;

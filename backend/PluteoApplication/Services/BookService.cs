@@ -1,7 +1,7 @@
 using ILogger = Serilog.ILogger;
 using Pluteo.Domain.Interfaces.Services;
 using Pluteo.Domain.Models.Settings;
-using Pluteo.Domain.Interfaces;
+using Pluteo.Domain.Interfaces.Repositories;
 using Pluteo.Domain.Models.Entities;
 using Pluteo.Domain.Exceptions;
 using System.Text.RegularExpressions;

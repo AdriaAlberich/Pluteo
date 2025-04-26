@@ -1,4 +1,4 @@
-namespace Pluteo.Domain.Interfaces;
+namespace Pluteo.Domain.Interfaces.Utils;
 public interface IResourceManager
 {
     string GetStringFormatted(string locale, string key, params object[] args);
