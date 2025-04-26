@@ -13,6 +13,7 @@ using ILogger = Serilog.ILogger;
 using Pluteo.Domain.Interfaces;
 using Pluteo.Infrastructure.Integrations;
 using Pluteo.Application.Systems;
+using Pluteo.Infrastructure.Jobs;
 
 namespace Pluteo.Infrastructure;
 public class Startup(IConfiguration configuration)
@@ -149,9 +150,11 @@ public class Startup(IConfiguration configuration)
         {
             var applicationSettings = s.GetRequiredService<IOptions<ApplicationSettings>>();
             var userService = s.GetRequiredService<UserService>();
+            var notificationSystem = s.GetRequiredService<NotificationSystem>();
+            var localizationManager = s.GetRequiredService<IResourceManager>();
             var logger = s.GetRequiredService<ILogger>();
 
-            ShelfBookSystem shelfBookSystem = new(applicationSettings.Value, userService, logger);
+            ShelfBookSystem shelfBookSystem = new(applicationSettings.Value, userService, notificationSystem, localizationManager, logger);
 
             return shelfBookSystem;
         });
@@ -172,5 +175,7 @@ public class Startup(IConfiguration configuration)
 
             return librarySystem;
         });
+
+        services.AddHostedService<LoanNotificationService>();
     }
 }
