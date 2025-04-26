@@ -13,26 +13,29 @@ public class BookModel
     public required string Title { get; set; }
     [BsonElement("ISBN")]
     [BsonRequired]
-    public required string ISBN { get; set; }
-    [BsonElement("Cover")]
+    public required List<string> ISBN { get; set; }
+    [BsonElement("CoverBig")]
     [BsonRequired]
-    public required string Cover { get; set; }
+    public required string CoverBig { get; set; }
+    [BsonElement("CoverSmall")]
+    [BsonRequired]
+    public required string CoverSmall { get; set; }
     [BsonElement("Authors")]
     [BsonRequired]
     public required List<string> Authors { get; set; }
-    [BsonElement("Tags")]
-    [BsonRequired]
-    public required List<string> Tags { get; set; }
     [BsonElement("Publishers")]
     [BsonRequired]
-    public required List<string> Publishers { get; set; }
-    [BsonElement("PublishDate")]
+    public required List<string> Publishers { get; set; } 
+    [BsonElement("PublishPlaces")]
     [BsonRequired]
-    public required DateTime PublishDate { get; set; }
+    public required List<string> PublishPlaces { get; set; }
+    [BsonElement("FirstPublishYear")]
+    [BsonRequired]
+    public required string FirstPublishYear { get; set; }
     [BsonElement("NumPages")]
     [BsonRequired]
     public required int NumPages { get; set; }
-    [BsonElement("HasEbook")]
+    [BsonElement("AvailableLanguages")]
     [BsonRequired]
-    public required bool HasEbook { get; set; }
+    public required List<string> AvailableLanguages { get; set; }
 }

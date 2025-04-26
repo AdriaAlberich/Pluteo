@@ -34,13 +34,14 @@ public class BookRepository : IBaseRepository<Book, Guid>
 
         updateDefinitions.Add(Builders<BookModel>.Update.Set(x => x.Title, model.Title));
         updateDefinitions.Add(Builders<BookModel>.Update.Set(x => x.ISBN, model.ISBN));
-        updateDefinitions.Add(Builders<BookModel>.Update.Set(x => x.Cover, model.Cover));
+        updateDefinitions.Add(Builders<BookModel>.Update.Set(x => x.CoverBig, model.CoverBig));
+        updateDefinitions.Add(Builders<BookModel>.Update.Set(x => x.CoverSmall, model.CoverSmall));
         updateDefinitions.Add(Builders<BookModel>.Update.Set(x => x.Authors, model.Authors));
-        updateDefinitions.Add(Builders<BookModel>.Update.Set(x => x.Tags, model.Tags));
         updateDefinitions.Add(Builders<BookModel>.Update.Set(x => x.Publishers, model.Publishers));
-        updateDefinitions.Add(Builders<BookModel>.Update.Set(x => x.PublishDate, model.PublishDate));
+        updateDefinitions.Add(Builders<BookModel>.Update.Set(x => x.PublishPlaces, model.PublishPlaces));
+        updateDefinitions.Add(Builders<BookModel>.Update.Set(x => x.FirstPublishYear, model.FirstPublishYear));
         updateDefinitions.Add(Builders<BookModel>.Update.Set(x => x.NumPages, model.NumPages));
-        updateDefinitions.Add(Builders<BookModel>.Update.Set(x => x.HasEbook, model.HasEbook));
+        updateDefinitions.Add(Builders<BookModel>.Update.Set(x => x.AvailableLanguages, model.AvailableLanguages));
 
         var updateDefinition = Builders<BookModel>.Update.Combine(updateDefinitions);
         await _collection.UpdateOneAsync(x => x.Id == model.Id, updateDefinition);

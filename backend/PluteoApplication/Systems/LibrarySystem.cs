@@ -24,22 +24,21 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
     {
         var user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_EXISTS");
 
-        var book = await _bookService.GetByISBN(isbn) ?? throw new ServiceException("BOOK_NOT_FOUND");
-
-        if (user.Shelves.All(s => s.Books.All(b => b.ISBN != book.ISBN)))
-        {
-            throw new ServiceException("BOOK_ALREADY_EXISTS_IN_SHELF");
-        }
+        Book? book = await _bookService.GetByISBN(isbn);
 
         ShelfBook? shelfBook = null;
         if (book != null)
         {
+            if (user.Shelves.All(s => s.Books.All(b => b.ISBN != book.ISBN)))
+                throw new ServiceException("BOOK_ALREADY_EXISTS_IN_SHELF");
+
             shelfBook = new ShelfBook
             {
                 Id = Guid.NewGuid(),
                 Title = book.Title,
                 ISBN = book.ISBN,
                 Authors = book.Authors,
+                Book = book.Id,
                 CoverSmall = book.CoverSmall,
                 CoverBig = book.CoverBig,
                 Publisher = book.Publishers,
@@ -158,7 +157,7 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
         {
             searchTerm = string.Empty;
         }
-        
+
         List<string> searchTerms = string.IsNullOrEmpty(searchTerm)
             ? [string.Empty]
             : [.. searchTerm.Split('+')];

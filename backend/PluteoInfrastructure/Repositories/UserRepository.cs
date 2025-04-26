@@ -36,6 +36,7 @@ public class UserRepository : IUserRepository<User, Guid>
         updateDefinitions.Add(Builders<UserModel>.Update.Set(x => x.Roles, model.Roles));
         updateDefinitions.Add(Builders<UserModel>.Update.Set(x => x.Notifications, model.Notifications));
         updateDefinitions.Add(Builders<UserModel>.Update.Set(x => x.Settings, model.Settings));
+        updateDefinitions.Add(Builders<UserModel>.Update.Set(x => x.Shelves, model.Shelves));
         updateDefinitions.Add(Builders<UserModel>.Update.Set(x => x.ActivationToken, model.ActivationToken));
         updateDefinitions.Add(Builders<UserModel>.Update.Set(x => x.ResetPasswordToken, model.ResetPasswordToken));
         
