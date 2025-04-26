@@ -154,9 +154,14 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
     {
         var user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_EXISTS");
 
+        if(searchTerm == "all")
+        {
+            searchTerm = string.Empty;
+        }
+        
         List<string> searchTerms = string.IsNullOrEmpty(searchTerm)
             ? [string.Empty]
-            : [.. searchTerm.Split(' ')];
+            : [.. searchTerm.Split('+')];
 
         var shelves = user.Shelves;
 

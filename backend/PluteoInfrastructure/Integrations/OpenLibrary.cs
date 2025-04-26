@@ -21,9 +21,11 @@ public class OpenLibrary(OpenLibrarySettings openLibrarySettings) : ILibraryInte
 
         RestRequest request = new();
         request.AddQueryParameter("q", string.Join("+", searchTerms));
-        request.AddQueryParameter("fields", "title,author_name,isbn,publisher,publish_place,first_publish_year,subject,number_of_pages,languages");
+        request.AddQueryParameter("fields", "title,author_name,isbn,publisher,publish_place,first_publish_year,number_of_pages_median,language");
         request.AddQueryParameter("page", page.ToString());
         request.AddQueryParameter("limit", pageSize.ToString());
+
+        request.AddHeader("User-Agent", "PluteoPLM - alberichjaumeadria@gmail.com");
 
         var response = await client.ExecuteAsync(request);
         if (response.IsSuccessful)
@@ -35,7 +37,7 @@ public class OpenLibrary(OpenLibrarySettings openLibrarySettings) : ILibraryInte
                 Title = doc.title ?? string.Empty,
                 ISBN = doc.isbn ?? [],
                 Authors = doc.author_name ?? [],
-                SearchCoverUrl = $"{_coverApiUrl}/b/id/{doc.isbn?.FirstOrDefault()}-M.jpg",
+                SearchCoverUrl = $"{_coverApiUrl}/b/isbn/{doc.isbn?.FirstOrDefault()}-M.jpg",
                 Publishers = doc.publisher ?? [],
                 PublishPlaces = doc.publish_place ?? [],
                 FirstPublishYear = doc.first_publish_year.ToString() ?? string.Empty,
@@ -68,8 +70,11 @@ public class OpenLibrary(OpenLibrarySettings openLibrarySettings) : ILibraryInte
 
         RestRequest request = new();
         request.AddQueryParameter("q", isbn);
-        request.AddQueryParameter("fields", "title,author_name,isbn,publisher,publish_place,first_publish_year,subject,number_of_pages,languages");
+        request.AddQueryParameter("fields", "title,author_name,isbn,publisher,publish_place,first_publish_year,number_of_pages_median,language");
+        request.AddQueryParameter("limit", "1");
 
+        request.AddHeader("User-Agent", "PluteoPLM - alberichjaumeadria@gmail.com");
+        
         var response = await client.ExecuteAsync(request);
         if (response.IsSuccessful)
         {
