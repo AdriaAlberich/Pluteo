@@ -24,6 +24,9 @@ public class UserModel
     [BsonElement("Settings")]
     [BsonRequired]
     public required UserSettings Settings { get; set; }
+    [BsonElement("Shelves")]
+    [BsonRequired]
+    public required List<Shelf> Shelves { get; set; }
     [BsonElement("ActivationToken")]
     [BsonRequired]
     public string? ActivationToken { get; set; }

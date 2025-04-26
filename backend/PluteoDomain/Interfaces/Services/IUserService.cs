@@ -22,4 +22,5 @@ public interface IUserService : IBaseEntityService<User, Guid>
         Task<User?> GetUserByEmail(string email);
         Task<UserSettingsResponse> GetUserSettings(string email);
         Task UpdateUserSettings(string email, UserSettingsUpdateRequest request);
+        Task<List<User>> ListWithLoans();
 }

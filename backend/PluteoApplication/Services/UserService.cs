@@ -15,7 +15,7 @@ public class UserService(ApplicationSettings config, ILogger logger, IUserReposi
 {
     private readonly ApplicationSettings _config = config;
     private readonly ILogger _logger = logger;
-    private readonly IBaseRepository<User, Guid> _userRepository = userRepository;
+    private readonly IUserRepository<User, Guid> _userRepository = userRepository;
     private readonly ITokenGenerator _tokenGenerator = tokenGenerator;
     private readonly IPasswordValidator _passwordValidator = passwordValidator;
     private readonly IPasswordCipher _passwordCipher = passwordCipher;
@@ -115,6 +115,11 @@ public class UserService(ApplicationSettings config, ILogger logger, IUserReposi
     public async Task<List<User>> List()
     {
         return await _userRepository.List();
+    }
+
+    public async Task<List<User>> ListWithLoans()
+    {
+        return await _userRepository.ListWithLoans();
     }
 
     public async Task<User?> GetUserByEmail(string email)

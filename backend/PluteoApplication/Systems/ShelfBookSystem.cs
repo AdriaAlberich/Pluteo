@@ -247,7 +247,7 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
             Library = request.Library,
             LoanDate = DateTime.UtcNow,
             DueDate = request.DueDate,
-            Notify = true,
+            Notify = request.Notify,
             LastNotificationDate = DateTime.UtcNow,
         };
 
@@ -296,8 +296,7 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
 
     public async Task SendLoanNotifications()
     {
-        // Change this to a more efficient way to get users with loans
-        var users = await _userService.List();
+        var users = await _userService.ListWithLoans();
 
         foreach(var user in users)
         {
