@@ -27,8 +27,8 @@ public class LibraryController(LibrarySystem librarySystem, IWebHostEnvironment 
     #region User Endpoints
 
     [Authorize(Roles = "User")]
-    [HttpGet("{searchTerm}/{pageNumber}/{pageSize}")]
-    public async Task<ActionResult> GetLibrary(string searchTerm, int pageNumber, int pageSize)
+    [HttpGet("{filterTerm}")]
+    public async Task<ActionResult> GetLibrary(string filterTerm)
     {
         try
         {
@@ -37,7 +37,7 @@ public class LibraryController(LibrarySystem librarySystem, IWebHostEnvironment 
             if (string.IsNullOrWhiteSpace(userEmail))
                 return BadRequest("USER_EMAIL_NULL");
 
-            return Ok(await _librarySystem.GetLibrary(userEmail, searchTerm, pageNumber, pageSize));
+            return Ok(await _librarySystem.GetLibrary(userEmail, filterTerm));
         }
         catch (ServiceException se)
         {

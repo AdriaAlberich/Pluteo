@@ -149,29 +149,30 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
         _logger.Information("Shelf book {Name} ({Id}) has been added to shelf {ShelfName} ({ShelfId}) for user {Email} ({Id}).", book.Title, shelfBook.Id, shelf.Name, shelf.Id, user.Email, user.Id);
     }
 
-    public async Task<LibraryOverview> GetLibrary(string email, string searchTerm, int page, int pageSize)
+    public async Task<LibraryOverview> GetLibrary(string email, string filterTerm)
     {
         var user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_EXISTS");
 
-        if(searchTerm == "all")
+        if(filterTerm == "all")
         {
-            searchTerm = string.Empty;
+            filterTerm = string.Empty;
         }
 
-        List<string> searchTerms = string.IsNullOrEmpty(searchTerm)
-            ? [string.Empty]
-            : [.. searchTerm.Split('+')];
+        List<string> filterTerms = string.IsNullOrWhiteSpace(filterTerm)
+            ? []
+            : [.. filterTerm.Split('+')];
 
         var shelves = user.Shelves;
 
         var shelfOverviews = shelves.Select(shelf =>
         {
             var filteredBooks = shelf.Books
-                .Where(book => searchTerms.Any(term => book.Title.Contains(term, StringComparison.OrdinalIgnoreCase)))
+                .Where(book => filterTerms.Count == 0 || filterTerms.Any(term => book.Title.Contains(term, StringComparison.OrdinalIgnoreCase)))
                 .Select(book => new ShelfBookOverview
                 {
                     Id = book.Id,
                     Title = book.Title,
+                    Order = book.Order,
                     Cover = book.CoverSmall
                 })
                 .ToList();
@@ -180,18 +181,16 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
             {
                 Id = shelf.Id,
                 Name = shelf.Name,
+                Order = shelf.Order,
+                IsDefault = shelf.IsDefault,
+                IsReadQueue = shelf.IsReadQueue,
                 Books = filteredBooks
             };
         }).ToList();
 
-        var paginatedShelves = shelfOverviews
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToList();
-
         return new LibraryOverview
         {
-            Shelves = paginatedShelves
+            Shelves = shelfOverviews
         };
     }
 
