@@ -352,13 +352,13 @@ public class UserController(UserService userService, IWebHostEnvironment env, IL
 
     #region Private methods
 
-        private static string? GetUserEmail(ClaimsPrincipal? user)
-        {
-            ArgumentNullException.ThrowIfNull(user);
+    private static string? GetUserEmail(ClaimsPrincipal? user)
+    {
+        ArgumentNullException.ThrowIfNull(user);
 
-            var emailClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
-            return emailClaim?.Value;
-        }
+        var emailClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
+        return emailClaim?.Value;
+    }
 
-        #endregion
+    #endregion
 }

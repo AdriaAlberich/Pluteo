@@ -10,7 +10,7 @@ using Pluteo.Infrastructure.Repositories;
 using Pluteo.Infrastructure.Utils;
 using Pluteo.Application.Services;
 using ILogger = Serilog.ILogger;
-using Pluteo.Domain.Interfaces;
+using Pluteo.Domain.Interfaces.Utils;
 using Pluteo.Infrastructure.Integrations;
 using Pluteo.Application.Systems;
 using Pluteo.Infrastructure.Jobs;

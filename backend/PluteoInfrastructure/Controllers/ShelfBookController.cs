@@ -101,7 +101,7 @@ public class ShelfBookController(ShelfBookSystem shelfBookSystem, IWebHostEnviro
 
     [Authorize(Roles = "User")]
     [HttpPatch("{shelfId}/{shelfBookId}/new-order")]
-    public async Task<ActionResult> ReOrderShelfBook(Guid shelfId, Guid shelfBookId, [FromBody] int newOrder)
+    public async Task<ActionResult> ReOrderShelfBook(Guid shelfId, Guid shelfBookId, [FromBody] ReOrderShelfBookRequest request)
     {
         try
         {
@@ -110,7 +110,7 @@ public class ShelfBookController(ShelfBookSystem shelfBookSystem, IWebHostEnviro
             if (string.IsNullOrWhiteSpace(userEmail))
                 return BadRequest("USER_EMAIL_NULL");
 
-            await _shelfBookSystem.ReOrderShelfBook(userEmail, shelfId, shelfBookId, newOrder);
+            await _shelfBookSystem.ReOrderShelfBook(userEmail, shelfId, shelfBookId, request.Order);
 
             return Ok();
         }
@@ -151,18 +151,92 @@ public class ShelfBookController(ShelfBookSystem shelfBookSystem, IWebHostEnviro
             return StatusCode(StatusCodes.Status500InternalServerError, ExceptionControl.ProcessException(e, _logger, _env.IsDevelopment(), false));
         }
     }
+
+    [Authorize(Roles = "User")]
+    [HttpPost("{shelfId}/{shelfBookId}/activate-loan")]
+    public async Task<ActionResult> ActivateShelfBookLoan(Guid shelfId, Guid shelfBookId, [FromBody] ActivateShelfBookLoanRequest request)
+    {
+        try
+        {
+            var userEmail = GetUserEmail(User);
+
+            if (string.IsNullOrWhiteSpace(userEmail))
+                return BadRequest("USER_EMAIL_NULL");
+
+            await _shelfBookSystem.ActivateShelfBookLoan(userEmail, shelfId, shelfBookId, request);
+
+            return Ok();
+        }
+        catch (ServiceException se)
+        {
+            return StatusCode(StatusCodes.Status400BadRequest, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+        }
+        catch (Exception e)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ExceptionControl.ProcessException(e, _logger, _env.IsDevelopment(), false));
+        }
+    }
+
+    [Authorize(Roles = "User")]
+    [HttpDelete("{shelfId}/{shelfBookId}/deactivate-loan")]
+    public async Task<ActionResult> DeactivateShelfBookLoan(Guid shelfId, Guid shelfBookId)
+    {
+        try
+        {
+            var userEmail = GetUserEmail(User);
+
+            if (string.IsNullOrWhiteSpace(userEmail))
+                return BadRequest("USER_EMAIL_NULL");
+
+            await _shelfBookSystem.DeactivateShelfBookLoan(userEmail, shelfId, shelfBookId);
+
+            return Ok();
+        }
+        catch (ServiceException se)
+        {
+            return StatusCode(StatusCodes.Status400BadRequest, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+        }
+        catch (Exception e)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ExceptionControl.ProcessException(e, _logger, _env.IsDevelopment(), false));
+        }
+    }
+
+    [Authorize(Roles = "User")]
+    [HttpGet("{shelfId}/{shelfBookId}/is-loan-active")]
+    public async Task<ActionResult> IsShelfBookLoanActive(Guid shelfId, Guid shelfBookId)
+    {
+        try
+        {
+            var userEmail = GetUserEmail(User);
+
+            if (string.IsNullOrWhiteSpace(userEmail))
+                return BadRequest("USER_EMAIL_NULL");
+
+            var isActive = await _shelfBookSystem.IsShelfBookLoanActive(userEmail, shelfId, shelfBookId);
+            return Ok(isActive);
+        }
+        catch (ServiceException se)
+        {
+            return StatusCode(StatusCodes.Status400BadRequest, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+        }
+        catch (Exception e)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ExceptionControl.ProcessException(e, _logger, _env.IsDevelopment(), false));
+        }
+    }
     
     #endregion
 
     #region Private methods
 
-        private static string? GetUserEmail(ClaimsPrincipal? user)
-        {
-            ArgumentNullException.ThrowIfNull(user);
+    private static string? GetUserEmail(ClaimsPrincipal? user)
+    {
+        ArgumentNullException.ThrowIfNull(user);
 
-            var emailClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
-            return emailClaim?.Value;
-        }
+        var emailClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
+        return emailClaim?.Value;
+    }
 
     #endregion
 }

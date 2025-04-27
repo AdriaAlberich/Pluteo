@@ -9,6 +9,7 @@ using Pluteo.Domain.Models.Settings;
 using System.Security.Claims;
 using Pluteo.Application.Systems;
 using Microsoft.Extensions.Options;
+using Pluteo.Domain.Models.Dto.Shelves;
 
 namespace Pluteo.Infrastructure.Controllers;
 [ApiController]
@@ -26,7 +27,7 @@ public class ShelfController(ShelfSystem shelfSystem, IWebHostEnvironment env, I
 
     [Authorize(Roles = "User")]
     [HttpPost()]
-    public async Task<ActionResult> AddShelf([FromBody] string shelfName)
+    public async Task<ActionResult> AddShelf([FromBody] AddUpdateShelfRequest request)
     {
         try
         {
@@ -35,7 +36,7 @@ public class ShelfController(ShelfSystem shelfSystem, IWebHostEnvironment env, I
             if (string.IsNullOrWhiteSpace(userEmail))
                 return BadRequest("USER_EMAIL_NULL");
 
-            await _shelfSystem.AddUserShelf(userEmail, shelfName);
+            await _shelfSystem.AddUserShelf(userEmail, request.Name);
     
             return Ok();
         }
@@ -76,7 +77,7 @@ public class ShelfController(ShelfSystem shelfSystem, IWebHostEnvironment env, I
 
     [Authorize(Roles = "User")]
     [HttpPatch("{shelfId}/new-order")]
-    public async Task<ActionResult> ReOrderShelf(Guid shelfId, [FromBody] int newOrder)
+    public async Task<ActionResult> ReOrderShelf(Guid shelfId, [FromBody] ReOrderShelfRequest request)
     {
         try
         {
@@ -85,7 +86,7 @@ public class ShelfController(ShelfSystem shelfSystem, IWebHostEnvironment env, I
             if (string.IsNullOrWhiteSpace(userEmail))
                 return BadRequest("USER_EMAIL_NULL");
 
-            await _shelfSystem.ReOrderUserShelf(userEmail, shelfId, newOrder);
+            await _shelfSystem.ReOrderUserShelf(userEmail, shelfId, request.Order);
 
             return Ok();
         }
@@ -101,7 +102,7 @@ public class ShelfController(ShelfSystem shelfSystem, IWebHostEnvironment env, I
 
     [Authorize(Roles = "User")]
     [HttpPatch("{shelfId}")]
-    public async Task<ActionResult> UpdateShelf(Guid shelfId, [FromBody] string newName)
+    public async Task<ActionResult> UpdateShelf(Guid shelfId, [FromBody] AddUpdateShelfRequest request)
     {
         try
         {
@@ -110,7 +111,7 @@ public class ShelfController(ShelfSystem shelfSystem, IWebHostEnvironment env, I
             if (string.IsNullOrWhiteSpace(userEmail))
                 return BadRequest("USER_EMAIL_NULL");
 
-            await _shelfSystem.UpdateUserShelf(userEmail, shelfId, newName);
+            await _shelfSystem.UpdateUserShelf(userEmail, shelfId, request.Name);
 
             return Ok();
         }
@@ -128,13 +129,13 @@ public class ShelfController(ShelfSystem shelfSystem, IWebHostEnvironment env, I
 
     #region Private methods
 
-        private static string? GetUserEmail(ClaimsPrincipal? user)
-        {
-            ArgumentNullException.ThrowIfNull(user);
+    private static string? GetUserEmail(ClaimsPrincipal? user)
+    {
+        ArgumentNullException.ThrowIfNull(user);
 
-            var emailClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
-            return emailClaim?.Value;
-        }
+        var emailClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
+        return emailClaim?.Value;
+    }
 
     #endregion
 }

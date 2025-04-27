@@ -1,7 +1,7 @@
 using Pluteo.Application.Services;
 using Pluteo.Domain.Enums;
 using Pluteo.Domain.Exceptions;
-using Pluteo.Domain.Interfaces;
+using Pluteo.Domain.Interfaces.Integrations;
 using Pluteo.Domain.Interfaces.Systems;
 using Pluteo.Domain.Models.Dto.Books;
 using Pluteo.Domain.Models.Dto.Library;
@@ -24,22 +24,21 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
     {
         var user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_EXISTS");
 
-        var book = await _bookService.GetByISBN(isbn) ?? throw new ServiceException("BOOK_NOT_FOUND");
-
-        if (user.Shelves.All(s => s.Books.All(b => b.ISBN != book.ISBN)))
-        {
-            throw new ServiceException("BOOK_ALREADY_EXISTS_IN_SHELF");
-        }
+        Book? book = await _bookService.GetByISBN(isbn);
 
         ShelfBook? shelfBook = null;
         if (book != null)
         {
+            if (user.Shelves.All(s => s.Books.All(b => b.ISBN != book.ISBN)))
+                throw new ServiceException("BOOK_ALREADY_EXISTS_IN_SHELF");
+
             shelfBook = new ShelfBook
             {
                 Id = Guid.NewGuid(),
                 Title = book.Title,
                 ISBN = book.ISBN,
                 Authors = book.Authors,
+                Book = book.Id,
                 CoverSmall = book.CoverSmall,
                 CoverBig = book.CoverBig,
                 Publisher = book.Publishers,
@@ -119,8 +118,8 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
             Title = book.Title ?? string.Empty,
             ISBN = [book.ISBN ?? string.Empty],
             Authors = [book.Authors ?? string.Empty],
-            CoverSmall = book.Cover,
-            CoverBig = book.Cover,
+            CoverSmall = book.Cover ?? string.Empty,
+            CoverBig = book.Cover ?? string.Empty,
             Publisher = [book.Publisher ?? string.Empty],
             PublishPlace = [book.PublishPlace ?? string.Empty],
             FirstPublishYear = book.FirstPublishYear ?? string.Empty,
@@ -150,24 +149,30 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
         _logger.Information("Shelf book {Name} ({Id}) has been added to shelf {ShelfName} ({ShelfId}) for user {Email} ({Id}).", book.Title, shelfBook.Id, shelf.Name, shelf.Id, user.Email, user.Id);
     }
 
-    public async Task<LibraryOverview> GetLibrary(string email, string searchTerm, int page, int pageSize)
+    public async Task<LibraryOverview> GetLibrary(string email, string filterTerm)
     {
         var user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_EXISTS");
 
-        List<string> searchTerms = string.IsNullOrEmpty(searchTerm)
-            ? [string.Empty]
-            : [.. searchTerm.Split(' ')];
+        if(filterTerm == "all")
+        {
+            filterTerm = string.Empty;
+        }
+
+        List<string> filterTerms = string.IsNullOrWhiteSpace(filterTerm)
+            ? []
+            : [.. filterTerm.Split('+')];
 
         var shelves = user.Shelves;
 
         var shelfOverviews = shelves.Select(shelf =>
         {
             var filteredBooks = shelf.Books
-                .Where(book => searchTerms.Any(term => book.Title.Contains(term, StringComparison.OrdinalIgnoreCase)))
+                .Where(book => filterTerms.Count == 0 || filterTerms.Any(term => book.Title.Contains(term, StringComparison.OrdinalIgnoreCase)))
                 .Select(book => new ShelfBookOverview
                 {
                     Id = book.Id,
                     Title = book.Title,
+                    Order = book.Order,
                     Cover = book.CoverSmall
                 })
                 .ToList();
@@ -176,18 +181,16 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
             {
                 Id = shelf.Id,
                 Name = shelf.Name,
+                Order = shelf.Order,
+                IsDefault = shelf.IsDefault,
+                IsReadQueue = shelf.IsReadQueue,
                 Books = filteredBooks
             };
         }).ToList();
 
-        var paginatedShelves = shelfOverviews
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToList();
-
         return new LibraryOverview
         {
-            Shelves = paginatedShelves
+            Shelves = shelfOverviews
         };
     }
 

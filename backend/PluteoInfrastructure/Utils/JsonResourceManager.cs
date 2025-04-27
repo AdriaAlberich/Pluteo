@@ -1,5 +1,5 @@
 using Newtonsoft.Json;
-using Pluteo.Domain.Interfaces;
+using Pluteo.Domain.Interfaces.Utils;
 using Pluteo.Domain.Static;
 using ILogger = Serilog.ILogger;
 

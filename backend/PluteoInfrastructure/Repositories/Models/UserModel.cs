@@ -20,10 +20,13 @@ public class UserModel
     public required List<string> Roles { get; set; }
     [BsonElement("Notifications")]
     [BsonRequired]
-    public required List<Notification> Notifications { get; set; }
+    public required List<NotificationModel> Notifications { get; set; }
     [BsonElement("Settings")]
     [BsonRequired]
-    public required UserSettings Settings { get; set; }
+    public required UserSettingsModel Settings { get; set; }
+    [BsonElement("Shelves")]
+    [BsonRequired]
+    public required List<ShelfModel> Shelves { get; set; }
     [BsonElement("ActivationToken")]
     [BsonRequired]
     public string? ActivationToken { get; set; }

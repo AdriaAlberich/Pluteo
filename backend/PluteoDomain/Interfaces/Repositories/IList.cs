@@ -1,4 +1,4 @@
-namespace Pluteo.Domain.Interfaces;
+namespace Pluteo.Domain.Interfaces.Repositories;
 public interface IList<TEntity, TEntityId>
 {
     Task<List<TEntity>> List();

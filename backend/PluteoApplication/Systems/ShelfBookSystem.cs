@@ -1,6 +1,6 @@
 using Pluteo.Application.Services;
 using Pluteo.Domain.Exceptions;
-using Pluteo.Domain.Interfaces;
+using Pluteo.Domain.Interfaces.Utils;
 using Pluteo.Domain.Interfaces.Systems;
 using Pluteo.Domain.Models.Dto.ShelfBooks;
 using Pluteo.Domain.Models.Entities;
@@ -189,9 +189,9 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
             isUpdated = true;
         }
 
-        if(request.NumPages > 0)
+        if(request.NumPages.HasValue)
         {
-            shelfBook.NumPages = request.NumPages;
+            shelfBook.NumPages = request.NumPages.Value;
             isUpdated = true;
         }
 
@@ -224,7 +224,7 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
             _logger.Information("No changes were made to shelf book {Name} ({Id}) in shelf {ShelfName} ({ShelfId}) for user {Email} ({Id}).", shelfBook.Title, shelfBook.Id, shelf.Name, shelf.Id, user.Email, user.Id);
     }
 
-    public async Task ActivateShelfBookLoan(string email, Guid shelfId, Guid shelfBookId, string library, DateTime dueDate)
+    public async Task ActivateShelfBookLoan(string email, Guid shelfId, Guid shelfBookId, ActivateShelfBookLoanRequest request)
     {
         if(shelfId == Guid.Empty)
             throw new ServiceException("SHELF_CANNOT_BE_NULL");
@@ -232,16 +232,22 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
         if(shelfBookId == Guid.Empty)
             throw new ServiceException("SHELF_BOOK_CANNOT_BE_NULL_OR_EMPTY");
 
+        if(request == null || string.IsNullOrWhiteSpace(request.Library) || request.DueDate == default)
+            throw new ServiceException("SHELF_BOOK_LOAN_CANNOT_BE_NULL");
+
         var user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_EXISTS");
         var shelf = user.Shelves.FirstOrDefault(s => s.Id == shelfId) ?? throw new ServiceException("SHELF_NOT_EXISTS");
         var shelfBook = shelf.Books.FirstOrDefault(sb => sb.Id == shelfBookId) ?? throw new ServiceException("SHELF_BOOK_NOT_EXISTS");
 
+        if(shelfBook.Loan != null)
+            throw new ServiceException("SHELF_BOOK_LOAN_ALREADY_EXISTS");
+
         shelfBook.Loan = new LibraryLoan
         {
-            Library = library,
+            Library = request.Library,
             LoanDate = DateTime.UtcNow,
-            DueDate = dueDate,
-            Notify = true,
+            DueDate = request.DueDate,
+            Notify = request.Notify,
             LastNotificationDate = DateTime.UtcNow,
         };
 
@@ -263,6 +269,9 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
         var user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_EXISTS");
         var shelf = user.Shelves.FirstOrDefault(s => s.Id == shelfId) ?? throw new ServiceException("SHELF_NOT_EXISTS");
         var shelfBook = shelf.Books.FirstOrDefault(sb => sb.Id == shelfBookId) ?? throw new ServiceException("SHELF_BOOK_NOT_EXISTS");
+
+        if(shelfBook.Loan == null)
+            throw new ServiceException("SHELF_BOOK_LOAN_NOT_EXISTS");
 
         shelfBook.Loan = null;
 
@@ -287,8 +296,7 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
 
     public async Task SendLoanNotifications()
     {
-        // Change this to a more efficient way to get users with loans
-        var users = await _userService.List();
+        var users = await _userService.ListWithLoans();
 
         foreach(var user in users)
         {
