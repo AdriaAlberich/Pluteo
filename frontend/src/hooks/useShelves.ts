@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { shelfApi } from '../services/api';
 
-export function useLibrary() {
+export function useShelves() {
 
   const createShelf = useMutation({
     mutationFn: ({ shelfName }: { shelfName: string }) => shelfApi.createShelf(shelfName)

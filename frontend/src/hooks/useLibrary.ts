@@ -1,11 +1,11 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { libraryApi } from '../services/api';
-import { ShelfBook, useAppStore } from '../context/appStore';
+import { LibraryOverview, ShelfBook, useAppStore } from '../context/appStore';
 
 export function useLibrary() {
   const { isAuthenticated, setLibrary } = useAppStore();
 
-  const getLibrary = useQuery({
+  const getLibrary = useQuery<LibraryOverview>({
     queryKey: ['library', { filterTerm: 'all' }],
     queryFn: async ({ queryKey }) => {
       const { filterTerm } = queryKey[1] as { filterTerm: string };
@@ -15,9 +15,7 @@ export function useLibrary() {
     },
     enabled: isAuthenticated,
     retry: 1,
-    retryDelay: 10000,
-    refetchInterval: false,
-    refetchOnWindowFocus: false
+    retryDelay: 1000
   });
 
   const searchBooks = useQuery({

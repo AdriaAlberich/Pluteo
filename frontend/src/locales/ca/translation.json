@@ -63,5 +63,9 @@
     "userprofile_confirm_new_password": "Confirma la nova contrasenya",
     "userprofile_change_password_button": "Canviar",
     "userprofile_change_password_cancel_button": "Cancel·lar",
-    "userprofile_change_password_success": "La contrasenya s'ha canviat amb èxit"
+    "userprofile_change_password_success": "La contrasenya s'ha canviat amb èxit",
+
+    "library_shelf_empty": "Arrossega un llibre aquí",
+    "library_shelf_default_title": "Sense classificar",
+    "library_shelf_read_queue_title": "Llista de lectura"
 }

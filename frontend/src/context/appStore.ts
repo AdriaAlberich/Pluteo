@@ -8,8 +8,8 @@ interface AppState {
   setNotifications: (notifications: any[]) => void;
   userSettings: any;
   setUserSettings: (settings: any) => void;
-  library: any;
-  setLibrary: (library: any) => void;
+  library: LibraryOverview;
+  setLibrary: (library: LibraryOverview) => void;
 }
 
 export interface UserSettings {
@@ -18,6 +18,13 @@ export interface UserSettings {
   notifyLoanBeforeDays: number;
   notifyLoanBeforeDaysFrequency: number;
   locale: string;
+}
+
+export interface ShelfBookPreview {
+  id: string;
+  title: string;
+  order: number;
+  cover: string;
 }
 
 export interface ShelfBook {
@@ -36,6 +43,19 @@ export interface ShelfBook {
   status: string;
 }
 
+export interface Shelf {
+  id: string;
+  name: string;
+  order: number;
+  isDefault: boolean;
+  isReadQueue: boolean;
+  books: ShelfBookPreview[];
+}
+
+export interface LibraryOverview {
+  shelves: Shelf[];
+}
+
 export const useAppStore = create<AppState>((set) => ({
   isAuthenticated: false,
   setIsAuthenticated: (auth) => set({ isAuthenticated: auth }),
@@ -48,6 +68,8 @@ export const useAppStore = create<AppState>((set) => ({
       i18n.changeLanguage(settings.locale);
     }
   },
-  library: {},
+  library: {
+    shelves: [],
+  } as LibraryOverview,
   setLibrary: (library) => set({ library }),
 }));
