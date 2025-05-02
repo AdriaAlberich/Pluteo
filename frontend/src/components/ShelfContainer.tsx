@@ -12,10 +12,12 @@ import { Pencil, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../context/appStore';
 import { useShelves } from '../hooks/useShelves';
+import { useLibrary } from '../hooks/useLibrary';
 
 export function ShelfContainer({ shelf, totalShelves }: { shelf: Shelf, totalShelves: number }) {
   const { library, setLibrary } = useAppStore();
   const { reOrderShelf, updateShelf, deleteShelf } = useShelves();
+  const { getLibraryRefetch } = useLibrary();
   const { t } = useTranslation();
   const [ editMode, setEditMode ] = useState(false);
 
@@ -32,15 +34,7 @@ export function ShelfContainer({ shelf, totalShelves }: { shelf: Shelf, totalShe
         order: newOrder,
       }, {
         onSuccess: () => {
-          const updatedShelves = library.shelves.map((s) => {
-            if (s.id === shelf.id) {
-              return { ...s, order: newOrder };
-            } else if (s.order === newOrder) {
-              return { ...s, order: s.order - 1 };
-            }
-            return s;
-          });
-          setLibrary({ ...library, shelves: updatedShelves });
+          getLibraryRefetch();
         }
       });
     }
@@ -51,15 +45,7 @@ export function ShelfContainer({ shelf, totalShelves }: { shelf: Shelf, totalShe
         order: newOrder,
       }, {
         onSuccess: () => {
-          const updatedShelves = library.shelves.map((s) => {
-            if (s.id === shelf.id) {
-              return { ...s, order: newOrder };
-            } else if (s.order === newOrder) {
-              return { ...s, order: s.order + 1 };
-            }
-            return s;
-          });
-          setLibrary({ ...library, shelves: updatedShelves });
+          getLibraryRefetch();
         }
       });
     }
@@ -102,8 +88,7 @@ export function ShelfContainer({ shelf, totalShelves }: { shelf: Shelf, totalShe
       shelfId: shelf.id,
     }, {
       onSuccess: () => {
-        const updatedShelves = library.shelves.filter((s) => s.id !== shelf.id);
-        setLibrary({ ...library, shelves: updatedShelves });
+        getLibraryRefetch();
       }
     });
   }
@@ -138,7 +123,7 @@ export function ShelfContainer({ shelf, totalShelves }: { shelf: Shelf, totalShe
         </div>
         { !(shelf.isDefault || shelf.isReadQueue) && (
           <div className="flex gap-2">
-            { shelf.order !== 3 && (
+            { shelf.order > 3 && (
               <button
                 onClick={() => {handleMove('up')}}
                 className={'text-white rounded-lg flex items-center justify-center gap-2 hover: bg-gray-700 p-2'}
@@ -146,7 +131,7 @@ export function ShelfContainer({ shelf, totalShelves }: { shelf: Shelf, totalShe
                 <ArrowUp/>
               </button>
             )}
-            { shelf.order === totalShelves && (
+            { shelf.order < totalShelves && (
               <button
                 onClick={() => {handleMove('down')}}
                 className={'text-white rounded-lg flex items-center justify-center gap-2 hover: bg-gray-700 p-2'}

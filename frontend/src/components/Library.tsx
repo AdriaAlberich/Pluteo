@@ -18,12 +18,14 @@ import { LibraryOverview, Shelf, ShelfBookPreview, ShelfBook, useAppStore } from
 import { useLibrary } from '../hooks/useLibrary';
 import { useShelfBooks } from '../hooks/useShelfBooks';
 import { useShelves } from '../hooks/useShelves';
+import { t } from 'i18next';
+import { create } from 'zustand';
 
 export function Library() {
   const { library, setLibrary } = useAppStore();
-  const { getLibrary } = useLibrary();
+  const { getLibrary, getLibraryRefetch } = useLibrary();
   const { reOrderShelfBook, reOrderShelfBookError, moveShelfBook, moveShelfBookError } = useShelfBooks();
-  const { reOrderShelf } = useShelves();
+  const { createShelf } = useShelves();
 
   const [draggingBook, setDraggingBook] = useState<ShelfBookPreview | null>(null);
   const sensors = useSensors(useSensor(PointerSensor));
@@ -102,8 +104,65 @@ export function Library() {
     }
   };
 
+  const handleCreateShelf = () => {
+    const shelfName = (document.getElementById('shelfName') as HTMLInputElement).value;
+    if (shelfName.trim() === '') {
+      alert(t('library_shelf_create_error'));
+      return;
+    }
+
+    if (library.shelves.some((shelf) => shelf.name === shelfName)) {
+      alert(t('library_shelf_create_duplicate_error'));
+      return;
+    }
+
+    createShelf({
+      shelfName,
+    }, {
+      onSuccess: () => {
+        getLibraryRefetch();
+      },
+      onError: (error) => {
+        console.error('Error creating shelf:', error);
+      },
+    });
+  };
+
   return (
     <div className="flex flex-col h-full w-full p-4 bg-gray-900 text-white">
+      <div className="flex items-center mb-4 gap-4">
+        <input
+          type="text"
+          name="shelfName"
+          id="shelfName"
+          placeholder={t('library_shelf_create_placeholder')}
+          className="appearance-none rounded-lg relative block px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+        />
+        <button
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          onClick={() => {handleCreateShelf()}}
+        >
+          {t('library_shelf_create_button')}
+        </button>
+      </div>
+      <div className="flex gap-4 mb-4">
+        <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+          {t('library_book_add_button')}
+        </button>
+        <button className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+          {t('library_book_search_button')}
+        </button>
+      </div>
+      <div className="flex gap-4 mb-4">
+        <input
+          type="text"
+          placeholder={t('library_book_filter_placeholder')}
+          className="appearance-none rounded-lg relative block px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+        />
+        <button className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
+          {t('library_book_filter_button')}
+        </button>
+      </div>
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -115,7 +174,7 @@ export function Library() {
           .slice()
           .sort((a, b) => a.order - b.order)
           .map((shelf) => (
-            <ShelfContainer key={shelf.id} shelf={shelf} totalShelves={library.shelves.length+1} />
+            <ShelfContainer key={shelf.id} shelf={shelf} totalShelves={library.shelves.length} />
         ))}
         </div>
 

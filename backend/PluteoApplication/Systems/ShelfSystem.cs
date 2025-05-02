@@ -52,6 +52,12 @@ public class ShelfSystem(ApplicationSettings config, UserService userService, IL
 
         user.Shelves.Remove(shelf);
 
+        for(int i = 0; i < user.Shelves.Count; i++)
+        {
+            if(user.Shelves[i].Order > shelf.Order)
+                user.Shelves[i].Order--;
+        }
+
         await _userService.Update(user);
         _logger.Information("Shelf {Name} ({Id}) has been removed for user {Email} ({Id}).", shelf.Name, shelf.Id, user.Email, user.Id);
     }
@@ -62,10 +68,18 @@ public class ShelfSystem(ApplicationSettings config, UserService userService, IL
 
         var shelf = user.Shelves.FirstOrDefault(s => s.Id == shelfId) ?? throw new ServiceException("SHELF_NOT_EXISTS");
 
-        if(newOrder < 1 || newOrder > user.Shelves.Count)
+        if(newOrder < 3)
             throw new ServiceException("INVALID_SHELF_ORDER");
 
-        shelf.Order = newOrder;
+        for(int i = 0; i < user.Shelves.Count; i++)
+        {
+            if(user.Shelves[i].Id == shelfId)
+                user.Shelves[i].Order = newOrder;
+            else if(user.Shelves[i].Order >= newOrder)
+                user.Shelves[i].Order--;
+        }
+
+        _logger.Information("Shelf {Name} ({Id}) has been reordered for user {Email} ({Id}).", shelf.Name, shelf.Id, user.Email, user.Id);
 
         await _userService.Update(user);
     }

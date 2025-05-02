@@ -40,6 +40,7 @@ export function useLibrary() {
 
   return {
     getLibrary: getLibrary.data,
+    getLibraryRefetch: getLibrary.refetch,
     getLibraryError: getLibrary.error,
     searchBooks: searchBooks.data,
     searchBooksError: searchBooks.error,
