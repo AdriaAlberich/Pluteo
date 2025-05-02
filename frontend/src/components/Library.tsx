@@ -20,9 +20,13 @@ import { useShelfBooks } from '../hooks/useShelfBooks';
 import { useShelves } from '../hooks/useShelves';
 import { t } from 'i18next';
 import { create } from 'zustand';
+import { ShelfBookDetails } from './ShelfBookDetails';
 
 export function Library() {
-  const { library, setLibrary } = useAppStore();
+
+  const [ showShelfBook, setShowShelfBook ] = useState(false);
+  
+  const { library, setLibrary, setSelectedShelfBookShelfId, setSelectedShelfBookId, setSelectedShelfBook } = useAppStore();
   const { getLibrary, getLibraryRefetch } = useLibrary();
   const { reOrderShelfBook, reOrderShelfBookError, moveShelfBook, moveShelfBookError } = useShelfBooks();
   const { createShelf } = useShelves();
@@ -51,6 +55,15 @@ export function Library() {
       const shelfIndex = library.shelves.findIndex((shelf) => shelf.id === draggingFromShelfId);
       const fromIndex = library.shelves[shelfIndex].books.findIndex((book) => book.id === draggingBookId);
       const overIndex = library.shelves[shelfIndex].books.findIndex((book) => book.id === overBookId);
+      
+      // If the book is dropped on itself or the drop target is not found, show the book details
+      if (fromIndex === overIndex || overIndex === -1) {
+        setSelectedShelfBookShelfId(draggingFromShelfId);
+        setSelectedShelfBookId(draggingBookId);
+        setShowShelfBook(true);
+        return;
+      }
+
       const updatedBooks = arrayMove(
         library.shelves[shelfIndex].books,
         fromIndex,
@@ -128,69 +141,92 @@ export function Library() {
     });
   };
 
-  return (
-    <div className="flex flex-col h-full w-full p-4 bg-gray-900 text-white">
-      <div className="flex items-center mb-4 gap-4">
-        <input
-          type="text"
-          name="shelfName"
-          id="shelfName"
-          placeholder={t('library_shelf_create_placeholder')}
-          className="appearance-none rounded-lg relative block px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-        />
-        <button
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          onClick={() => {handleCreateShelf()}}
-        >
-          {t('library_shelf_create_button')}
-        </button>
-      </div>
-      <div className="flex gap-4 mb-4">
-        <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-          {t('library_book_add_button')}
-        </button>
-        <button className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
-          {t('library_book_search_button')}
-        </button>
-      </div>
-      <div className="flex gap-4 mb-4">
-        <input
-          type="text"
-          placeholder={t('library_book_filter_placeholder')}
-          className="appearance-none rounded-lg relative block px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-        />
-        <button className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
-          {t('library_book_filter_button')}
-        </button>
-      </div>
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragStart={onDragStart}
-        onDragEnd={onDragEnd}
-      >
-        <div className="flex flex-col gap-4 overflow-y-auto h-full">
-        {library.shelves
-          .slice()
-          .sort((a, b) => a.order - b.order)
-          .map((shelf) => (
-            <ShelfContainer key={shelf.id} shelf={shelf} totalShelves={library.shelves.length} />
-        ))}
-        </div>
+  const handleCreateShelfBook = () => {
+    setSelectedShelfBookShelfId(undefined);
+    setSelectedShelfBookId(undefined);
+    setShowShelfBook(true);
+  };
 
-        <DragOverlay>
-          {draggingBook ? (
-            <div className="flex flex-col items-center bg-gray-700 p-4 rounded shadow-lg">
-              <img
-                src={draggingBook.cover}
-                alt={draggingBook.title}
-                className="w-32 h-48 object-cover mb-2"
+  const handleBookDetailsClose = () => {
+    setShowShelfBook(false);
+    setSelectedShelfBookShelfId(undefined);
+    setSelectedShelfBookId(undefined);
+    setSelectedShelfBook(undefined);
+  }
+
+  return (
+    <>
+      <div className="flex flex-col h-full w-full p-4 bg-gray-900 text-white">
+        <div className="flex items-center mb-4 gap-4">
+          <input
+            type="text"
+            name="shelfName"
+            id="shelfName"
+            placeholder={t('library_shelf_create_placeholder')}
+            className="appearance-none rounded-lg relative block px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          />
+          <button
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            onClick={() => {handleCreateShelf()}}
+          >
+            {t('library_shelf_create_button')}
+          </button>
+        </div>
+        <div className="flex gap-4 mb-4">
+          <button 
+              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+              onClick={() => {handleCreateShelfBook()}}
+          >
+            {t('library_book_add_button')}
+          </button>
+          <button className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+            {t('library_book_search_button')}
+          </button>
+        </div>
+        <div className="flex gap-4 mb-4">
+          <input
+            type="text"
+            placeholder={t('library_book_filter_placeholder')}
+            className="appearance-none rounded-lg relative block px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          />
+          <button className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
+            {t('library_book_filter_button')}
+          </button>
+        </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={onDragStart}
+          onDragEnd={onDragEnd}
+        >
+          <div className="flex flex-col gap-4 overflow-y-auto h-full">
+          {library.shelves
+            .slice()
+            .sort((a, b) => a.order - b.order)
+            .map((shelf) => (
+              <ShelfContainer 
+                key={shelf.id} 
+                shelf={shelf} 
+                totalShelves={library.shelves.length}
               />
-              <span className="text-sm text-center">{draggingBook.title}</span>
-            </div>
-          ) : null}
-        </DragOverlay>
-      </DndContext>
-    </div>
+          ))}
+          </div>
+
+          <DragOverlay>
+            {draggingBook ? (
+              <div className="flex flex-col items-center bg-gray-700 p-4 rounded shadow-lg">
+                <img
+                  src={draggingBook.cover}
+                  alt={draggingBook.title}
+                  className="w-32 h-48 object-cover mb-2"
+                />
+                <span className="text-sm text-center">{draggingBook.title}</span>
+              </div>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
+      </div>
+      {showShelfBook && <ShelfBookDetails onClose={() => handleBookDetailsClose()} />}
+    </>
   );
 }

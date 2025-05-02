@@ -36,7 +36,7 @@ public class ShelfBookController(ShelfBookSystem shelfBookSystem, IWebHostEnviro
             if (string.IsNullOrWhiteSpace(userEmail))
                 return BadRequest("USER_EMAIL_NULL");
 
-            var shelfBook = await _shelfBookSystem.GetShelfBook(userEmail, shelfId, shelfBookId);
+            var shelfBook = await _shelfBookSystem.GetShelfBookDetails(userEmail, shelfId, shelfBookId);
             return Ok(shelfBook);
         }
         catch (ServiceException se)

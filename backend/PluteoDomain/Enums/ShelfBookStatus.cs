@@ -4,11 +4,10 @@ public enum ShelfBookStatus
 {
     None = 0,
     Unread = 1,
-    Reading = 2,
-    Read = 3,
-    Abandoned = 4,
-    Wishlist = 5,
-    ToRead = 6,
-    CurrentlyReading = 7
+    ToRead = 2,
+    Reading = 3,
+    Read = 4,
+    Abandoned = 5,
+    Wishlist = 6
 }
 

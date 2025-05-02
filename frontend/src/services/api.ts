@@ -96,7 +96,7 @@ export const libraryApi = {
   addBook: (isbn: string, shelfId: string) =>
     api.post('/library/add', { isbn, shelfId }),
   addBookManually: (shelfBook: Partial<ShelfBook>, shelfId: string) =>
-    api.post('/library/add-manually',{ shelfBook, shelfId }),
+    api.post('/library/add-manually',{ book: shelfBook, shelfId }),
 };
 
 // Shelf related endpoints
@@ -113,7 +113,7 @@ export const shelfApi = {
 
 // Shelfbook related endpoints
 export const shelfBookApi = {
-  getShelfBookDetails: (shelfId: string, shelfBookId: string) =>
+  getShelfBookDetails: (shelfId: string | undefined, shelfBookId: string | undefined) =>
     api.get(`/shelfbooks/${shelfId}/${shelfBookId}`),
   updateShelfBook: (shelfId: string, shelfBookId: string, data: Partial<ShelfBook>) =>
     api.patch(`/shelfbooks/${shelfId}/${shelfBookId}`, data),

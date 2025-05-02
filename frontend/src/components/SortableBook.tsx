@@ -1,5 +1,6 @@
 import { useDraggable } from '@dnd-kit/core';
 import { ShelfBookPreview } from '../context/appStore';
+import { useState } from 'react';
 
 interface SortableBookProps {
   id: string;

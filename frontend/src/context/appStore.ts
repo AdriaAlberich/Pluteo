@@ -10,6 +10,12 @@ interface AppState {
   setUserSettings: (settings: any) => void;
   library: LibraryOverview;
   setLibrary: (library: LibraryOverview) => void;
+  selectedShelfBookShelfId: string | undefined;
+  setSelectedShelfBookShelfId: (shelfId: string | undefined) => void;
+  selectedShelfBookId: string | undefined;
+  setSelectedShelfBookId: (bookId: string | undefined) => void;
+  selectedShelfBook: ShelfBook | undefined;
+  setSelectedShelfBook: (book: ShelfBook | undefined) => void;
 }
 
 export interface UserSettings {
@@ -27,6 +33,14 @@ export interface ShelfBookPreview {
   cover: string;
 }
 
+export interface Loan {
+  library: string;
+  loanDate: Date;
+  dueDate: Date;
+  notify: boolean;
+  lastNotificationDate: Date;
+}
+
 export interface ShelfBook {
   id: string;
   title: string;
@@ -41,6 +55,8 @@ export interface ShelfBook {
   notes: string;
   physicalLocation: string;
   status: string;
+  order: number;
+  loan: Loan | null;
 }
 
 export interface Shelf {
@@ -72,4 +88,10 @@ export const useAppStore = create<AppState>((set) => ({
     shelves: [],
   } as LibraryOverview,
   setLibrary: (library) => set({ library }),
+  selectedShelfBookShelfId: undefined,
+  setSelectedShelfBookShelfId: (shelfId) => set({ selectedShelfBookShelfId: shelfId }),
+  selectedShelfBookId: undefined,
+  setSelectedShelfBookId: (bookId) => set({ selectedShelfBookId: bookId }),
+  selectedShelfBook: undefined,
+  setSelectedShelfBook: (book) => set({ selectedShelfBook: book }),
 }));

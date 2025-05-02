@@ -46,6 +46,32 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
         return shelfBook;
     }
 
+    public async Task<ShelfBookDetails> GetShelfBookDetails(string email, Guid shelfId, Guid shelfBookId)
+    {
+        var shelfBook = await GetShelfBook(email, shelfId, shelfBookId);
+        
+        var shelfBookDetails = new ShelfBookDetails
+        {
+            Id = shelfBook.Id,
+            Order = shelfBook.Order,
+            Title = shelfBook.Title,
+            ISBN = shelfBook.ISBN.FirstOrDefault(),
+            Authors = shelfBook.Authors.FirstOrDefault(),
+            Cover = shelfBook.CoverBig,
+            FirstPublishYear = shelfBook.FirstPublishYear,
+            Publisher = shelfBook.Publisher.FirstOrDefault(),
+            PublishPlace = shelfBook.PublishPlace.FirstOrDefault(),
+            NumPages = shelfBook.NumPages,
+            AvailableLanguages = shelfBook.AvailableLanguages.FirstOrDefault(),
+            PhysicalLocation = shelfBook.PhysicalLocation,
+            Notes = shelfBook.Notes,
+            Status = shelfBook.Status,
+            Loan = shelfBook.Loan,
+        };
+
+        return shelfBookDetails;
+    }
+
     public async Task MoveShelfBook(string email, Guid shelfId, Guid shelfBookId, Guid newShelfId)
     {
         if(shelfId == Guid.Empty)

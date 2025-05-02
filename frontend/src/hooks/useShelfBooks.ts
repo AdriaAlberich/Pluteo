@@ -1,14 +1,16 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { shelfBookApi } from '../services/api';
-import { ShelfBook } from '../context/appStore';
+import { ShelfBook, useAppStore } from '../context/appStore';
+import { set } from 'date-fns';
 
 export function useShelfBooks() {
+  const { selectedShelfBookShelfId, selectedShelfBookId, setSelectedShelfBook } = useAppStore();
 
-  const getShelfBookDetails = useQuery({
-    queryKey: ['shelfBookDetails', { shelfId: '', shelfBookId: '' }],
-    queryFn: async ({ queryKey }) => {
-      const { shelfId, shelfBookId } = queryKey[1] as { shelfId: string, shelfBookId: string };
-      const response = await shelfBookApi.getShelfBookDetails(shelfId, shelfBookId);
+  const getShelfBookDetails = useQuery<ShelfBook>({
+    queryKey: ['shelfBookDetails', { selectedShelfBookShelfId, selectedShelfBookId }],
+    queryFn: async () => {
+      const response = await shelfBookApi.getShelfBookDetails(selectedShelfBookShelfId, selectedShelfBookId);
+      setSelectedShelfBook(response.data);
       return response.data;
     },
     enabled: false,
@@ -54,6 +56,7 @@ export function useShelfBooks() {
 
   return {
     getShelfBookDetails: getShelfBookDetails.data,
+    getShelfBookDetailsRefetch: getShelfBookDetails.refetch,
     getShelfBookDetailsError: getShelfBookDetails.error,
     updateShelfBook: updateShelfBook.mutate,
     updateShelfBookError: updateShelfBook.error,
@@ -68,6 +71,7 @@ export function useShelfBooks() {
     deactivateShelfBookLoan: deactivateShelfBookLoan.mutate,
     deactivateShelfBookLoanError: deactivateShelfBookLoan.error,
     isShelfBookLoanActive: isShelfBookLoanActive.data,
+    isShelfBookLoanActiveRefetch: isShelfBookLoanActive.refetch,
     isShelfBookLoanActiveError: isShelfBookLoanActive.error,
     isGetDetailsLoading: getShelfBookDetails.isLoading,
     isUpdateLoading: updateShelfBook.isPending,

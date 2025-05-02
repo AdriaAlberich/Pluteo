@@ -1,4 +1,5 @@
 using Pluteo.Domain.Enums;
+using Pluteo.Domain.Models.Entities;
 
 namespace Pluteo.Domain.Models.Dto.ShelfBooks;
 public class ShelfBookDetails
@@ -17,4 +18,5 @@ public class ShelfBookDetails
     public string? AvailableLanguages { get; set; }
     public string? Notes { get; set; }
     public string? PhysicalLocation { get; set; }
+    public LibraryLoan? Loan { get; set; }
 }

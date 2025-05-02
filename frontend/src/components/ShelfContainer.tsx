@@ -14,7 +14,12 @@ import { useAppStore } from '../context/appStore';
 import { useShelves } from '../hooks/useShelves';
 import { useLibrary } from '../hooks/useLibrary';
 
-export function ShelfContainer({ shelf, totalShelves }: { shelf: Shelf, totalShelves: number }) {
+interface ShelfContainerProps {
+  shelf: Shelf, 
+  totalShelves: number
+}
+
+export function ShelfContainer({ shelf, totalShelves }: ShelfContainerProps) {
   const { library, setLibrary } = useAppStore();
   const { reOrderShelf, updateShelf, deleteShelf } = useShelves();
   const { getLibraryRefetch } = useLibrary();
