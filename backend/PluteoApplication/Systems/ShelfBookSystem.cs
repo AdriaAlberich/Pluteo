@@ -6,6 +6,7 @@ using Pluteo.Domain.Models.Dto.ShelfBooks;
 using Pluteo.Domain.Models.Entities;
 using Pluteo.Domain.Models.Settings;
 using ILogger = Serilog.ILogger;
+using Pluteo.Domain.Enums;
 
 namespace Pluteo.Application.Systems;
 public class ShelfBookSystem(ApplicationSettings config, UserService userService, NotificationSystem notificationSystem, IResourceManager localizationManager, ILogger logger) : IShelfBookSystem
@@ -147,7 +148,7 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
         _logger.Information("Shelf book {Name} ({Id}) has been reordered to position {NewOrder} in shelf {ShelfName} ({ShelfId}) for user {Email} ({Id}).", shelfBook.Title, shelfBook.Id, newOrder, shelf.Name, shelf.Id, user.Email, user.Id);
     }
 
-    public async Task UpdateShelfBook(string email, Guid shelfId, Guid shelfBookId, CreateUpdateShelfBook request)
+    public async Task UpdateShelfBook(string email, Guid shelfId, Guid shelfBookId, ShelfBookDetails request)
     {
         if(shelfId == Guid.Empty)
             throw new ServiceException("SHELF_CANNOT_BE_NULL");
@@ -238,6 +239,12 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
         if(!string.IsNullOrWhiteSpace(request.Notes))
         {
             shelfBook.Notes = request.Notes;
+            isUpdated = true;
+        }
+
+        if(request.Status != ShelfBookStatus.None)
+        {
+            shelfBook.Status = request.Status;
             isUpdated = true;
         }
 

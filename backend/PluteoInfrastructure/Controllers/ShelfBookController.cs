@@ -126,7 +126,7 @@ public class ShelfBookController(ShelfBookSystem shelfBookSystem, IWebHostEnviro
 
     [Authorize(Roles = "User")]
     [HttpPatch("{shelfId}/{shelfBookId}")]
-    public async Task<ActionResult> UpdateShelfBook(Guid shelfId, Guid shelfBookId, [FromBody] CreateUpdateShelfBook request)
+    public async Task<ActionResult> UpdateShelfBook(Guid shelfId, Guid shelfBookId, [FromBody] ShelfBookDetails request)
     {
         try
         {

@@ -15,7 +15,7 @@ export function useNotifications() {
     enabled: isAuthenticated,
     retry: 1,
     retryDelay: 1000,
-    refetchInterval: 10000,
+    refetchInterval: 30000,
     refetchOnWindowFocus: true
   });
 
