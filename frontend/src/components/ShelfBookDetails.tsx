@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X, Save, Trash } from 'lucide-react';
+import { X, Save, Trash, Book, Info, CircleAlert } from 'lucide-react';
 import { ShelfBook, useAppStore } from '../context/appStore';
 import { useShelfBooks } from '../hooks/useShelfBooks';
 import { useLibrary } from '../hooks/useLibrary';
@@ -12,10 +12,35 @@ interface ShelfBookDetailsProps {
 export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
   const { selectedShelfBookId, selectedShelfBookShelfId, selectedShelfBook, setSelectedShelfBook } = useAppStore();
   const [ isBookCreation, setIsBookCreation ] = useState(true);
+  const [ showLoanForm, setShowLoanForm ] = useState(false);
+  const [ safeDelete, setSafeDelete ] = useState(false);
+  const [ isShelfBookDetailsError, setShelfBookDetailsError ] = useState(false);
+  const [ isShelfBookDetailsSuccess, setShelfBookDetailsSuccess ] = useState(false);
   const { t } = useTranslation();
 
-  const { getShelfBookDetailsRefetch, updateShelfBook, isUpdateLoading, deleteShelfBook, activateShelfBookLoan, deactivateShelfBookLoan, isShelfBookLoanActiveRefetch } = useShelfBooks();
-  const { getLibraryRefetch, addBookManually, isAddBookManuallyLoading } = useLibrary();
+  const { 
+    getShelfBookDetailsRefetch, 
+    updateShelfBook, 
+    updateShelfBookError, 
+    isUpdateLoading, 
+    deleteShelfBook, 
+    deleteShelfBookError, 
+    isDeleteLoading, 
+    activateShelfBookLoan, 
+    activateShelfBookLoanError, 
+    isActivateLoanLoading, 
+    deactivateShelfBookLoan, 
+    deactivateShelfBookLoanError, 
+    isDeactivateLoanLoading, 
+    isShelfBookLoanActiveRefetch 
+  } = useShelfBooks();
+
+  const { 
+    getLibraryRefetch, 
+    addBookManually, 
+    addBookManuallyError, 
+    isAddBookManuallyLoading 
+  } = useLibrary();
 
   useEffect(() => {
     if (selectedShelfBookId && selectedShelfBookShelfId) {
@@ -51,6 +76,14 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
   }
 
   const handleBookDelete = async () => {
+    if (!safeDelete) {
+      setSafeDelete(true);
+      setTimeout(() => {
+        setSafeDelete(false);
+      }, 3000);
+      return;
+    }
+
     if (selectedShelfBook) {
       deleteShelfBook({
         shelfId: selectedShelfBookShelfId!,
@@ -74,6 +107,68 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
       reader.readAsDataURL(file);
     }
   };
+
+  const handleLoanForm = () => {
+    setShowLoanForm(true);
+  };
+
+  const handleActivateLoan = () => {
+    if (selectedShelfBook) {
+      activateShelfBookLoan({
+        shelfId: selectedShelfBookShelfId!,
+        shelfBookId: selectedShelfBookId!,
+        data: selectedShelfBook.loan!,
+      });
+    }
+  }
+
+  const handleDeactivateLoan = () => {
+    if (selectedShelfBook) {
+      deactivateShelfBookLoan({
+        shelfId: selectedShelfBookShelfId!,
+        shelfBookId: selectedShelfBookId!
+      });
+    }
+  }
+
+  const handleErrors = () => {
+    
+    if (updateShelfBookError) {
+      return handleError(updateShelfBookError);
+    } else if (deleteShelfBookError) {
+      return handleError(deleteShelfBookError);
+    } else if (activateShelfBookLoanError) {
+      return handleError(activateShelfBookLoanError);
+    } else if (deactivateShelfBookLoanError) {
+      return handleError(deactivateShelfBookLoanError);
+    } else if (addBookManuallyError) {
+      return handleError(addBookManuallyError);
+    }
+
+    return null;
+  };
+
+  // TODO: Finish this
+  const handleError = (error: any) => {
+    const status = (error as any)?.response?.status;
+    let errorMessage = (error as any)?.response?.data?.message || 'An unknown error occurred';
+    console.log('Error:', status, errorMessage);
+    if (status === 400) {
+      if (errorMessage === 'USER_NEW_PASSWORD_NOT_VALID') {
+        errorMessage = t('auth_password_not_valid_error');
+      } else if (errorMessage === 'USER_NEW_PASSWORD_CONFIRMATION_NOT_MATCH') {
+        errorMessage = t('auth_password_match_error');
+      } else if (errorMessage === 'USER_PASSWORD_INCORRECT') {
+        errorMessage = t('auth_password_incorrect_error');
+      } else {
+        errorMessage = t('auth_generic_error');
+      }
+    }else if (status === 500) {
+      errorMessage = t('auth_server_error');
+    }
+
+    return errorMessage;
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -120,6 +215,9 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
             </div>
             <div className="w-full h-[1px] bg-gray-600 my-4"></div>
             <h3 className="text-lg font-semibold text-white">Book Details</h3>
+            <label className="block text-sm text-gray-400 mb-2">
+              Title
+            </label>
             <input
               id="title"
               name="title"
@@ -134,6 +232,9 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
                 })
               }
             />
+            <label className="block text-sm text-gray-400 mb-2">
+              ISBN
+            </label>
             <input
               id="isbn"
               name="isbn"
@@ -148,6 +249,9 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
                 })
               }
             />
+            <label className="block text-sm text-gray-400 mb-2">
+              Author(s)
+            </label>
             <input
               id="author"
               name="author"
@@ -162,6 +266,9 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
                 })
               }
             />
+            <label className="block text-sm text-gray-400 mb-2">
+              Publisher
+            </label>
             <input
               id="publisher"
               name="publisher"
@@ -176,6 +283,9 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
                 })
               }
             />
+            <label className="block text-sm text-gray-400 mb-2">
+              Publisher Place
+            </label>
             <input
               id="publisherPlace"
               name="publisherPlace"
@@ -190,6 +300,9 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
                 })
               }
             />
+            <label className="block text-sm text-gray-400 mb-2">
+              First Published Year
+            </label>
             <input
               id="firstPublishedYear"
               name="firstPublishedYear"
@@ -204,6 +317,9 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
                 })
               }
             />
+            <label className="block text-sm text-gray-400 mb-2">
+              Number of Pages
+            </label>
             <input
               id="numPages"
               name="numPages"
@@ -218,6 +334,9 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
                 })
               }
             />
+            <label className="block text-sm text-gray-400 mb-2">
+              Available Languages
+            </label>
             <input
               id="availableLanguages"
               name="availableLanguages"
@@ -232,6 +351,9 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
                 })
               }
             />
+            <label className="block text-sm text-gray-400 mb-2">
+              Notes
+            </label>
             <textarea
               id="notes"
               name="notes"
@@ -245,6 +367,9 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
                 })
               }
             ></textarea>
+            <label className="block text-sm text-gray-400 mb-2">
+              Physical Location
+            </label>
             <input
               id="physicalLocation"
               name="physicalLocation"
@@ -259,6 +384,9 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
                 })
               }
             />
+            <label className="block text-sm text-gray-400 mb-2">
+              Status
+            </label>
             <select
               id="status"
               name="status"
@@ -281,49 +409,121 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
             </select>
             {!isBookCreation && (
               <div>
-                <input
-                  id="library"
-                  name="library"
-                  type="text"
-                  className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Library Name"
-                />
-                <input
-                  id="dueDate"
-                  name="dueDate"
-                  type="date"
-                  className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                />
-                <div className="flex items-center gap-2">
+                {!showLoanForm ? (
+                  <div>
+                    <button
+                      onClick={handleLoanForm}
+                      className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 flex items-center justify-center gap-2"
+                    >
+                      <Book className="w-4 h-4" />
+                      Manage Loan
+                    </button>
+                  </div>
+                ) : (
+                <div className="p-4 bg-gray-900 rounded-lg">
+                  <h3 className="text-lg font-semibold text-white">Loan Details</h3>
+                  <label className="block text-sm text-gray-400 mb-2">
+                    Loaned To
+                  </label>
                   <input
-                    id="notify"
-                    name="notify"
-                    type="checkbox"
-                    className="rounded-lg border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    checked={ false }
+                    id="library"
+                    name="library"
+                    type="text"
+                    className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Library Name"
+                    value={ selectedShelfBook?.loan?.library || '' }
+                    onChange={(e) =>
+                      setSelectedShelfBook({
+                        ...selectedShelfBook!,
+                        loan: {
+                          ...selectedShelfBook!.loan!,
+                          library: e.target.value,
+                        },
+                      })
+                    }
                   />
-                  <label htmlFor="notify" className="text-white">Notify</label>
+                  <label className="block text-sm text-gray-400 mb-2">
+                    Loaned Date
+                  </label>
+                  <input
+                    id="dueDate"
+                    name="dueDate"
+                    type="date"
+                    className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Due Date"
+                    value={
+                      selectedShelfBook?.loan?.dueDate
+                        ? new Date(selectedShelfBook.loan.dueDate).toISOString().split('T')[0]
+                        : ''
+                    }
+                    onChange={(e) =>
+                      setSelectedShelfBook({
+                        ...selectedShelfBook!,
+                        loan: {
+                          ...selectedShelfBook!.loan!,
+                          dueDate: new Date(e.target.value),
+                        },
+                      })
+                    }
+                  />
+                  <div className="mt-4">
+                    <label className="block text-sm text-gray-400 mb-2">
+                      Receive Notifications
+                    </label>
+                    <input
+                      id="notify"
+                      name="notify"
+                      type="checkbox"
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      checked={ selectedShelfBook?.loan?.notify }
+                      onChange={(e) =>
+                        setSelectedShelfBook({
+                          ...selectedShelfBook!,
+                          loan: {
+                            ...selectedShelfBook!.loan!,
+                            notify: e.target.checked,
+                          },
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {selectedShelfBook?.loan === null ? (
+                      <button
+                        type="button"
+                        onClick={ handleActivateLoan }
+                        className="flex-1 py-2 text-white rounded-lg bg-green-700 hover:bg-green-600 flex items-center justify-center gap-2"
+                      >
+                        Activate Loan
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={ handleDeactivateLoan }
+                        className="flex-1 py-2 text-white rounded-lg bg-red-700 hover:bg-red-600 flex items-center justify-center gap-2"
+                      >
+                        Deactivate Loan
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {}}
-                    className="flex-1 py-2 text-white rounded-lg bg-green-700 hover:bg-green-600 flex items-center justify-center gap-2"
-                  >
-                    Activate Loan
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {}}
-                    className="flex-1 py-2 text-white rounded-lg bg-red-700 hover:bg-red-600 flex items-center justify-center gap-2"
-                  >
-                    Deactivate Loan
-                  </button>
-                </div>
+                )}
               </div>
             )}
           </div>
           <div className="flex gap-3">
+            {isShelfBookDetailsSuccess && (
+                <div className="flex items-center bg-blue-500 text-white text-sm font-bold px-4 py-3" role="alert">
+                  <Info className="w-4 h-4 mr-2" />
+                  <p>{ t('userprofile_change_password_success') }</p>
+                </div>
+            )}
+            {isShelfBookDetailsError && (
+              <div className="flex items-center bg-red-500 text-white text-sm font-bold px-4 py-3" role="alert">
+                <CircleAlert className="w-4 h-4 mr-2" />
+                <p>{ handleErrors() }</p>
+              </div>
+            )}
             <button
               type="submit"
               onClick={ handleBookSubmit }
@@ -362,10 +562,14 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
               <button
                 type="button"
                 onClick={ handleBookDelete }
-                className="flex-1 py-2 text-white rounded-lg bg-red-700 hover:bg-red-600 flex items-center justify-center gap-2"
+                className={`flex-1 py-2 text-white rounded-lg ${safeDelete ? 'bg-red-900 hover:bg-red-800' : 'bg-red-700 hover:bg-red-600'} flex items-center justify-center gap-2`}
               >
                 <Trash className="w-4 h-4" />
-                Delete
+                {safeDelete ? (
+                  <span>Confirm Deletion?</span>
+                ) : (
+                  <span>Delete</span>
+                )}
               </button>
             )}
           </div>
