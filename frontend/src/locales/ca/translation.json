@@ -73,5 +73,19 @@
     "library_book_add_button": "Afegir llibre nou",
     "library_book_search_button": "Afegir llibre existent",
     "library_book_filter_placeholder": "Filtrar llibres",
-    "library_book_filter_button": "Filtrar"
+    "library_book_filter_button": "Filtrar",
+
+    "booksearch_title": "Afegir llibre existent",
+    "booksearch_title_search": "Cercar",
+    "booksearch_search_term": "Cerca per títol, autor, ISBN, o qualsevol terme relacionat",
+    "booksearch_search_term_placeholder": "Títol, autor, ISBN, etc",
+    "booksearch_search_external": "Cerca a internet (desmarcat cercarà només dins Pluteo)",
+    "booksearch_search_button": "Cercar",
+    "booksearch_search_button_searching": "Cercant...",
+    "booksearch_search_page_previous": "Anterior",
+    "booksearch_search_page_next": "Següent",
+    "booksearch_search_page": "Pàgina",
+    "booksearch_search_page_of": "de",
+    "booksearch_search_results": "Resultats de la cerca",
+    "booksearch_search_results_empty": "Sense resultats"
 }

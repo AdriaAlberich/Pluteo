@@ -16,6 +16,20 @@ interface AppState {
   setSelectedShelfBookId: (bookId: string | undefined) => void;
   selectedShelfBook: ShelfBook | undefined;
   setSelectedShelfBook: (book: ShelfBook | undefined) => void;
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  external: boolean;
+  setExternal: (external: boolean) => void;
+  searchPageNumber: number;
+  setSearchPageNumber: (pageNumber: number) => void;
+  searchPageSize: number;
+  setSearchPageSize: (pageSize: number) => void;
+  searchTotalResults: number;
+  setSearchTotalResults: (totalResults: number) => void;
+  searchTotalPages: number;
+  setSearchTotalPages: (totalPages: number) => void;
+  searchResults: BookSearchResult | undefined;
+  setSearchResults: (results: BookSearchResult | undefined) => void;
 }
 
 export interface UserSettings {
@@ -72,6 +86,25 @@ export interface LibraryOverview {
   shelves: Shelf[];
 }
 
+export interface SearchResultItem { 
+  title: string;
+  isbn: string[];
+  searchCoverUrl: string;
+  authors: string[];
+  publishers: string[];
+  publishPlaces: string[];
+  firstPublishYear: string;
+  numPages: number;
+  availableLanguages: string[];
+}
+
+export interface BookSearchResult {
+  totalResults: number;
+  page: number;
+  totalPages: number;
+  results: SearchResultItem[];
+}
+
 export const useAppStore = create<AppState>((set) => ({
   isAuthenticated: false,
   setIsAuthenticated: (auth) => set({ isAuthenticated: auth }),
@@ -94,4 +127,18 @@ export const useAppStore = create<AppState>((set) => ({
   setSelectedShelfBookId: (bookId) => set({ selectedShelfBookId: bookId }),
   selectedShelfBook: undefined,
   setSelectedShelfBook: (book) => set({ selectedShelfBook: book }),
+  searchTerm: '',
+  setSearchTerm: (term) => set({ searchTerm: term }),
+  external: false,
+  setExternal: (external) => set({ external }),
+  searchPageNumber: 1,
+  setSearchPageNumber: (pageNumber) => set({ searchPageNumber: pageNumber }),
+  searchPageSize: 10,
+  setSearchPageSize: (pageSize) => set({ searchPageSize: pageSize }),
+  searchTotalResults: 0,
+  setSearchTotalResults: (totalResults) => set({ searchTotalResults: totalResults }),
+  searchTotalPages: 0,
+  setSearchTotalPages: (totalPages) => set({ searchTotalPages: totalPages }),
+  searchResults: undefined,
+  setSearchResults: (results) => set({ searchResults: results }),
 }));

@@ -93,9 +93,9 @@ export const libraryApi = {
     api.get(`/library/${encodeURIComponent(filterTerm)}`),
   searchBooks: (searchTerm: string, pageNumber: number, pageSize: number, external: boolean) =>
     api.get(`/library/search/${encodeURIComponent(searchTerm)}/${pageNumber}/${pageSize}/${external}`),
-  addBook: (isbn: string, shelfId: string) =>
+  addBook: (isbn: string, shelfId: string | undefined) =>
     api.post('/library/add', { isbn, shelfId }),
-  addBookManually: (shelfBook: Partial<ShelfBook>, shelfId: string) =>
+  addBookManually: (shelfBook: Partial<ShelfBook>, shelfId: string | undefined) =>
     api.post('/library/add-manually',{ book: shelfBook, shelfId }),
 };
 

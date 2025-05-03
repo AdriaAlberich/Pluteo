@@ -3,7 +3,7 @@ import { libraryApi } from '../services/api';
 import { LibraryOverview, ShelfBook, useAppStore } from '../context/appStore';
 
 export function useLibrary() {
-  const { isAuthenticated, setLibrary } = useAppStore();
+  const { isAuthenticated, setLibrary, searchTerm, searchPageNumber, searchPageSize, external, setSearchResults, setSearchTotalPages, setSearchTotalResults, setSearchPageNumber } = useAppStore();
 
   const getLibrary = useQuery<LibraryOverview>({
     queryKey: ['library', { filterTerm: 'all' }],
@@ -19,23 +19,25 @@ export function useLibrary() {
   });
 
   const searchBooks = useQuery({
-    queryKey: ['searchBooks', { searchTerm: '', pageNumber: 1, pageSize: 10, external: false }],
-    queryFn: async ({ queryKey }) => {
-      const { searchTerm, pageNumber, pageSize, external } = queryKey[1] as { searchTerm: string; pageNumber: number; pageSize: number; external: boolean };
-      const response = await libraryApi.searchBooks(searchTerm, pageNumber, pageSize, external);
+    queryKey: ['searchBooks', { searchTerm, searchPageNumber, searchPageSize, external }],
+    queryFn: async () => {
+      const response = await libraryApi.searchBooks(searchTerm, searchPageNumber, searchPageSize, external);
+      setSearchResults(response.data);
+      setSearchTotalPages(response.data.totalPages);
+      setSearchTotalResults(response.data.totalResults);
+      setSearchPageNumber(response.data.page);
       return response.data;
     },
     enabled: false,
-    retry: 1,
-    retryDelay: 10000,
+    retry: false
   });
 
   const addBook = useMutation({
-    mutationFn: ({ isbn, shelfId }: { isbn: string; shelfId: string }) => libraryApi.addBook(isbn, shelfId)
+    mutationFn: ({ isbn, shelfId }: { isbn: string; shelfId?: string | undefined }) => libraryApi.addBook(isbn, shelfId),
   });
 
   const addBookManually = useMutation({
-    mutationFn: ({ shelfBook, shelfId }: { shelfBook: Partial<ShelfBook>; shelfId: string }) => libraryApi.addBookManually(shelfBook, shelfId)
+    mutationFn: ({ shelfBook, shelfId }: { shelfBook: Partial<ShelfBook>; shelfId: string | undefined }) => libraryApi.addBookManually(shelfBook, shelfId)
   });
 
   return {
@@ -43,6 +45,7 @@ export function useLibrary() {
     getLibraryRefetch: getLibrary.refetch,
     getLibraryError: getLibrary.error,
     searchBooks: searchBooks.data,
+    searchBooksRefetch: searchBooks.refetch,
     searchBooksError: searchBooks.error,
     addBook: addBook.mutate,
     addBookError: addBook.error,

@@ -80,8 +80,8 @@ public class OpenLibrary(OpenLibrarySettings openLibrarySettings) : ILibraryInte
         {
             var result = JsonConvert.DeserializeObject<OpenLibrarySearchResults>(response.Content ?? string.Empty);
             
-            var coverBigUrl = $"{_coverApiUrl}/b/id/{result?.docs?.FirstOrDefault()?.isbn?.FirstOrDefault()}-L.jpg";
-            var coverSmallUrl = $"{_coverApiUrl}/b/id/{result?.docs?.FirstOrDefault()?.isbn?.FirstOrDefault()}-M.jpg";
+            var coverBigUrl = $"{_coverApiUrl}/b/isbn/{result?.docs?.FirstOrDefault()?.isbn?.FirstOrDefault()}-L.jpg";
+            var coverSmallUrl = $"{_coverApiUrl}/b/isbn/{result?.docs?.FirstOrDefault()?.isbn?.FirstOrDefault()}-M.jpg";
 
             var coverBigBase64 = await GetBase64FromUrl(coverBigUrl);
             var coverSmallBase64 = await GetBase64FromUrl(coverSmallUrl);
@@ -106,14 +106,21 @@ public class OpenLibrary(OpenLibrarySettings openLibrarySettings) : ILibraryInte
         throw new Exception("Error fetching data from Open Library API.");
     }
 
-    private static async Task<string> GetBase64FromUrl(string coverBigUrl)
+    private static async Task<string> GetBase64FromUrl(string imageUrl)
     {
-        RestClient client = new(coverBigUrl);
+        RestClient client = new(imageUrl);
         RestRequest request = new();
+
+        request.AddHeader("User-Agent", "PluteoPLM - alberichjaumeadria@gmail.com");
+
         var response = await client.ExecuteAsync(request);
-        if (response.IsSuccessful)
+        if (response.IsSuccessful && response.RawBytes != null)
         {
-            return Convert.ToBase64String(response.RawBytes ?? []);
+            var contentType = response.ContentType ?? "image/jpeg";
+
+            var base64String = Convert.ToBase64String(response.RawBytes);
+
+            return $"data:{contentType};base64,{base64String}";
         }
 
         throw new Exception("Error fetching data from Open Library API.");

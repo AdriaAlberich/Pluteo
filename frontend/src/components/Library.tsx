@@ -21,10 +21,12 @@ import { useShelves } from '../hooks/useShelves';
 import { t } from 'i18next';
 import { create } from 'zustand';
 import { ShelfBookDetails } from './ShelfBookDetails';
+import { BookSearch } from './BookSearch';
 
 export function Library() {
 
   const [ showShelfBook, setShowShelfBook ] = useState(false);
+  const [ showSearch, setShowSearch ] = useState(false);
   
   const { library, setLibrary, setSelectedShelfBookShelfId, setSelectedShelfBookId, setSelectedShelfBook } = useAppStore();
   const { getLibrary, getLibraryRefetch } = useLibrary();
@@ -154,6 +156,14 @@ export function Library() {
     setSelectedShelfBook(undefined);
   }
 
+  const handleSearchClose = () => {
+    setShowSearch(false);
+  }
+
+  const handleSearch = () => {
+    setShowSearch(true);
+  }
+
   return (
     <>
       <div className="flex flex-col h-full w-full p-4 bg-gray-900 text-white">
@@ -174,12 +184,15 @@ export function Library() {
         </div>
         <div className="flex gap-4 mb-4">
           <button 
-              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-              onClick={() => {handleCreateShelfBook()}}
+            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+            onClick={() => {handleCreateShelfBook()}}
           >
             {t('library_book_add_button')}
           </button>
-          <button className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+          <button 
+            className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
+            onClick={() => {handleSearch()}}
+          >
             {t('library_book_search_button')}
           </button>
         </div>
@@ -227,6 +240,7 @@ export function Library() {
         </DndContext>
       </div>
       {showShelfBook && <ShelfBookDetails onClose={() => handleBookDetailsClose()} />}
+      {showSearch && <BookSearch onClose={() => handleSearchClose()} />}
     </>
   );
 }
