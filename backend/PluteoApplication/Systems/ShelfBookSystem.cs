@@ -56,17 +56,17 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
             Id = shelfBook.Id,
             Order = shelfBook.Order,
             Title = shelfBook.Title,
-            ISBN = shelfBook.ISBN.FirstOrDefault(),
-            Authors = shelfBook.Authors.FirstOrDefault(),
-            Cover = shelfBook.CoverBig,
+            ISBN = string.Join(" ", shelfBook.ISBN),
+            Authors = string.Join(" ", shelfBook.Authors),
+            Cover = shelfBook.CoverSmall,
             FirstPublishYear = shelfBook.FirstPublishYear,
-            Publisher = shelfBook.Publisher.FirstOrDefault(),
-            PublishPlace = shelfBook.PublishPlace.FirstOrDefault(),
+            Publisher = string.Join(" ", shelfBook.Publisher),
+            PublishPlace = string.Join(" ", shelfBook.PublishPlace),
             NumPages = shelfBook.NumPages,
-            AvailableLanguages = shelfBook.AvailableLanguages.FirstOrDefault(),
+            AvailableLanguages = string.Join(" ", shelfBook.AvailableLanguages),
             PhysicalLocation = shelfBook.PhysicalLocation,
             Notes = shelfBook.Notes,
-            Status = shelfBook.Status,
+            Status = ((int)shelfBook.Status).ToString(),
             Loan = shelfBook.Loan,
         };
 
@@ -242,10 +242,13 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
             isUpdated = true;
         }
 
-        if(request.Status != ShelfBookStatus.None)
+        if(!string.IsNullOrWhiteSpace(request.Status))
         {
-            shelfBook.Status = request.Status;
-            isUpdated = true;
+            if(Enum.TryParse<ShelfBookStatus>(request.Status, true, out var status))
+            {
+                shelfBook.Status = status;
+                isUpdated = true;
+            }
         }
 
         if(isUpdated)

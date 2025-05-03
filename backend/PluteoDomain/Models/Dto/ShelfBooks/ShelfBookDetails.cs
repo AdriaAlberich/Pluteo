@@ -1,12 +1,11 @@
-using Pluteo.Domain.Enums;
 using Pluteo.Domain.Models.Entities;
 
 namespace Pluteo.Domain.Models.Dto.ShelfBooks;
 public class ShelfBookDetails
 {
-    public required Guid Id { get; set; }
-    public required string Title { get; set; }
-    public required ShelfBookStatus Status { get; set; }
+    public Guid? Id { get; set; }
+    public string? Title { get; set; }
+    public string? Status { get; set; }
     public int? Order { get; set; }
     public string? ISBN { get; set; }
     public string? Cover { get; set; }
