@@ -174,7 +174,7 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-gray-800 rounded-lg w-full max-w-xl p-3">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-white">{ selectedShelfBook?.title || "Add new book" }</h2>
+          <h2 className="text-xl font-bold text-white">{ selectedShelfBook?.title || t('shelfbookdetails_add_book_title') }</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-white">
             <X className="w-6 h-6" />
           </button>
@@ -185,14 +185,14 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
               <div className="flex justify-center mb-4">
                 <img
                   src={selectedShelfBook.cover}
-                  alt="Book Cover"
+                  alt={t('shelfbookdetails_cover_image')}
                   className="w-32 h-48 object-cover rounded"
                 />
               </div>
               ) : (
                 <div className="flex justify-center mb-4">
                   <div className="w-32 h-48 bg-gray-700 rounded flex items-center justify-center text-gray-400">
-                    No Cover
+                    {t('shelfbookdetails_no_cover_image')}
                   </div>
                 </div>
               )
@@ -202,7 +202,7 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
                 htmlFor="cover"
                 className="cursor-pointer bg-blue-700 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg"
               >
-                Upload Cover
+                {t('shelfbookdetails_upload_cover_image')}
               </label>
               <input
                 id="cover"
@@ -214,16 +214,16 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
               />
             </div>
             <div className="w-full h-[1px] bg-gray-600 my-4"></div>
-            <h3 className="text-lg font-semibold text-white">Book Details</h3>
+            <h3 className="text-lg font-semibold text-white">{t('shelfbookdetails_book_details_title')}</h3>
             <label className="block text-sm text-gray-400 mb-2">
-              Title
+              {t('shelfbookdetails_book_title')}
             </label>
             <input
               id="title"
               name="title"
               type="text"
               className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Title"
+              placeholder={t('shelfbookdetails_book_title_placeholder')}
               value={ selectedShelfBook?.title || '' }
               onChange={(e) =>
                 setSelectedShelfBook({
@@ -233,14 +233,14 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
               }
             />
             <label className="block text-sm text-gray-400 mb-2">
-              ISBN
+              {t('shelfbookdetails_book_isbn')}
             </label>
             <input
               id="isbn"
               name="isbn"
               type="text"
               className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="ISBN"
+              placeholder={t('shelfbookdetails_book_isbn_placeholder')}
               value={ selectedShelfBook?.isbn || '' }
               onChange={(e) =>
                 setSelectedShelfBook({
@@ -250,14 +250,14 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
               }
             />
             <label className="block text-sm text-gray-400 mb-2">
-              Author(s)
+              {t('shelfbookdetails_book_authors')}
             </label>
             <input
               id="author"
               name="author"
               type="text"
               className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Author"
+              placeholder={t('shelfbookdetails_book_authors_placeholder')}
               value={ selectedShelfBook?.authors || '' }
               onChange={(e) =>
                 setSelectedShelfBook({
@@ -267,14 +267,14 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
               }
             />
             <label className="block text-sm text-gray-400 mb-2">
-              Publisher
+              {t('shelfbookdetails_book_publisher')}
             </label>
             <input
               id="publisher"
               name="publisher"
               type="text"
               className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Publisher"
+              placeholder={t('shelfbookdetails_book_publisher_placeholder')}
               value={ selectedShelfBook?.publisher || '' }
               onChange={(e) =>
                 setSelectedShelfBook({
@@ -284,14 +284,14 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
               }
             />
             <label className="block text-sm text-gray-400 mb-2">
-              Publisher Place
+              {t('shelfbookdetails_book_publisher_place')}
             </label>
             <input
               id="publisherPlace"
               name="publisherPlace"
               type="text"
               className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Publisher Place"
+              placeholder={t('shelfbookdetails_book_publisher_place_placeholder')}
               value={ selectedShelfBook?.publishPlace || '' }
               onChange={(e) =>
                 setSelectedShelfBook({
@@ -301,14 +301,14 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
               }
             />
             <label className="block text-sm text-gray-400 mb-2">
-              First Published Year
+              {t('shelfbookdetails_book_first_publish_year')}
             </label>
             <input
               id="firstPublishedYear"
               name="firstPublishedYear"
               type="text"
               className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="First Published Year"
+              placeholder={t('shelfbookdetails_book_first_publish_year_placeholder')}
               value={ selectedShelfBook?.firstPublishYear || '' }
               onChange={(e) =>
                 setSelectedShelfBook({
@@ -318,14 +318,14 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
               }
             />
             <label className="block text-sm text-gray-400 mb-2">
-              Number of Pages
+              {t('shelfbookdetails_book_num_pages')}
             </label>
             <input
               id="numPages"
               name="numPages"
               type="text"
               className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Number of Pages"
+              placeholder={t('shelfbookdetails_book_num_pages_placeholder')}
               value={ selectedShelfBook?.numPages || '' }
               onChange={(e) =>
                 setSelectedShelfBook({
@@ -335,14 +335,14 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
               }
             />
             <label className="block text-sm text-gray-400 mb-2">
-              Available Languages
+              {t('shelfbookdetails_book_available_languages')}
             </label>
             <input
               id="availableLanguages"
               name="availableLanguages"
               type="text"
               className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Available Languages"
+              placeholder={t('shelfbookdetails_book_available_languages_placeholder')}
               value={ selectedShelfBook?.availableLanguages || '' }
               onChange={(e) =>
                 setSelectedShelfBook({
@@ -352,13 +352,13 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
               }
             />
             <label className="block text-sm text-gray-400 mb-2">
-              Notes
+              {t('shelfbookdetails_book_notes')}
             </label>
             <textarea
               id="notes"
               name="notes"
               className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Notes"
+              placeholder={t('shelfbookdetails_book_notes_placeholder')}
               value={ selectedShelfBook?.notes || '' }
               onChange={(e) =>
                 setSelectedShelfBook({
@@ -368,14 +368,14 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
               }
             ></textarea>
             <label className="block text-sm text-gray-400 mb-2">
-              Physical Location
+              {t('shelfbookdetails_book_physical_location')}
             </label>
             <input
               id="physicalLocation"
               name="physicalLocation"
               type="text"
               className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Physical Location"
+              placeholder={t('shelfbookdetails_book_physical_location_placeholder')}
               value={ selectedShelfBook?.physicalLocation || '' }
               onChange={(e) =>
                 setSelectedShelfBook({
@@ -385,7 +385,7 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
               }
             />
             <label className="block text-sm text-gray-400 mb-2">
-              Status
+              {t('shelfbookdetails_book_status')}
             </label>
             <select
               id="status"
@@ -399,13 +399,13 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
                 })
               }
             >
-              <option value="0" disabled>Select Status</option>
-              <option value="1">Unread</option>
-              <option value="2">To Read</option>
-              <option value="3">Reading</option>
-              <option value="4">Read</option>
-              <option value="5">Abandoned</option>
-              <option value="6">Wishlist</option>
+              <option value="0" disabled>{t('shelfbookdetails_book_status_default')}</option>
+              <option value="1">{t('shelfbookdetails_book_status_unread')}</option>
+              <option value="2">{t('shelfbookdetails_book_status_toread')}</option>
+              <option value="3">{t('shelfbookdetails_book_status_reading')}</option>
+              <option value="4">{t('shelfbookdetails_book_status_read')}</option>
+              <option value="5">{t('shelfbookdetails_book_status_abandoned')}</option>
+              <option value="6">{t('shelfbookdetails_book_status_wishlist')}</option>
             </select>
             {!isBookCreation && (
               <div>
@@ -416,21 +416,21 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
                       className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 flex items-center justify-center gap-2"
                     >
                       <Book className="w-4 h-4" />
-                      Manage Loan
+                      {t('shelfbookdetails_book_loan_show_button')}
                     </button>
                   </div>
                 ) : (
                 <div className="p-4 bg-gray-900 rounded-lg">
-                  <h3 className="text-lg font-semibold text-white">Loan Details</h3>
+                  <h3 className="text-lg font-semibold text-white">{t('shelfbookdetails_book_loan_details_title')}</h3>
                   <label className="block text-sm text-gray-400 mb-2">
-                    Loaned To
+                    {t('shelfbookdetails_book_loan_loaned_to')}
                   </label>
                   <input
                     id="library"
                     name="library"
                     type="text"
                     className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Library Name"
+                    placeholder={t('shelfbookdetails_book_loan_loaned_to_placeholder')}
                     value={ selectedShelfBook?.loan?.library || '' }
                     onChange={(e) =>
                       setSelectedShelfBook({
@@ -443,14 +443,14 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
                     }
                   />
                   <label className="block text-sm text-gray-400 mb-2">
-                    Loaned Date
+                    {t('shelfbookdetails_book_loan_due_date')}
                   </label>
                   <input
                     id="dueDate"
                     name="dueDate"
                     type="date"
                     className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Due Date"
+                    placeholder={t('shelfbookdetails_book_loan_due_date_placeholder')}
                     value={
                       selectedShelfBook?.loan?.dueDate
                         ? new Date(selectedShelfBook.loan.dueDate).toISOString().split('T')[0]
@@ -468,7 +468,7 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
                   />
                   <div className="mt-4">
                     <label className="block text-sm text-gray-400 mb-2">
-                      Receive Notifications
+                      {t('shelfbookdetails_book_loan_notify')}
                     </label>
                     <input
                       id="notify"
@@ -494,7 +494,7 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
                         onClick={ handleActivateLoan }
                         className="flex-1 py-2 text-white rounded-lg bg-green-700 hover:bg-green-600 flex items-center justify-center gap-2"
                       >
-                        Activate Loan
+                        {t('shelfbookdetails_book_loan_activate_button')}
                       </button>
                     ) : (
                       <button
@@ -502,7 +502,7 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
                         onClick={ handleDeactivateLoan }
                         className="flex-1 py-2 text-white rounded-lg bg-red-700 hover:bg-red-600 flex items-center justify-center gap-2"
                       >
-                        Deactivate Loan
+                        {t('shelfbookdetails_book_loan_deactivate_button')}
                       </button>
                     )}
                   </div>
@@ -554,7 +554,7 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
               ) : (
                 <>
                   <Save className="w-4 h-4" />
-                  { isBookCreation ? "Add" : "Save" }
+                  { isBookCreation ? t('shelfbookdetails_add_button') : t('shelfbookdetails_save_button') }
                 </>
               )}
             </button>
@@ -566,9 +566,9 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
               >
                 <Trash className="w-4 h-4" />
                 {safeDelete ? (
-                  <span>Confirm Deletion?</span>
+                  <span>{t('shelfbookdetails_delete_button_confirm')}</span>
                 ) : (
-                  <span>Delete</span>
+                  <span>{t('shelfbookdetails_delete_button')}</span>
                 )}
               </button>
             )}
