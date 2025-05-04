@@ -90,6 +90,7 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
         var newShelf = user.Shelves.FirstOrDefault(s => s.Id == newShelfId) ?? throw new ServiceException("NEW_SHELF_NOT_EXISTS");
         var shelfBook = shelf.Books.FirstOrDefault(sb => sb.Id == shelfBookId) ?? throw new ServiceException("SHELF_BOOK_NOT_EXISTS");
 
+        shelfBook.Order = newShelf.Books.Count + 1;
         shelf.Books.Remove(shelfBook);
         newShelf.Books.Add(shelfBook);
 

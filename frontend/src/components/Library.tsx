@@ -68,8 +68,6 @@ export function Library() {
         const shelfIndex = library.shelves.findIndex((shelf) => shelf.id === draggingFromShelfId);
         const fromIndex = library.shelves[shelfIndex].books.findIndex((book) => book.id === draggingBookId);
         const overIndex = library.shelves[shelfIndex].books.findIndex((book) => book.id === overBookId);
-
-        console.log('fromIndex', fromIndex, 'overIndex', overIndex);
         
         // If the book is dropped on itself or the drop target is not found, show the book details
         if (fromIndex === overIndex || overIndex === -1) {
@@ -78,6 +76,12 @@ export function Library() {
           setShowShelfBook(true);
           return;
         }
+
+        const updatedBooks = arrayMove(
+          library.shelves[shelfIndex].books,
+          fromIndex,
+          overIndex
+        );
         
         // Call reorder here
         reOrderShelfBook({
@@ -119,8 +123,7 @@ export function Library() {
       },
       {
         onSuccess: () => {
-          library.shelves = updatedShelves;
-          setLibrary(library);
+          getLibraryRefetch();
         },
       });
     }

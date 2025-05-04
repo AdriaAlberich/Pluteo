@@ -25,18 +25,18 @@ export function ShelfContainer({ shelf, totalShelves }: ShelfContainerProps) {
   const { getLibraryRefetch } = useLibrary();
   const { t } = useTranslation();
   const [ editMode, setEditMode ] = useState(false);
+  const [ safeDelete, setSafeDelete ] = useState(false);
 
   const { setNodeRef } = useDroppable({
     id: shelf.id,
   });
 
   const handleMove = (direction: string) => {
-    console.log(`Move ${shelf.name} ${direction}`);
+    console.log(`Move ${shelf.name} ${direction}, order=${shelf.order} totalShelves=${totalShelves}`);
     if (direction === 'up' && shelf.order > 3) {
-      const newOrder = shelf.order - 1;
       reOrderShelf({
         shelfId: shelf.id,
-        order: newOrder,
+        order: 1,
       }, {
         onSuccess: () => {
           getLibraryRefetch();
@@ -44,10 +44,9 @@ export function ShelfContainer({ shelf, totalShelves }: ShelfContainerProps) {
       });
     }
     else if (direction === 'down' && shelf.order < totalShelves) {
-      const newOrder = shelf.order + 1;
       reOrderShelf({
         shelfId: shelf.id,
-        order: newOrder,
+        order: 2,
       }, {
         onSuccess: () => {
           getLibraryRefetch();
@@ -88,7 +87,14 @@ export function ShelfContainer({ shelf, totalShelves }: ShelfContainerProps) {
   }
 
   const handleDelete = () => {
-    console.log(`Delete ${shelf.name}`);
+    if (!safeDelete) {
+      setSafeDelete(true);
+      setTimeout(() => {
+        setSafeDelete(false);
+      }, 3000);
+      return;
+    }
+
     deleteShelf({
       shelfId: shelf.id,
     }, {
@@ -120,7 +126,7 @@ export function ShelfContainer({ shelf, totalShelves }: ShelfContainerProps) {
           { !(shelf.isDefault || shelf.isReadQueue) && (
             <button
                   onClick={() => {handleEdit()}}
-                  className={'text-white rounded-lg flex items-center justify-center gap-2 hover: bg-gray-700 p-2'}
+                  className={'text-white rounded-lg flex items-center justify-center gap-2 hover: bg-blue-600 p-2'}
                 >
                   <Pencil/>
             </button>
@@ -131,7 +137,7 @@ export function ShelfContainer({ shelf, totalShelves }: ShelfContainerProps) {
             { shelf.order > 3 && (
               <button
                 onClick={() => {handleMove('up')}}
-                className={'text-white rounded-lg flex items-center justify-center gap-2 hover: bg-gray-700 p-2'}
+                className={'text-white rounded-lg flex items-center justify-center gap-2 hover: bg-yellow-600 p-2'}
               >
                 <ArrowUp/>
               </button>
@@ -139,15 +145,15 @@ export function ShelfContainer({ shelf, totalShelves }: ShelfContainerProps) {
             { shelf.order < totalShelves && (
               <button
                 onClick={() => {handleMove('down')}}
-                className={'text-white rounded-lg flex items-center justify-center gap-2 hover: bg-gray-700 p-2'}
+                className={'text-white rounded-lg flex items-center justify-center gap-2 hover: bg-yellow-600 p-2'}
               >
                 <ArrowDown/>
               </button>
             )}
-            <div className="w-[1px] h-10 bg-gray-600"></div>
+            <div className="w-[1px] h-10 bg-gray-500"></div>
             <button
               onClick={() => {handleDelete()}}
-              className={'text-white rounded-lg flex items-center justify-center gap-2 hover: bg-gray-700 p-2'}
+              className={`text-white rounded-lg flex items-center justify-center gap-2 p-2 ${ safeDelete ? 'hover: bg-red-800' : 'hover: bg-red-600' }`}
             >
               <Trash2/>
             </button>
@@ -158,7 +164,7 @@ export function ShelfContainer({ shelf, totalShelves }: ShelfContainerProps) {
         items={shelf.books.map((book) => `${shelf.id}_${book.id}`)}
         strategy={rectSortingStrategy}
       >
-        <div className="flex gap-4 overflow-x-auto">
+        <div className="flex gap-4 overflow-x-auto overflow-y-hidden custom-scrollbar">
           {shelf.books.length > 0 ? (
             shelf.books
             .slice()
@@ -171,7 +177,7 @@ export function ShelfContainer({ shelf, totalShelves }: ShelfContainerProps) {
               />
             ))
           ) : (
-            <div className="flex items-center justify-center w-full h-full min-h-[230px] text-gray-500 text-sm border-2 border-dashed border-gray-600">
+            <div className="flex items-center justify-center w-full h-full min-h-[220px] text-gray-500 text-sm border-2 border-dashed border-gray-600">
               {t('library_shelf_empty')}
             </div>
           )}
