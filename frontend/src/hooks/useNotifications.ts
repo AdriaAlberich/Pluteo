@@ -3,7 +3,7 @@ import { notificationsApi } from '../services/api';
 import { useAppStore } from '../context/appStore';
 
 export function useNotifications() {
-  const { isAuthenticated, setNotifications } = useAppStore();
+  const { isAuthenticated, setNotifications, setNotificationsUnreadCount } = useAppStore();
 
   const getNotifications = useQuery({
     queryKey: ['notifications'],
@@ -28,11 +28,16 @@ export function useNotifications() {
   });
 
   const clearAll = useMutation({
-    mutationFn: notificationsApi.clearAll
+    mutationFn: notificationsApi.clearAll,
+    onSuccess: () => {
+      setNotifications([]);
+      setNotificationsUnreadCount(0);
+    }
   });
 
   return {
     getNotifications: getNotifications.data,
+    getNotificationsRefetch: getNotifications.refetch,
     markAsRead: markAsRead.mutate,
     deleteOne: deleteOne.mutate,
     clearAll: clearAll.mutate,

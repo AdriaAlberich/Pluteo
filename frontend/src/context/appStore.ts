@@ -6,6 +6,8 @@ interface AppState {
   setIsAuthenticated: (auth: boolean) => void;
   notifications: any[];
   setNotifications: (notifications: any[]) => void;
+  notificationsUnreadCount: number;
+  setNotificationsUnreadCount: (count: number) => void;
   userSettings: any;
   setUserSettings: (settings: any) => void;
   library: LibraryOverview;
@@ -112,6 +114,8 @@ export const useAppStore = create<AppState>((set) => ({
   setIsAuthenticated: (auth) => set({ isAuthenticated: auth }),
   notifications: [],
   setNotifications: (notifications) => set({ notifications }),
+  notificationsUnreadCount: 0,
+  setNotificationsUnreadCount: (count) => set({ notificationsUnreadCount: count }),
   userSettings: {} as UserSettings,
   setUserSettings: (settings) => {
     set({ userSettings: settings })

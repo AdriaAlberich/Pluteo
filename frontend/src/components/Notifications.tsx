@@ -1,31 +1,38 @@
 import { useEffect, useState, useRef } from 'react';
 import { Bell } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { ca, es } from 'date-fns/locale';
 import { useAppStore } from '../context/appStore';
 import { useNotifications } from '../hooks/useNotifications';
 import { useTranslation } from 'react-i18next';
 
+
 export function Notifications() {
   const [isOpen, setIsOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const { notifications, setNotifications } = useAppStore();
-  const { markAsRead, clearAll } = useNotifications();
-  const { t } = useTranslation();
+  const { notifications, setNotifications, notificationsUnreadCount, setNotificationsUnreadCount } = useAppStore();
+  const { markAsRead, clearAll, getNotificationsRefetch } = useNotifications();
+  const { t, i18n } = useTranslation();
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (notifications) {
       const unread = notifications.filter((notification: { markedAsRead: any; }) => !notification.markedAsRead);
-      setUnreadCount(unread.length);
+      setNotificationsUnreadCount(unread.length);
     }
   }, [notifications, setNotifications]);
 
   const handleNotificationClick = (notificationId: string) => {
-    const notification = notifications.find((n) => n.id === notificationId);
+    const notification = notifications.find((n) => n.notificationId === notificationId);
     if (notification) {
       notification.markedAsRead = true;
     }
-    markAsRead(notificationId);
+    markAsRead(
+      notificationId,
+      {
+        onSuccess: () => {
+          getNotificationsRefetch();
+        },
+      });
   };
 
   useEffect(() => {
@@ -42,10 +49,7 @@ export function Notifications() {
   }, []);
 
   const handleClearAll = () => {
-    setIsOpen(false);
-    setUnreadCount(0);
-    setNotifications([]);
-    clearAll;
+    clearAll();
   };
 
   return (
@@ -55,9 +59,9 @@ export function Notifications() {
         className="relative p-2 text-gray-400 hover:text-white transition-colors"
       >
         <Bell className="w-6 h-6" />
-        {unreadCount > 0 && (
+        {notificationsUnreadCount > 0 && (
           <span className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-            {unreadCount}
+            {notificationsUnreadCount}
           </span>
         )}
       </button>
@@ -68,7 +72,7 @@ export function Notifications() {
             <h3 className="text-lg font-semibold">{t('notifications_title')}</h3>
             {notifications.length > 0 && (
               <button
-                onClick={handleClearAll}
+                onClick={ handleClearAll }
                 className="text-sm text-gray-400 hover:text-white"
               >
                 {t('notifications_clear_all')}
@@ -76,7 +80,7 @@ export function Notifications() {
             )}
           </div>
 
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-96 overflow-y-auto custom-scrollbar">
             {notifications.length === 0 ? (
               <div className="p-4 text-center text-gray-400">
                 {t('notifications_no_notifications')}
@@ -84,19 +88,18 @@ export function Notifications() {
             ) : (
                 notifications.map((notification) => (
                 <div
-                  key={notification.id}
-                  onClick={() => handleNotificationClick(notification.id)}
-                  className={`p-4 border-b border-gray-700 cursor-pointer hover:bg-gray-700 transition-colors ${
-                    !notification.markedAsRead ? 'bg-gray-700/50' : ''
-                  }`}
+                  key={notification.notificationId}
+                  onClick={() => handleNotificationClick(notification.notificationId)}
+                  className={`p-4 border-b border-gray-700 cursor-pointer hover:bg-gray-700 transition-colors ${!notification.markedAsRead ? 'bg-gray-700' : ''}`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 rounded-full mt-2 bg-blue-500"/>
+                    <div className={`w-2 h-2 rounded-full mt-2 ${!notification.markedAsRead ? 'bg-blue-500' : 'bg-grey-700'}`}/>
                     <div className="flex-1">
                       <p className="text-sm">{notification.content}</p>
                       <p className="text-xs text-gray-400 mt-1">
                         {formatDistanceToNow(notification.timestamp, {
                           addSuffix: true,
+                          locale: i18n.language === 'ca' ? ca : i18n.language === 'es' ? es : undefined
                         })}
                       </p>
                     </div>

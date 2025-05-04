@@ -128,7 +128,7 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
             NumPages = book.NumPages ?? 0,
             PhysicalLocation = book.PhysicalLocation ?? string.Empty,
             Notes = book.Notes ?? string.Empty,
-            Status = book.Status ?? ShelfBookStatus.None,
+            Status = Enum.Parse<ShelfBookStatus>(book.Status ?? string.Empty, true),
             Order = 0
         };
 

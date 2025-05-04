@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X, Save, Trash, Book, Info, CircleAlert } from 'lucide-react';
+import { X, Save, Trash, Hand, Book, Info, CircleAlert } from 'lucide-react';
 import { ShelfBook, useAppStore } from '../context/appStore';
 import { useShelfBooks } from '../hooks/useShelfBooks';
 import { useLibrary } from '../hooks/useLibrary';
@@ -15,7 +15,13 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
   const [ showLoanForm, setShowLoanForm ] = useState(false);
   const [ safeDelete, setSafeDelete ] = useState(false);
   const [ isShelfBookDetailsError, setShelfBookDetailsError ] = useState(false);
+  const [ isShelfBookDetailsTitleError, setShelfBookDetailsTitleError ] = useState(false);
   const [ isShelfBookDetailsSuccess, setShelfBookDetailsSuccess ] = useState(false);
+  const [ loanForm, setLoanForm ] = useState({
+    library: selectedShelfBook?.loan?.library || '',
+    dueDate: selectedShelfBook?.loan?.dueDate || new Date(),
+    notify: selectedShelfBook?.loan?.notify || false,
+  });
   const { t } = useTranslation();
 
   const { 
@@ -53,13 +59,38 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
 
   const handleBookSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!selectedShelfBook) return;
+
+    if (selectedShelfBook === undefined || (selectedShelfBook.title === undefined || selectedShelfBook.title === '')) {
+      setShelfBookDetailsError(true);
+      setShelfBookDetailsTitleError(true);
+      setTimeout(() => {
+        setShelfBookDetailsError(false);
+        setShelfBookDetailsTitleError(false);
+      }
+      , 5000);
+      return;
+    } else {
+      setShelfBookDetailsError(false);
+      setShelfBookDetailsTitleError(false);
+    }
+
+    if(selectedShelfBook.status === undefined)
+      selectedShelfBook.status = '0';
+
     if (!isBookCreation) {
       updateShelfBook({
         shelfId: selectedShelfBookShelfId!,
         shelfBookId: selectedShelfBookId!,
         shelfBook: selectedShelfBook,
+      },
+      {
+        onSuccess: () => {
+          getShelfBookDetailsRefetch();
+          setShelfBookDetailsSuccess(true);
+          setTimeout(() => {
+            setShelfBookDetailsSuccess(false);
+          }, 5000);
+        }
       });
     } else {
       addBookManually({
@@ -88,8 +119,13 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
       deleteShelfBook({
         shelfId: selectedShelfBookShelfId!,
         shelfBookId: selectedShelfBookId!,
+      },
+      {
+        onSuccess: () => {
+          getLibraryRefetch();
+          onClose();
+        }
       });
-      onClose();
     }
   }
 
@@ -117,7 +153,16 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
       activateShelfBookLoan({
         shelfId: selectedShelfBookShelfId!,
         shelfBookId: selectedShelfBookId!,
-        data: selectedShelfBook.loan!,
+        data: {
+          library: loanForm.library,
+          dueDate: loanForm.dueDate,
+          notify: loanForm.notify,
+        }
+      },
+      {
+        onSuccess: () => {
+          getShelfBookDetailsRefetch();
+        }
       });
     }
   }
@@ -127,6 +172,15 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
       deactivateShelfBookLoan({
         shelfId: selectedShelfBookShelfId!,
         shelfBookId: selectedShelfBookId!
+      },
+      {
+        onSuccess: () => {
+          loanForm.library = '';
+          loanForm.dueDate = new Date();
+          loanForm.notify = false;
+          setLoanForm(loanForm);
+          getShelfBookDetailsRefetch();
+        }
       });
     }
   }
@@ -180,7 +234,7 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
           </button>
         </div>
         <form onSubmit={ handleBookSubmit } className="space-y-4">
-          <div className="space-y-6 p-2 max-h-[80vh] overflow-y-auto custom-scrollbar">
+          <div className="space-y-6 p-2 max-h-[70vh] overflow-y-auto custom-scrollbar">
             {selectedShelfBook?.cover ? (
               <div className="flex justify-center mb-4">
                 <img
@@ -210,11 +264,34 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={handleImageUpload}
+                onChange={ handleImageUpload }
               />
             </div>
             <div className="w-full h-[1px] bg-gray-600 my-4"></div>
             <h3 className="text-lg font-semibold text-white">{t('shelfbookdetails_book_details_title')}</h3>
+            <label className="block text-sm text-gray-400 mb-2">
+              {t('shelfbookdetails_book_status')}
+            </label>
+            <select
+              id="status"
+              name="status"
+              className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              value={ selectedShelfBook?.status || '' }
+              onChange={(e) =>
+                setSelectedShelfBook({
+                  ...selectedShelfBook!,
+                  status: e.target.value,
+                })
+              }
+            >
+              <option value="0" disabled>{t('shelfbookdetails_book_status_default')}</option>
+              <option value="1">{t('shelfbookdetails_book_status_unread')}</option>
+              <option value="2">{t('shelfbookdetails_book_status_toread')}</option>
+              <option value="3">{t('shelfbookdetails_book_status_reading')}</option>
+              <option value="4">{t('shelfbookdetails_book_status_read')}</option>
+              <option value="5">{t('shelfbookdetails_book_status_abandoned')}</option>
+              <option value="6">{t('shelfbookdetails_book_status_wishlist')}</option>
+            </select>
             <label className="block text-sm text-gray-400 mb-2">
               {t('shelfbookdetails_book_title')}
             </label>
@@ -330,7 +407,7 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
               onChange={(e) =>
                 setSelectedShelfBook({
                   ...selectedShelfBook!,
-                  title: e.target.value,
+                  numPages: e.target.value,
                 })
               }
             />
@@ -384,29 +461,6 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
                 })
               }
             />
-            <label className="block text-sm text-gray-400 mb-2">
-              {t('shelfbookdetails_book_status')}
-            </label>
-            <select
-              id="status"
-              name="status"
-              className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              value={ selectedShelfBook?.status || '' }
-              onChange={(e) =>
-                setSelectedShelfBook({
-                  ...selectedShelfBook!,
-                  status: e.target.value,
-                })
-              }
-            >
-              <option value="0" disabled>{t('shelfbookdetails_book_status_default')}</option>
-              <option value="1">{t('shelfbookdetails_book_status_unread')}</option>
-              <option value="2">{t('shelfbookdetails_book_status_toread')}</option>
-              <option value="3">{t('shelfbookdetails_book_status_reading')}</option>
-              <option value="4">{t('shelfbookdetails_book_status_read')}</option>
-              <option value="5">{t('shelfbookdetails_book_status_abandoned')}</option>
-              <option value="6">{t('shelfbookdetails_book_status_wishlist')}</option>
-            </select>
             {!isBookCreation && (
               <div>
                 {!showLoanForm ? (
@@ -431,14 +485,11 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
                     type="text"
                     className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder={t('shelfbookdetails_book_loan_loaned_to_placeholder')}
-                    value={ selectedShelfBook?.loan?.library || '' }
+                    defaultValue={ selectedShelfBook?.loan?.library || '' }
                     onChange={(e) =>
-                      setSelectedShelfBook({
-                        ...selectedShelfBook!,
-                        loan: {
-                          ...selectedShelfBook!.loan!,
-                          library: e.target.value,
-                        },
+                      setLoanForm({
+                        ...loanForm,
+                        library: e.target.value,
                       })
                     }
                   />
@@ -451,18 +502,15 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
                     type="date"
                     className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder={t('shelfbookdetails_book_loan_due_date_placeholder')}
-                    value={
+                    defaultValue={
                       selectedShelfBook?.loan?.dueDate
                         ? new Date(selectedShelfBook.loan.dueDate).toISOString().split('T')[0]
                         : ''
                     }
                     onChange={(e) =>
-                      setSelectedShelfBook({
-                        ...selectedShelfBook!,
-                        loan: {
-                          ...selectedShelfBook!.loan!,
-                          dueDate: new Date(e.target.value),
-                        },
+                      setLoanForm({
+                        ...loanForm,
+                        dueDate: new Date(e.target.value),
                       })
                     }
                   />
@@ -475,14 +523,11 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
                       name="notify"
                       type="checkbox"
                       className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                      checked={ selectedShelfBook?.loan?.notify }
+                      defaultChecked={ selectedShelfBook?.loan?.notify }
                       onChange={(e) =>
-                        setSelectedShelfBook({
-                          ...selectedShelfBook!,
-                          loan: {
-                            ...selectedShelfBook!.loan!,
-                            notify: e.target.checked,
-                          },
+                        setLoanForm({
+                          ...loanForm,
+                          notify: e.target.checked,
                         })
                       }
                     />
@@ -494,7 +539,20 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
                         onClick={ handleActivateLoan }
                         className="flex-1 py-2 text-white rounded-lg bg-green-700 hover:bg-green-600 flex items-center justify-center gap-2"
                       >
-                        {t('shelfbookdetails_book_loan_activate_button')}
+                        { isActivateLoanLoading ? (
+                          <>
+                            <svg aria-hidden="true" className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                              <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+                            </svg>
+                            {t('shelfbookdetails_book_loan_activate_button_loading')}
+                          </>
+                        ) : (
+                          <>
+                            <Hand className="w-4 h-4" />
+                            {t('shelfbookdetails_book_loan_activate_button')}
+                          </>
+                        )}
                       </button>
                     ) : (
                       <button
@@ -502,7 +560,20 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
                         onClick={ handleDeactivateLoan }
                         className="flex-1 py-2 text-white rounded-lg bg-red-700 hover:bg-red-600 flex items-center justify-center gap-2"
                       >
-                        {t('shelfbookdetails_book_loan_deactivate_button')}
+                        { isDeactivateLoanLoading ? (
+                          <>
+                            <svg aria-hidden="true" className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                              <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+                            </svg>
+                            {t('shelfbookdetails_book_loan_deactivate_button_loading')}
+                          </>
+                        ) : (
+                          <>
+                            <CircleAlert className="w-4 h-4" />
+                            {t('shelfbookdetails_book_loan_deactivate_button')}
+                          </>
+                        )}
                       </button>
                     )}
                   </div>
@@ -512,18 +583,6 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
             )}
           </div>
           <div className="flex gap-3">
-            {isShelfBookDetailsSuccess && (
-                <div className="flex items-center bg-blue-500 text-white text-sm font-bold px-4 py-3" role="alert">
-                  <Info className="w-4 h-4 mr-2" />
-                  <p>{ t('userprofile_change_password_success') }</p>
-                </div>
-            )}
-            {isShelfBookDetailsError && (
-              <div className="flex items-center bg-red-500 text-white text-sm font-bold px-4 py-3" role="alert">
-                <CircleAlert className="w-4 h-4 mr-2" />
-                <p>{ handleErrors() }</p>
-              </div>
-            )}
             <button
               type="submit"
               onClick={ handleBookSubmit }
@@ -531,26 +590,13 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
               disabled={isUpdateLoading || isAddBookManuallyLoading}
             >
               {(isUpdateLoading || isAddBookManuallyLoading) ? (
-                <svg
-                  className="animate-spin h-5 w-5 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v8H4z"
-                  ></path>
-                </svg>
+                <>
+                  <svg aria-hidden="true" className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                    <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+                  </svg>
+                  { isBookCreation ? t('shelfbookdetails_add_button_loading') : t('shelfbookdetails_save_button_loading') }
+                </>
               ) : (
                 <>
                   <Save className="w-4 h-4" />
@@ -573,6 +619,18 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
               </button>
             )}
           </div>
+          {isShelfBookDetailsSuccess && (
+            <div className="flex items-center bg-blue-500 text-white text-sm font-bold px-4 py-3" role="alert">
+              <Info className="w-4 h-4 mr-2" />
+              <p>{ t('shelfbookdetails_success_action') }</p>
+            </div>
+          )}
+          {isShelfBookDetailsError && (
+            <div className="flex items-center bg-red-500 text-white text-sm font-bold px-4 py-3" role="alert">
+              <CircleAlert className="w-4 h-4 mr-2" />
+              <p>{ isShelfBookDetailsTitleError ? t('shelfbookdetails_title_error') : handleErrors() }</p>
+            </div>
+          )}
         </form>
       </div>
     </div>

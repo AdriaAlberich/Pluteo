@@ -61,7 +61,7 @@ export function Library() {
     console.log('overBookId', overBookId, 'draggingBookId', draggingBookId, 'draggingFromShelfId', draggingFromShelfId, 'draggingOverShelfId', draggingOverShelfId);
 
     if (draggingFromShelfId === draggingOverShelfId) {
-      if(filterTerm === undefined || filterTerm === '') {
+      if(filterTerm === undefined || filterTerm === 'all') {
         // Reorder books within the same shelf
         const shelfIndex = library.shelves.findIndex((shelf) => shelf.id === draggingFromShelfId);
         const fromIndex = library.shelves[shelfIndex].books.findIndex((book) => book.id === draggingBookId);
@@ -131,6 +131,7 @@ export function Library() {
 
   const handleCreateShelf = () => {
     const shelfName = (document.getElementById('shelfName') as HTMLInputElement).value;
+    (document.getElementById('shelfName') as HTMLInputElement).value = '';
     if (shelfName.trim() === '') {
       alert(t('library_shelf_create_error'));
       return;
@@ -187,7 +188,7 @@ export function Library() {
 
   const handleFilterClear = () => {
     (document.getElementById('filter') as HTMLInputElement).value = '';
-    setFilterTerm('');
+    setFilterTerm('all');
     getLibraryRefetch();
   }
 

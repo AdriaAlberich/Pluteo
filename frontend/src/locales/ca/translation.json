@@ -46,7 +46,7 @@
 
     "notifications_title": "Notificacions",
     "notifications_clear_all": "Esborrar tot",
-    "notifications_no_notifications": "No hi ha notificacions",
+    "notifications_no_notifications": "No tens notificacions",
 
     "userprofile_title": "Perfil d'usuari",
     "userprofile_info_title": "Informació",
@@ -132,9 +132,16 @@
     "shelfbookdetails_book_loan_due_date_placeholder": "Data de devolució del llibre",
     "shelfbookdetails_book_loan_notify": "Rebre notificacions del préstec",
     "shelfbookdetails_book_loan_activate_button": "Activar préstec",
+    "shelfbookdetails_book_loan_activate_button_loading": "Activant préstec...",
     "shelfbookdetails_book_loan_deactivate_button": "Desactivar préstec",
+    "shelfbookdetails_book_loan_deactivate_button_loading": "Desactivant préstec...",
     "shelfbookdetails_add_button": "Afegir llibre",
+    "shelfbookdetails_add_button_loading": "Afegint llibre...",
     "shelfbookdetails_save_button": "Desar llibre",
+    "shelfbookdetails_save_button_loading": "Desant llibre...",
     "shelfbookdetails_delete_button": "Esborrar llibre",
-    "shelfbookdetails_delete_button_confirm": "Confirma"
+    "shelfbookdetails_delete_button_confirm": "Confirma",
+    "shelfbookdetails_delete_button_loading": "Esborrant...",
+    "shelfbookdetails_success_action": "Aplicats els canvis amb èxit",
+    "shelfbookdetails_title_error": "El títol és obligatori"
 }
