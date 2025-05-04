@@ -3,19 +3,30 @@ import { libraryApi } from '../services/api';
 import { LibraryOverview, ShelfBook, useAppStore } from '../context/appStore';
 
 export function useLibrary() {
-  const { isAuthenticated, setLibrary, searchTerm, searchPageNumber, searchPageSize, external, setSearchResults, setSearchTotalPages, setSearchTotalResults, setSearchPageNumber } = useAppStore();
+  const { 
+    isAuthenticated, 
+    setLibrary, 
+    searchTerm, 
+    searchPageNumber, 
+    searchPageSize, 
+    external, 
+    setSearchResults, 
+    setSearchTotalPages, 
+    setSearchTotalResults, 
+    setSearchPageNumber,
+    filterTerm,
+    setFilterTerm
+  } = useAppStore();
 
   const getLibrary = useQuery<LibraryOverview>({
-    queryKey: ['library', { filterTerm: 'all' }],
-    queryFn: async ({ queryKey }) => {
-      const { filterTerm } = queryKey[1] as { filterTerm: string };
+    queryKey: ['library', { filterTerm }],
+    queryFn: async () => {
       const response = await libraryApi.getLibrary(filterTerm);
       setLibrary(response.data);
       return response.data;
     },
     enabled: isAuthenticated,
-    retry: 1,
-    retryDelay: 1000
+    retry: false
   });
 
   const searchBooks = useQuery({

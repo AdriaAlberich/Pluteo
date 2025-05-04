@@ -27,7 +27,16 @@ export function Library() {
   const [ showShelfBook, setShowShelfBook ] = useState(false);
   const [ showSearch, setShowSearch ] = useState(false);
   
-  const { library, setLibrary, setSelectedShelfBookShelfId, setSelectedShelfBookId, setSelectedShelfBook } = useAppStore();
+  const { 
+    library, 
+    setLibrary, 
+    setSelectedShelfBookShelfId, 
+    setSelectedShelfBookId, 
+    setSelectedShelfBook,
+    filterTerm,
+    setFilterTerm,
+  } = useAppStore();
+
   const { getLibrary, getLibraryRefetch } = useLibrary();
   const { reOrderShelfBook, reOrderShelfBookError, moveShelfBook, moveShelfBookError } = useShelfBooks();
   const { createShelf } = useShelves();
@@ -52,37 +61,39 @@ export function Library() {
     console.log('overBookId', overBookId, 'draggingBookId', draggingBookId, 'draggingFromShelfId', draggingFromShelfId, 'draggingOverShelfId', draggingOverShelfId);
 
     if (draggingFromShelfId === draggingOverShelfId) {
-      // Reorder books within the same shelf
-      const shelfIndex = library.shelves.findIndex((shelf) => shelf.id === draggingFromShelfId);
-      const fromIndex = library.shelves[shelfIndex].books.findIndex((book) => book.id === draggingBookId);
-      const overIndex = library.shelves[shelfIndex].books.findIndex((book) => book.id === overBookId);
-      
-      // If the book is dropped on itself or the drop target is not found, show the book details
-      if (fromIndex === overIndex || overIndex === -1) {
-        setSelectedShelfBookShelfId(draggingFromShelfId);
-        setSelectedShelfBookId(draggingBookId);
-        setShowShelfBook(true);
-        return;
-      }
-
-      const updatedBooks = arrayMove(
-        library.shelves[shelfIndex].books,
-        fromIndex,
-        overIndex
-      );
-      
-      // Call reorder here
-      reOrderShelfBook({
-        shelfId: draggingFromShelfId,
-        shelfBookId: draggingBookId,
-        order: overIndex,
-      },
-      {
-        onSuccess: () => {
-          library.shelves[shelfIndex].books = updatedBooks;
-          setLibrary(library);
+      if(filterTerm === undefined || filterTerm === '') {
+        // Reorder books within the same shelf
+        const shelfIndex = library.shelves.findIndex((shelf) => shelf.id === draggingFromShelfId);
+        const fromIndex = library.shelves[shelfIndex].books.findIndex((book) => book.id === draggingBookId);
+        const overIndex = library.shelves[shelfIndex].books.findIndex((book) => book.id === overBookId);
+        
+        // If the book is dropped on itself or the drop target is not found, show the book details
+        if (fromIndex === overIndex || overIndex === -1) {
+          setSelectedShelfBookShelfId(draggingFromShelfId);
+          setSelectedShelfBookId(draggingBookId);
+          setShowShelfBook(true);
+          return;
         }
-      });
+
+        const updatedBooks = arrayMove(
+          library.shelves[shelfIndex].books,
+          fromIndex,
+          overIndex
+        );
+        
+        // Call reorder here
+        reOrderShelfBook({
+          shelfId: draggingFromShelfId,
+          shelfBookId: draggingBookId,
+          order: overIndex,
+        },
+        {
+          onSuccess: () => {
+            library.shelves[shelfIndex].books = updatedBooks;
+            setLibrary(library);
+          }
+        });
+      }
     } else {
       // Move book to a different shelf
       const sourceShelfIndex = library.shelves.findIndex((shelf) => shelf.id === draggingFromShelfId);
@@ -163,6 +174,23 @@ export function Library() {
     setShowSearch(true);
   }
 
+  const handleFilter = () => {
+    const filterValue = (document.getElementById('filter') as HTMLInputElement).value;
+    if (filterValue.trim() === '') {
+      alert(t('library_book_filter_error'));
+      return;
+    }
+
+    setFilterTerm(filterValue.trim().replace(' ', '+'));
+    getLibraryRefetch();
+  }
+
+  const handleFilterClear = () => {
+    (document.getElementById('filter') as HTMLInputElement).value = '';
+    setFilterTerm('');
+    getLibraryRefetch();
+  }
+
   return (
     <>
       <div className="flex flex-col h-full w-full p-4 bg-gray-900 text-white">
@@ -184,11 +212,22 @@ export function Library() {
           <div className="flex gap-4 mb-4">
             <input
               type="text"
+              name="filter"
+              id="filter"
               placeholder={t('library_book_filter_placeholder')}
               className="appearance-none rounded-lg relative block px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
-            <button className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
+            <button 
+              className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
+              onClick={() => {handleFilter()}}
+            >
               {t('library_book_filter_button')}
+            </button>
+            <button 
+              className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
+              onClick={() => {handleFilterClear()}}
+            >
+              {t('library_book_filter_button_clear')}
             </button>
           </div>
         </div>

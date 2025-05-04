@@ -75,6 +75,7 @@
     "library_book_search_button": "Afegir llibre existent",
     "library_book_filter_placeholder": "Filtrar llibres",
     "library_book_filter_button": "Filtrar",
+    "library_book_filter_button_clear": "Esborrar filtre",
 
     "booksearch_title": "Afegir llibre existent",
     "booksearch_title_search": "Cercar",

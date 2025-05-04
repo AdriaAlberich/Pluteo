@@ -30,6 +30,8 @@ interface AppState {
   setSearchTotalPages: (totalPages: number) => void;
   searchResults: BookSearchResult | undefined;
   setSearchResults: (results: BookSearchResult | undefined) => void;
+  filterTerm: string;
+  setFilterTerm: (term: string) => void;
 }
 
 export interface UserSettings {
@@ -141,4 +143,6 @@ export const useAppStore = create<AppState>((set) => ({
   setSearchTotalPages: (totalPages) => set({ searchTotalPages: totalPages }),
   searchResults: undefined,
   setSearchResults: (results) => set({ searchResults: results }),
+  filterTerm: 'all',
+  setFilterTerm: (term) => set({ filterTerm: term }),
 }));

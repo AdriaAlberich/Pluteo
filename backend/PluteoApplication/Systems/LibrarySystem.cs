@@ -1,3 +1,4 @@
+using System.Text;
 using Pluteo.Application.Services;
 using Pluteo.Domain.Enums;
 using Pluteo.Domain.Exceptions;
@@ -149,13 +150,17 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
         _logger.Information("Shelf book {Name} ({Id}) has been added to shelf {ShelfName} ({ShelfId}) for user {Email} ({Id}).", book.Title, shelfBook.Id, shelf.Name, shelf.Id, user.Email, user.Id);
     }
 
-    public async Task<LibraryOverview> GetLibrary(string email, string filterTerm)
+    public async Task<LibraryOverview> GetLibrary(string email, string? filterTerm)
     {
         var user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_EXISTS");
 
-        if(filterTerm == "all")
+        if(filterTerm == null || filterTerm == "all")
         {
             filterTerm = string.Empty;
+        }
+        else
+        {
+            filterTerm = Uri.UnescapeDataString(filterTerm);
         }
 
         List<string> filterTerms = string.IsNullOrWhiteSpace(filterTerm)

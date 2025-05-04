@@ -89,8 +89,10 @@ export const notificationsApi = {
 
 // Library related endpoints
 export const libraryApi = {
-  getLibrary: (filterTerm: string) =>
-    api.get(`/library/${encodeURIComponent(filterTerm)}`),
+  getLibrary: (filterTerm: string) => {
+    const query = filterTerm ? `?filter=${encodeURIComponent(filterTerm)}` : '';
+    return api.get(`/library${query}`);
+  },
   searchBooks: (searchTerm: string, pageNumber: number, pageSize: number, external: boolean) =>
     api.get(`/library/search/${encodeURIComponent(searchTerm)}/${pageNumber}/${pageSize}/${external}`),
   addBook: (isbn: string, shelfId: string | undefined) =>
