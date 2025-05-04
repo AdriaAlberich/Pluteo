@@ -1,4 +1,4 @@
-import { useDraggable } from '@dnd-kit/core';
+import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { ShelfBookPreview } from '../context/appStore';
 import { useState } from 'react';
 
@@ -8,11 +8,15 @@ interface SortableBookProps {
 }
 
 export function SortableBook({ id, book }: SortableBookProps) {
-  const { attributes, listeners, setNodeRef } = useDraggable({ id });
+  const { attributes, listeners, setNodeRef: setDraggableRef } = useDraggable({ id });
+  const { setNodeRef: setDroppableRef } = useDroppable({ id });
 
   return (
     <div
-      ref={setNodeRef}
+      ref={(node) => {
+        setDraggableRef(node);
+        setDroppableRef(node);
+      }}
       {...attributes}
       {...listeners}
       className="flex flex-col items-center bg-gray-700 p-4 rounded shadow-lg"

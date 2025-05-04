@@ -56,16 +56,20 @@ export function Library() {
 
     if (!over) return;
 
+    console.log('over', over, 'active', active);
+
     const [draggingFromShelfId, draggingBookId] = String(active.id).split('_');
     const [draggingOverShelfId, overBookId] = String(over.id).split('_');
     console.log('overBookId', overBookId, 'draggingBookId', draggingBookId, 'draggingFromShelfId', draggingFromShelfId, 'draggingOverShelfId', draggingOverShelfId);
 
     if (draggingFromShelfId === draggingOverShelfId) {
-      if(filterTerm === undefined || filterTerm === 'all') {
+      if(filterTerm === undefined || filterTerm === '' || filterTerm === 'all') {
         // Reorder books within the same shelf
         const shelfIndex = library.shelves.findIndex((shelf) => shelf.id === draggingFromShelfId);
         const fromIndex = library.shelves[shelfIndex].books.findIndex((book) => book.id === draggingBookId);
         const overIndex = library.shelves[shelfIndex].books.findIndex((book) => book.id === overBookId);
+
+        console.log('fromIndex', fromIndex, 'overIndex', overIndex);
         
         // If the book is dropped on itself or the drop target is not found, show the book details
         if (fromIndex === overIndex || overIndex === -1) {
@@ -74,23 +78,16 @@ export function Library() {
           setShowShelfBook(true);
           return;
         }
-
-        const updatedBooks = arrayMove(
-          library.shelves[shelfIndex].books,
-          fromIndex,
-          overIndex
-        );
         
         // Call reorder here
         reOrderShelfBook({
           shelfId: draggingFromShelfId,
           shelfBookId: draggingBookId,
-          order: overIndex,
+          order: overIndex+1,
         },
         {
           onSuccess: () => {
-            library.shelves[shelfIndex].books = updatedBooks;
-            setLibrary(library);
+            getLibraryRefetch();
           }
         });
       }
@@ -175,26 +172,6 @@ export function Library() {
     setShowSearch(true);
   }
 
-  const handleFilter = () => {
-    const filterValue = (document.getElementById('filter') as HTMLInputElement).value
-      .trim()
-      .replace(/\s+/g, '+');
-
-    if (filterValue.trim() === '') {
-      alert(t('library_book_filter_error'));
-      return;
-    }
-
-    setFilterTerm(filterValue);
-    getLibraryRefetch();
-  }
-
-  const handleFilterClear = () => {
-    (document.getElementById('filter') as HTMLInputElement).value = '';
-    setFilterTerm('all');
-    getLibraryRefetch();
-  }
-
   return (
     <>
       <div className="flex flex-col h-full w-full p-4 bg-gray-900 text-white">
@@ -220,19 +197,8 @@ export function Library() {
               id="filter"
               placeholder={t('library_book_filter_placeholder')}
               className="appearance-none rounded-lg relative block px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              onChange={(e) => setFilterTerm(e.target.value)}
             />
-            <button 
-              className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
-              onClick={() => {handleFilter()}}
-            >
-              {t('library_book_filter_button')}
-            </button>
-            <button 
-              className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
-              onClick={() => {handleFilterClear()}}
-            >
-              {t('library_book_filter_button_clear')}
-            </button>
           </div>
         </div>
         <h2 className="text-xl font-bold mb-4">{t('library_shelves_title')}</h2>
