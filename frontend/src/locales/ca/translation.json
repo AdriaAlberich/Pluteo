@@ -65,11 +65,12 @@
     "userprofile_change_password_cancel_button": "Cancel·lar",
     "userprofile_change_password_success": "La contrasenya s'ha canviat amb èxit",
 
+    "library_shelves_title": "Prestatges",
     "library_shelf_empty": "Arrossega un llibre aquí",
     "library_shelf_default_title": "Sense classificar",
     "library_shelf_read_queue_title": "Llista de lectura",
     "library_shelf_create_placeholder": "Nom prestatge",
-    "library_shelf_create_button": "Crear prestatge",
+    "library_shelf_create_button": "Afegir prestatge",
     "library_book_add_button": "Afegir llibre nou",
     "library_book_search_button": "Afegir llibre existent",
     "library_book_filter_placeholder": "Filtrar llibres",

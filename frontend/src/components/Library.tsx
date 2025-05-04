@@ -19,7 +19,6 @@ import { useLibrary } from '../hooks/useLibrary';
 import { useShelfBooks } from '../hooks/useShelfBooks';
 import { useShelves } from '../hooks/useShelves';
 import { t } from 'i18next';
-import { create } from 'zustand';
 import { ShelfBookDetails } from './ShelfBookDetails';
 import { BookSearch } from './BookSearch';
 
@@ -167,45 +166,33 @@ export function Library() {
   return (
     <>
       <div className="flex flex-col h-full w-full p-4 bg-gray-900 text-white">
-        <div className="flex items-center mb-4 gap-4">
-          <input
-            type="text"
-            name="shelfName"
-            id="shelfName"
-            placeholder={t('library_shelf_create_placeholder')}
-            className="appearance-none rounded-lg relative block px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          />
-          <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            onClick={() => {handleCreateShelf()}}
-          >
-            {t('library_shelf_create_button')}
-          </button>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex gap-4 mb-4">
+            <button 
+              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+              onClick={() => {handleCreateShelfBook()}}
+            >
+              {t('library_book_add_button')}
+            </button>
+            <button 
+              className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
+              onClick={() => {handleSearch()}}
+            >
+              {t('library_book_search_button')}
+            </button>
+          </div>
+          <div className="flex gap-4 mb-4">
+            <input
+              type="text"
+              placeholder={t('library_book_filter_placeholder')}
+              className="appearance-none rounded-lg relative block px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+            <button className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
+              {t('library_book_filter_button')}
+            </button>
+          </div>
         </div>
-        <div className="flex gap-4 mb-4">
-          <button 
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-            onClick={() => {handleCreateShelfBook()}}
-          >
-            {t('library_book_add_button')}
-          </button>
-          <button 
-            className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
-            onClick={() => {handleSearch()}}
-          >
-            {t('library_book_search_button')}
-          </button>
-        </div>
-        <div className="flex gap-4 mb-4">
-          <input
-            type="text"
-            placeholder={t('library_book_filter_placeholder')}
-            className="appearance-none rounded-lg relative block px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          />
-          <button className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
-            {t('library_book_filter_button')}
-          </button>
-        </div>
+        <h2 className="text-xl font-bold mb-4">{t('library_shelves_title')}</h2>
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -238,6 +225,21 @@ export function Library() {
             ) : null}
           </DragOverlay>
         </DndContext>
+        <div className="flex items-center justify-center mb-4 gap-4">
+          <input
+            type="text"
+            name="shelfName"
+            id="shelfName"
+            placeholder={t('library_shelf_create_placeholder')}
+            className="appearance-none rounded-lg relative block px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          />
+          <button
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            onClick={() => {handleCreateShelf()}}
+          >
+            {t('library_shelf_create_button')}
+          </button>
+        </div>
       </div>
       {showShelfBook && <ShelfBookDetails onClose={() => handleBookDetailsClose()} />}
       {showSearch && <BookSearch onClose={() => handleSearchClose()} />}
