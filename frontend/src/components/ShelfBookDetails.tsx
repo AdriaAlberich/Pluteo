@@ -474,7 +474,7 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
                     </button>
                   </div>
                 ) : (
-                <div className="p-4 bg-gray-900 rounded-lg">
+                <div className="p-4 bg-gray-900 rounded-lg space-y-4">
                   <h3 className="text-lg font-semibold text-white">{t('shelfbookdetails_book_loan_details_title')}</h3>
                   <label className="block text-sm text-gray-400 mb-2">
                     {t('shelfbookdetails_book_loan_loaned_to')}

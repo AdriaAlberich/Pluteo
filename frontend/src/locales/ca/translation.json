@@ -90,6 +90,18 @@
     "booksearch_search_page_of": "de",
     "booksearch_search_results": "Resultats de la cerca",
     "booksearch_search_results_empty": "Sense resultats",
+    "booksearch_search_term_error": "No pots deixar el camp de cerca buit",
+
+    "searchresult_no_cover_image": "Sense portada",
+    "searchresult_isbn": "ISBN",
+    "searchresult_authors": "Autor(s)",
+    "searchresult_publishers": "Editorial",
+    "searchresult_publish_places": "Lloc de publicació",
+    "searchresult_first_publish_year": "Any de publicació",
+    "searchresult_numpages": "Nombre de pàgines",
+    "searchresult_available_languages": "Idiomes disponibles",
+    "searchresult_add_button": "Afegir llibre",
+    "searchresult_add_button_loading": "Afegint llibre...",
 
     "shelfbookdetails_add_book_title": "Afegir llibre",
     "shelfbookdetails_cover_image": "Portada",

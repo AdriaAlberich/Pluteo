@@ -208,6 +208,7 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
         }
         else
         {
+            searchTerm = Uri.UnescapeDataString(searchTerm);
             searchTerms = [.. searchTerm.Split('+')];
         }
 

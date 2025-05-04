@@ -176,13 +176,16 @@ export function Library() {
   }
 
   const handleFilter = () => {
-    const filterValue = (document.getElementById('filter') as HTMLInputElement).value;
+    const filterValue = (document.getElementById('filter') as HTMLInputElement).value
+      .trim()
+      .replace(/\s+/g, '+');
+
     if (filterValue.trim() === '') {
       alert(t('library_book_filter_error'));
       return;
     }
 
-    setFilterTerm(filterValue.trim().replace(' ', '+'));
+    setFilterTerm(filterValue);
     getLibraryRefetch();
   }
 
