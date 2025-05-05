@@ -19,7 +19,7 @@ export function SortableBook({ id, book }: SortableBookProps) {
       }}
       {...attributes}
       {...listeners}
-      className="flex-shrink-0 flex flex-col items-center bg-gray-700 p-4 rounded shadow-lg w-36 h-60"
+      className="flex-shrink-0 flex flex-col items-center bg-gray-700 p-4 rounded shadow-lg w-36 h-55"
     >
       <img
         src={book.cover}

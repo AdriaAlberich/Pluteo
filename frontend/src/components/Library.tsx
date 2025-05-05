@@ -82,7 +82,7 @@ export function Library() {
           fromIndex,
           overIndex
         );
-        
+
         // Call reorder here
         reOrderShelfBook({
           shelfId: draggingFromShelfId,
@@ -224,7 +224,7 @@ export function Library() {
           ))}
           </div>
 
-          <DragOverlay>
+          <DragOverlay dropAnimation={null}>
             {draggingBook ? (
               <div className="flex flex-col items-center bg-gray-700 p-4 rounded shadow-lg">
                 <img

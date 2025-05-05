@@ -5,10 +5,10 @@ import {
   rectSortingStrategy,
   SortableContext,
 } from '@dnd-kit/sortable';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { SortableBook } from './SortableBook';
 import { Shelf, ShelfBookPreview } from '../context/appStore';
-import { Pencil, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
+import { Pencil, Trash, Trash2, ArrowUp, ArrowDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../context/appStore';
 import { useShelves } from '../hooks/useShelves';
@@ -20,16 +20,30 @@ interface ShelfContainerProps {
 }
 
 export function ShelfContainer({ shelf, totalShelves }: ShelfContainerProps) {
-  const { library, setLibrary } = useAppStore();
   const { reOrderShelf, updateShelf, deleteShelf } = useShelves();
   const { getLibraryRefetch } = useLibrary();
   const { t } = useTranslation();
   const [ editMode, setEditMode ] = useState(false);
   const [ safeDelete, setSafeDelete ] = useState(false);
+  const [ isOverflowing, setIsOverflowing ] = useState(false);
 
   const { setNodeRef } = useDroppable({
     id: shelf.id,
   });
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollIntervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    window.addEventListener('resize', checkOverflow);
+    return () => {
+      window.removeEventListener('resize', checkOverflow);
+    };
+  }, []);
+
+  useEffect(() => {
+    checkOverflow();
+  }, [shelf.books.length]);
 
   const handleMove = (direction: string) => {
     console.log(`Move ${shelf.name} ${direction}, order=${shelf.order} totalShelves=${totalShelves}`);
@@ -58,25 +72,18 @@ export function ShelfContainer({ shelf, totalShelves }: ShelfContainerProps) {
   const handleEdit = () => {
     console.log(`Edit ${shelf.name}`);
     if (editMode) {
-      if (shelf.name.trim() === '') {
+      shelf.name = (document.getElementById('shelfName') as HTMLInputElement).value;
+      if (shelf.name === undefined || shelf.name.trim() === '') {
         alert(t('library_shelf_edit_error'));
         return;
       }
-
-      shelf.name = (document.getElementById('shelfName') as HTMLInputElement).value;
       
       updateShelf({
         shelfId: shelf.id,
         shelfName: shelf.name,
       }, {
         onSuccess: () => {
-          const updatedShelves = library.shelves.map((s) => {
-            if (s.id === shelf.id) {
-              return { ...s, name: shelf.name };
-            }
-            return s;
-          });
-          setLibrary({ ...library, shelves: updatedShelves });
+          getLibraryRefetch();
           setEditMode(false);
         }
       });
@@ -103,6 +110,30 @@ export function ShelfContainer({ shelf, totalShelves }: ShelfContainerProps) {
       }
     });
   }
+
+  const startScroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      scrollIntervalRef.current = setInterval(() => {
+        scrollRef.current?.scrollBy({
+          left: direction === 'left' ? -10 : 10,
+          behavior: 'auto',
+        });
+      }, 10);
+    }
+  };
+
+  const stopScroll = () => {
+    if (scrollIntervalRef.current) {
+      clearInterval(scrollIntervalRef.current);
+      scrollIntervalRef.current = null;
+    }
+  };
+
+  const checkOverflow = () => {
+    if (scrollRef.current) {
+      setIsOverflowing(scrollRef.current.scrollWidth > scrollRef.current.clientWidth);
+    }
+  };
 
   return (
     <div
@@ -155,34 +186,59 @@ export function ShelfContainer({ shelf, totalShelves }: ShelfContainerProps) {
               onClick={() => {handleDelete()}}
               className={`text-white rounded-lg flex items-center justify-center gap-2 p-2 ${ safeDelete ? 'hover: bg-red-800' : 'hover: bg-red-600' }`}
             >
-              <Trash2/>
+              { safeDelete ? <Trash2/> : <Trash/> }
             </button>
           </div>
         )}
       </div>
-      <SortableContext
-        items={shelf.books.map((book) => `${shelf.id}_${book.id}`)}
-        strategy={rectSortingStrategy}
-      >
-        <div className="flex gap-4 overflow-x-auto overflow-y-hidden custom-scrollbar">
-          {shelf.books.length > 0 ? (
-            shelf.books
-            .slice()
-            .sort((a, b) => a.order - b.order)
-            .map((book) => (
-              <SortableBook
-                key={`${shelf.id}_${book.id}`}
-                id={`${shelf.id}_${book.id}`}
-                book={book}
-              />
-            ))
-          ) : (
-            <div className="flex items-center justify-center w-full h-full min-h-[220px] text-gray-500 text-sm border-2 border-dashed border-gray-600">
-              {t('library_shelf_empty')}
-            </div>
-          )}
-        </div>
-      </SortableContext>
+      <div className="relative">
+        {isOverflowing && (
+          <button
+            onMouseDown={() => startScroll('left')}
+            onMouseUp={stopScroll}
+            onMouseLeave={stopScroll}
+            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-gray-500 hover:bg-gray-400 text-white p-3 rounded-full z-10 opacity-70 hover:opacity-100"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+        )}
+        <SortableContext
+          items={shelf.books.map((book) => `${shelf.id}_${book.id}`)}
+          strategy={rectSortingStrategy}
+        >
+          <div 
+            ref={scrollRef}
+            className="flex gap-4 overflow-x-auto overflow-y-hidden custom-scrollbar"
+          >
+            {shelf.books.length > 0 ? (
+              shelf.books
+              .slice()
+              .sort((a, b) => a.order - b.order)
+              .map((book) => (
+                <SortableBook
+                  key={`${shelf.id}_${book.id}`}
+                  id={`${shelf.id}_${book.id}`}
+                  book={book}
+                />
+              ))
+            ) : (
+              <div className="flex items-center justify-center w-full h-full min-h-[220px] text-gray-500 text-sm border-2 border-dashed border-gray-600">
+                {t('library_shelf_empty')}
+              </div>
+            )}
+          </div>
+        </SortableContext>
+        {isOverflowing && (
+          <button
+            onMouseDown={() => startScroll('right')}
+            onMouseUp={stopScroll}
+            onMouseLeave={stopScroll}
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-500 hover:bg-gray-400 text-white p-3 rounded-full z-10 opacity-70 hover:opacity-100"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+        )}
+      </div>
     </div>
   );
 }

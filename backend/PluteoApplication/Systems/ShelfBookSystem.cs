@@ -283,7 +283,7 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
         {
             Library = request.Library,
             LoanDate = DateTime.UtcNow,
-            DueDate = request.DueDate,
+            DueDate = request.DueDate.ToUniversalTime(),
             Notify = request.Notify,
             LastNotificationDate = DateTime.UtcNow,
         };
