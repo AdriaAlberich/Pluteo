@@ -288,7 +288,7 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
             LastNotificationDate = DateTime.UtcNow,
         };
 
-        string message = _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanInitialNotificationMessage", shelfBook.Title, user.Settings.NotifyLoanBeforeDays, user.Settings.NotifyLoanBeforeDaysFrequency);
+        string message = _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanInitialNotificationMessage", shelfBook.Title);
         await _notificationSystem.AddNotification(user, _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanNotificationTitle", shelfBook.Title), message);
 
         await _userService.Update(user);
@@ -311,6 +311,9 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
             throw new ServiceException("SHELF_BOOK_LOAN_NOT_EXISTS");
 
         shelfBook.Loan = null;
+
+        string message = _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanDeactivationNotificationMessage", shelfBook.Title);
+        await _notificationSystem.AddNotification(user, _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanNotificationTitle", shelfBook.Title), message);
 
         await _userService.Update(user);
         _logger.Information("Shelf book {Name} ({Id}) has loan notifications deactivated for user {Email} ({Id}).", shelfBook.Title, shelfBook.Id, shelf.Name, shelf.Id, user.Email, user.Id);

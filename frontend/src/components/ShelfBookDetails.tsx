@@ -175,10 +175,6 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
       },
       {
         onSuccess: () => {
-          loanForm.library = '';
-          loanForm.dueDate = new Date();
-          loanForm.notify = false;
-          setLoanForm(loanForm);
           getShelfBookDetailsRefetch();
         }
       });

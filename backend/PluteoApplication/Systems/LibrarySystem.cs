@@ -56,25 +56,6 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
         else
         {
             var externalBook = await _externalLibrary.GetBookDetails(isbn) ?? throw new ServiceException("BOOK_NOT_FOUND");
-            
-            shelfBook = new ShelfBook
-            {
-                Id = Guid.NewGuid(),
-                Title = externalBook.Title,
-                ISBN = externalBook.ISBN,
-                Authors = externalBook.Authors,
-                CoverSmall = externalBook.CoverSmall,
-                CoverBig = externalBook.CoverBig,
-                Publisher = externalBook.Publishers,
-                PublishPlace = externalBook.PublishPlaces,
-                FirstPublishYear = externalBook.FirstPublishYear,
-                AvailableLanguages = externalBook.AvailableLanguages,
-                NumPages = externalBook.NumPages,
-                PhysicalLocation = string.Empty,
-                Notes = string.Empty,
-                Status = ShelfBookStatus.None,
-                Order = 0
-            };
 
             await _bookService.Create(new CreateBookRequest
             {
@@ -89,6 +70,28 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
                 NumPages = externalBook.NumPages,
                 AvailableLanguages = externalBook.AvailableLanguages
             });
+
+            var newBookId = await _bookService.GetByISBN(isbn) ?? throw new ServiceException("BOOK_NOT_FOUND");
+
+            shelfBook = new ShelfBook
+            {
+                Id = Guid.NewGuid(),
+                Title = externalBook.Title,
+                ISBN = externalBook.ISBN,
+                Authors = externalBook.Authors,
+                Book = newBookId.Id,
+                CoverSmall = externalBook.CoverSmall,
+                CoverBig = externalBook.CoverBig,
+                Publisher = externalBook.Publishers,
+                PublishPlace = externalBook.PublishPlaces,
+                FirstPublishYear = externalBook.FirstPublishYear,
+                AvailableLanguages = externalBook.AvailableLanguages,
+                NumPages = externalBook.NumPages,
+                PhysicalLocation = string.Empty,
+                Notes = string.Empty,
+                Status = ShelfBookStatus.None,
+                Order = 0
+            };
         }
 
         Shelf? shelf = null;
