@@ -4,6 +4,7 @@ import { ShelfBook, useAppStore } from '../context/appStore';
 import { useShelfBooks } from '../hooks/useShelfBooks';
 import { useLibrary } from '../hooks/useLibrary';
 import { useTranslation } from 'react-i18next';
+import { useNotifications } from '../hooks/useNotifications';
 
 interface ShelfBookDetailsProps {
   onClose: () => void;
@@ -47,6 +48,8 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
     addBookManuallyError, 
     isAddBookManuallyLoading 
   } = useLibrary();
+
+  const { getNotificationsRefetch } = useNotifications();
 
   useEffect(() => {
     if (selectedShelfBookId && selectedShelfBookShelfId) {
@@ -162,6 +165,7 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
       {
         onSuccess: () => {
           getShelfBookDetailsRefetch();
+          getNotificationsRefetch();
         }
       });
     }
@@ -176,6 +180,7 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
       {
         onSuccess: () => {
           getShelfBookDetailsRefetch();
+          getNotificationsRefetch();
         }
       });
     }

@@ -248,7 +248,7 @@ export function Library() {
                   alt={draggingBook.title}
                   className="w-32 h-40 object-cover mb-2 rounded"
                 />
-                <span className="text-sm text-center">{draggingBook.title}</span>
+                <span className="text-sm text-center text-white truncate w-full">{draggingBook.title}</span>
               </div>
             ) : null}
           </DragOverlay>
