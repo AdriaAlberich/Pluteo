@@ -46,7 +46,6 @@ export function ShelfContainer({ shelf, totalShelves }: ShelfContainerProps) {
   }, [shelf.books.length]);
 
   const handleMove = (direction: string) => {
-    console.log(`Move ${shelf.name} ${direction}, order=${shelf.order} totalShelves=${totalShelves}`);
     if (direction === 'up' && shelf.order > 3) {
       reOrderShelf({
         shelfId: shelf.id,
@@ -70,7 +69,6 @@ export function ShelfContainer({ shelf, totalShelves }: ShelfContainerProps) {
   }
 
   const handleEdit = () => {
-    console.log(`Edit ${shelf.name}`);
     if (editMode) {
       shelf.name = (document.getElementById('shelfName') as HTMLInputElement).value;
       if (shelf.name === undefined || shelf.name.trim() === '') {
@@ -107,6 +105,9 @@ export function ShelfContainer({ shelf, totalShelves }: ShelfContainerProps) {
     }, {
       onSuccess: () => {
         getLibraryRefetch();
+      },
+      onError: () => {
+        alert(t('library_shelf_delete_error'));
       }
     });
   }

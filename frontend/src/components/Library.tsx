@@ -21,6 +21,7 @@ import { useShelves } from '../hooks/useShelves';
 import { t } from 'i18next';
 import { ShelfBookDetails } from './ShelfBookDetails';
 import { BookSearch } from './BookSearch';
+import { Plus, Search } from 'lucide-react';
 
 export function Library() {
 
@@ -41,7 +42,9 @@ export function Library() {
   const { reOrderShelfBook, reOrderShelfBookError, moveShelfBook, moveShelfBookError } = useShelfBooks();
   const { createShelf } = useShelves();
 
-  const [draggingBook, setDraggingBook] = useState<ShelfBookPreview | null>(null);
+  const [ draggingBook, setDraggingBook ] = useState<ShelfBookPreview | null>(null);
+  const [ hideEmptyShelves, setHideEmptyShelves ] = useState(false);
+
   const sensors = useSensors(useSensor(PointerSensor));
 
   const onDragStart = ({ active }: { active: any }) => {
@@ -132,7 +135,7 @@ export function Library() {
   const handleCreateShelf = () => {
     const shelfName = (document.getElementById('shelfName') as HTMLInputElement).value;
     (document.getElementById('shelfName') as HTMLInputElement).value = '';
-    if (shelfName.trim() === '') {
+    if (shelfName === undefined || shelfName.trim() === '') {
       alert(t('library_shelf_create_error'));
       return;
     }
@@ -147,10 +150,7 @@ export function Library() {
     }, {
       onSuccess: () => {
         getLibraryRefetch();
-      },
-      onError: (error) => {
-        console.error('Error creating shelf:', error);
-      },
+      }
     });
   };
 
@@ -175,33 +175,52 @@ export function Library() {
     setShowSearch(true);
   }
 
+  const filteredShelves = library.shelves
+    .slice()
+    .sort((a, b) => a.order - b.order)
+    .filter((shelf) => shelf.isDefault || shelf.isReadQueue || (!hideEmptyShelves || shelf.books.length > 0));
+
   return (
     <>
       <div className="flex flex-col h-full w-full p-4 bg-gray-900 text-white">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex gap-4 mb-4">
+        <div className="flex flex-wrap items-center justify-between mb-2">
+          <div className="flex flex-wrap gap-4 mb-4 mr-4">
             <button 
               className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
               onClick={() => {handleCreateShelfBook()}}
             >
+              <Plus className="inline mr-1" />
               {t('library_book_add_button')}
             </button>
             <button 
               className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
               onClick={() => {handleSearch()}}
             >
+              <Search className="inline mr-1" />
               {t('library_book_search_button')}
             </button>
           </div>
-          <div className="flex gap-4 mb-4">
+          <div className="flex flex-wrap gap-4 mb-4">
             <input
               type="text"
               name="filter"
               id="filter"
               placeholder={t('library_book_filter_placeholder')}
-              className="appearance-none rounded-lg relative block px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="appearance-none rounded-lg relative block px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 w-full sm:w-auto"
               onChange={(e) => setFilterTerm(e.target.value)}
             />
+            <div className="flex items-center gap-2">
+              <label htmlFor="hideEmptyShelves" className="block text-sm text-gray-400 whitespace-nowrap">
+                {t('library_book_filter_hide_empty_shelves')}
+              </label>
+              <input
+                id="hideEmptyShelves"
+                name="hideEmptyShelves"
+                type="checkbox"
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                onChange={(e) => setHideEmptyShelves(e.target.checked)}
+              />
+            </div>
           </div>
         </div>
         <h2 className="text-xl font-bold mb-4">{t('library_shelves_title')}</h2>
@@ -212,10 +231,7 @@ export function Library() {
           onDragEnd={onDragEnd}
         >
           <div className="flex flex-col gap-4 overflow-y-auto h-full">
-          {library.shelves
-            .slice()
-            .sort((a, b) => a.order - b.order)
-            .map((shelf) => (
+          {filteredShelves.map((shelf) => (
               <ShelfContainer 
                 key={shelf.id} 
                 shelf={shelf} 
@@ -226,11 +242,11 @@ export function Library() {
 
           <DragOverlay dropAnimation={null}>
             {draggingBook ? (
-              <div className="flex flex-col items-center bg-gray-700 p-4 rounded shadow-lg">
+              <div className="flex-shrink-0 flex flex-col items-center bg-gray-700 p-4 rounded shadow-lg w-36 h-55">
                 <img
                   src={draggingBook.cover}
                   alt={draggingBook.title}
-                  className="w-32 h-48 object-cover mb-2"
+                  className="w-32 h-40 object-cover mb-2 rounded"
                 />
                 <span className="text-sm text-center">{draggingBook.title}</span>
               </div>
@@ -249,6 +265,7 @@ export function Library() {
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
             onClick={() => {handleCreateShelf()}}
           >
+            <Plus className="inline mr-1" />
             {t('library_shelf_create_button')}
           </button>
         </div>
