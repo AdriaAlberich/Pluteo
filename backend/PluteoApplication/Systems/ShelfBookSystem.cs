@@ -166,13 +166,13 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
 
         bool isUpdated = false;
 
-        if(!string.IsNullOrWhiteSpace(request.Title))
+        if(request.Title != null)
         {
             shelfBook.Title = request.Title;
             isUpdated = true;
         }
 
-        if(!string.IsNullOrWhiteSpace(request.ISBN))
+        if(request.ISBN != null)
         {
             shelfBook.ISBN = [];
             shelfBook.ISBN.Add(request.ISBN);
@@ -180,7 +180,7 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
             isUpdated = true;
         }
 
-        if(!string.IsNullOrWhiteSpace(request.Authors))
+        if(request.Authors != null)
         {
             shelfBook.Authors = [];
             shelfBook.Authors.Add(request.Authors);
@@ -188,20 +188,20 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
             isUpdated = true;
         }
 
-        if(!string.IsNullOrWhiteSpace(request.Cover))
+        if(request.Cover != null)
         {
             shelfBook.CoverBig = request.Cover;
             shelfBook.CoverSmall = request.Cover;
             isUpdated = true;
         }
 
-        if(!string.IsNullOrWhiteSpace(request.FirstPublishYear))
+        if(request.FirstPublishYear != null)
         {
             shelfBook.FirstPublishYear = request.FirstPublishYear;
             isUpdated = true;
         }
         
-        if(!string.IsNullOrWhiteSpace(request.Publisher))
+        if(request.Publisher != null)
         {
             shelfBook.Publisher = [];
             shelfBook.Publisher.Add(request.Publisher);
@@ -209,7 +209,7 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
             isUpdated = true;
         }
 
-        if(!string.IsNullOrWhiteSpace(request.PublishPlace))
+        if(request.PublishPlace != null)
         {
             shelfBook.PublishPlace = [];
             shelfBook.PublishPlace.Add(request.PublishPlace);
@@ -223,7 +223,7 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
             isUpdated = true;
         }
 
-        if(!string.IsNullOrWhiteSpace(request.AvailableLanguages))
+        if(request.AvailableLanguages != null)
         {
             shelfBook.AvailableLanguages = [];
             shelfBook.AvailableLanguages.Add(request.AvailableLanguages);
@@ -231,19 +231,19 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
             isUpdated = true;
         }
 
-        if(!string.IsNullOrWhiteSpace(request.PhysicalLocation))
+        if(request.PhysicalLocation != null)
         {
             shelfBook.PhysicalLocation = request.PhysicalLocation;
             isUpdated = true;
         }
         
-        if(!string.IsNullOrWhiteSpace(request.Notes))
+        if(request.Notes != null)
         {
             shelfBook.Notes = request.Notes;
             isUpdated = true;
         }
 
-        if(!string.IsNullOrWhiteSpace(request.Status))
+        if(request.Status != null)
         {
             if(Enum.TryParse<ShelfBookStatus>(request.Status, true, out var status))
             {

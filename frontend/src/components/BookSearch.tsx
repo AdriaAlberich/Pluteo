@@ -149,7 +149,9 @@ export function BookSearch({ onClose }: BookSearchProps) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
+    >
       <div className="bg-gray-800 rounded-lg w-full max-w-xl p-3">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-white">{t('booksearch_title')}</h2>

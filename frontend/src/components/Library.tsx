@@ -200,7 +200,7 @@ export function Library() {
               {t('library_book_search_button')}
             </button>
           </div>
-          <div className="flex flex-wrap gap-4 mb-4">
+          <div className="flex flex-wrap flex-col gap-4 mb-4">
             <input
               type="text"
               name="filter"
