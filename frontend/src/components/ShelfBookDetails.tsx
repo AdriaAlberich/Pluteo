@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { X, Save, Trash, Hand, Book, Info, CircleAlert } from 'lucide-react';
-import { ShelfBook, useAppStore } from '../context/appStore';
+import { useAppStore } from '../context/appStore';
 import { useShelfBooks } from '../hooks/useShelfBooks';
 import { useLibrary } from '../hooks/useLibrary';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +11,16 @@ interface ShelfBookDetailsProps {
 }
 
 export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
-  const { selectedShelfBookId, selectedShelfBookShelfId, selectedShelfBook, setSelectedShelfBook } = useAppStore();
+
+  // Get the global state from the store
+  const { 
+    selectedShelfBookId, 
+    selectedShelfBookShelfId, 
+    selectedShelfBook, 
+    setSelectedShelfBook 
+  } = useAppStore();
+
+  // Set the local state variables
   const [ isBookCreation, setIsBookCreation ] = useState(true);
   const [ showLoanForm, setShowLoanForm ] = useState(false);
   const [ safeDelete, setSafeDelete ] = useState(false);
@@ -23,8 +32,11 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
     dueDate: selectedShelfBook?.loan?.dueDate || new Date(),
     notify: selectedShelfBook?.loan?.notify || false,
   });
+
+  // Include the traslation hook
   const { t } = useTranslation();
 
+  // Get the shelfbook hook queries and mutations
   const { 
     getShelfBookDetailsRefetch, 
     updateShelfBook, 
@@ -32,16 +44,15 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
     isUpdateLoading, 
     deleteShelfBook, 
     deleteShelfBookError, 
-    isDeleteLoading, 
     activateShelfBookLoan, 
     activateShelfBookLoanError, 
     isActivateLoanLoading, 
     deactivateShelfBookLoan, 
     deactivateShelfBookLoanError, 
-    isDeactivateLoanLoading, 
-    isShelfBookLoanActiveRefetch 
+    isDeactivateLoanLoading
   } = useShelfBooks();
 
+  // Get the library hook queries and mutations
   const { 
     getLibraryRefetch, 
     addBookManually, 
@@ -49,8 +60,10 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
     isAddBookManuallyLoading 
   } = useLibrary();
 
+  // Get the notifications hook query refetch
   const { getNotificationsRefetch } = useNotifications();
 
+  // Handle if is a book creation or update and fetch the book details if is an update
   useEffect(() => {
     if (selectedShelfBookId && selectedShelfBookShelfId) {
       setIsBookCreation(false);
@@ -60,27 +73,21 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
     }
   }, []);
 
+  // Handle the create/update book button click
   const handleBookSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (selectedShelfBook === undefined || (selectedShelfBook.title === undefined || selectedShelfBook.title === '')) {
-      setShelfBookDetailsError(true);
       setShelfBookDetailsTitleError(true);
-      setTimeout(() => {
-        setShelfBookDetailsError(false);
-        setShelfBookDetailsTitleError(false);
-      }
-      , 5000);
+      showError();
       return;
-    } else {
-      setShelfBookDetailsError(false);
-      setShelfBookDetailsTitleError(false);
     }
 
     if(selectedShelfBook.status === undefined)
       selectedShelfBook.status = '0';
 
     if (!isBookCreation) {
+      // Update the book details
       updateShelfBook({
         shelfId: selectedShelfBookShelfId!,
         shelfBookId: selectedShelfBookId!,
@@ -93,9 +100,13 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
           setTimeout(() => {
             setShelfBookDetailsSuccess(false);
           }, 5000);
+        },
+        onError: () => {
+          showError();
         }
       });
     } else {
+      // Add a new book to the library
       addBookManually({
         shelfId: selectedShelfBookShelfId!,
         shelfBook: selectedShelfBook,
@@ -104,12 +115,18 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
         onSuccess: () => {
           getLibraryRefetch();
           onClose();
+        },
+        onError: () => {
+          showError();
         }
       });
     }
   }
 
+  // Handle the delete book button click
   const handleBookDelete = async () => {
+
+    // Safe delete confirmation (doble click)
     if (!safeDelete) {
       setSafeDelete(true);
       setTimeout(() => {
@@ -127,11 +144,15 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
         onSuccess: () => {
           getLibraryRefetch();
           onClose();
+        },
+        onError: () => {
+          showError();
         }
       });
     }
   }
 
+  // Hook the attached cover and convert to base64 string
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -147,10 +168,12 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
     }
   };
 
+  // Handle the show loan form button click
   const handleLoanForm = () => {
     setShowLoanForm(true);
   };
 
+  // Handle the activate loan button click
   const handleActivateLoan = () => {
     if (selectedShelfBook) {
       activateShelfBookLoan({
@@ -166,11 +189,15 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
         onSuccess: () => {
           getShelfBookDetailsRefetch();
           getNotificationsRefetch();
+        },
+        onError: () => {
+          showError();
         }
       });
     }
   }
 
+  // Handle the deactivate loan button click
   const handleDeactivateLoan = () => {
     if (selectedShelfBook) {
       deactivateShelfBookLoan({
@@ -181,11 +208,15 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
         onSuccess: () => {
           getShelfBookDetailsRefetch();
           getNotificationsRefetch();
+        },
+        onError: () => {
+          showError();
         }
       });
     }
   }
 
+  // Handle the errors from the hook mutations and queries
   const handleErrors = () => {
     
     if (updateShelfBookError) {
@@ -203,10 +234,10 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
     return null;
   };
 
-  // TODO: Finish this
+  // Handle the error messages from the API (localized)
   const handleError = (error: any) => {
     const status = (error as any)?.response?.status;
-    let errorMessage = (error as any)?.response?.data?.message || 'An unknown error occurred';
+    let errorMessage = (error as any)?.response?.data?.message || t('generic_unknown_error');
     console.log('Error:', status, errorMessage);
     if (status === 400) {
       if (errorMessage === 'USER_NEW_PASSWORD_NOT_VALID') {
@@ -216,13 +247,21 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
       } else if (errorMessage === 'USER_PASSWORD_INCORRECT') {
         errorMessage = t('auth_password_incorrect_error');
       } else {
-        errorMessage = t('auth_generic_error');
+        errorMessage = t('generic_error');
       }
     }else if (status === 500) {
-      errorMessage = t('auth_server_error');
+      errorMessage = t('generic_server_error');
     }
 
     return errorMessage;
+  }
+
+  // Show error message for 5 seconds
+  const showError = () => {
+    setShelfBookDetailsError(true);
+    setTimeout(() => {
+      setShelfBookDetailsError(false);
+    }, 5000);
   }
 
   return (

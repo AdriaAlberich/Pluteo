@@ -90,7 +90,7 @@ export interface LibraryOverview {
   shelves: Shelf[];
 }
 
-export interface SearchResultItem { 
+export interface BookSearchResultItem { 
   title: string;
   isbn: string[];
   searchCoverUrl: string;
@@ -106,7 +106,7 @@ export interface BookSearchResult {
   totalResults: number;
   page: number;
   totalPages: number;
-  results: SearchResultItem[];
+  results: BookSearchResultItem[];
 }
 
 export const useAppStore = create<AppState>((set) => ({

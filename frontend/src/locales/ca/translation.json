@@ -1,4 +1,8 @@
 {
+    "generic_unknown_error": "S'ha produït un error desconegut. Si us plau, torna-ho a intentar més tard.",
+    "generic_error": "S'ha produït un error. Si us plau, torna-ho a intentar més tard.",
+    "generic_server_error": "S'ha produït un error al servidor. Si us plau, torna-ho a intentar més tard.",
+
     "auth_login_title": "Accedeix al teu compte",
     "auth_register_title": "Crear nou compte",
     "auth_email_label": "Correu electrònic",
@@ -95,6 +99,7 @@
     "booksearch_search_results": "Resultats de la cerca",
     "booksearch_search_results_empty": "Sense resultats",
     "booksearch_search_term_error": "No pots deixar el camp de cerca buit",
+    "booksearch_book_already_exists_error": "Ja tens aquest llibre a la teva biblioteca",
 
     "searchresult_no_cover_image": "Sense portada",
     "searchresult_isbn": "ISBN",

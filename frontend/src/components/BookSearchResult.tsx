@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLibrary } from '../hooks/useLibrary';
 
-interface SearchResultProps {
+interface BookSearchResultProps {
   title: string;
   isbn: string[];
   searchCoverUrl: string;
@@ -16,10 +16,22 @@ interface SearchResultProps {
   onClick: (isbn: string) => void;
 }
 
-export function SearchResult({ title, isbn, searchCoverUrl, authors, publishers, publishPlaces, firstPublishYear, numPages, availableLanguages, onClick }: SearchResultProps) {
+export function BookSearchResult({ title, isbn, searchCoverUrl, authors, publishers, publishPlaces, firstPublishYear, numPages, availableLanguages, onClick }: BookSearchResultProps) {
+
+  // Get if we are adding a book from the library hook
   const { isAddBookLoading } = useLibrary();
+
+  // Get the translation function
   const { t } = useTranslation();
+
+  // State to control if the book is being added
   const [ isBeingAdded, setIsBeingAdded ] = useState(false);
+
+  // Handle the click for the add book button
+  const handleClick = () => {
+    setIsBeingAdded(true);
+    onClick(isbn[0]);
+  }
 
   return (
     <div className="flex flex-col bg-gray-700 shadow-lg rounded p-4 h-full space-y-2">
@@ -50,7 +62,7 @@ export function SearchResult({ title, isbn, searchCoverUrl, authors, publishers,
       </div>
       <div className="mt-auto">
         <button
-            onClick={() => {setIsBeingAdded(true); onClick(isbn[0]);}}
+            onClick={() => { handleClick() }}
             className="w-full px-4 py-2 bg-green-500 hover:bg-green-700 text-white font-bold rounded"
             disabled={isBeingAdded || isAddBookLoading}
           >

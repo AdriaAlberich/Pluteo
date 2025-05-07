@@ -1,25 +1,23 @@
-import { useEffect, useState } from 'react';
-import { X, Search, Plus, Info, CircleAlert } from 'lucide-react';
-import { BookSearchResult, SearchResultItem, useAppStore } from '../context/appStore';
+import { useState } from 'react';
+import { X, Search, Info, CircleAlert } from 'lucide-react';
+import { BookSearchResultItem, useAppStore } from '../context/appStore';
 import { useLibrary } from '../hooks/useLibrary';
 import { useTranslation } from 'react-i18next';
-import { SearchResult } from './SearchResult';
+import { BookSearchResult } from './BookSearchResult';
 
 interface BookSearchProps {
   onClose: () => void;
 }
 
 export function BookSearch({ onClose }: BookSearchProps) {
+
+  // Get global state from the store
   const { 
     searchTerm, 
-    setSearchTerm, 
-    external, 
+    setSearchTerm,
     setExternal, 
-    searchPageNumber, 
     setSearchPageNumber, 
-    searchPageSize, 
     setSearchPageSize, 
-    searchTotalPages, 
     setSearchTotalPages, 
     searchTotalResults, 
     setSearchTotalResults, 
@@ -27,11 +25,14 @@ export function BookSearch({ onClose }: BookSearchProps) {
     setSearchResults 
   } = useAppStore();
 
+  // Set local state variables
   const [ isBookSearchError, setBookSearchError ] = useState(false);
   const [ isBookSearchTermError, setSearchTermError ] = useState(false);
 
+  // Include the traslation hook
   const { t } = useTranslation();
 
+  // Get the library hooks
   const { 
     getLibraryRefetch,
     searchBooksRefetch,
@@ -42,31 +43,28 @@ export function BookSearch({ onClose }: BookSearchProps) {
     isAddBookLoading,
   } = useLibrary();
 
+  // Update the input search (we replace the spaces with +)
   const updateSearchTerm = (term: string) => {
     term = term.trim().replace(/\s+/g, '+');
     setSearchTerm(term);
   }
 
+  // Update the external search checkbox
   const updateExternal = (external: boolean) => {
     setExternal(external);
   }
 
+  // Handle the logic for the search button
   const handleSearchSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (searchTerm === undefined || searchTerm.trim() === '') {
-      setBookSearchError(true);
       setSearchTermError(true);
-      setTimeout(() => {
-        setBookSearchError(false);
-        setSearchTermError(false);
-      }
-      , 5000);
+      showError();
       return;
     }
     else {
-      setBookSearchError(false);
-      setSearchTermError(false);
+      resetSearch();
     }
 
     setSearchPageNumber(1);
@@ -75,6 +73,7 @@ export function BookSearch({ onClose }: BookSearchProps) {
     searchBooksRefetch();
   }
 
+  // Handle the logic for the pagination (not working yet)
 /*const handleNextPage = () => {
     if (searchPageNumber < searchTotalPages) {
       setSearchPageNumber(searchPageNumber + 1);
@@ -89,6 +88,7 @@ export function BookSearch({ onClose }: BookSearchProps) {
     }
   } */
 
+  // Handle the logic for the add book button from the search result
   const handleAddBook = async (isbn: string) => {
     if (isAddBookLoading) return;
 
@@ -99,22 +99,18 @@ export function BookSearch({ onClose }: BookSearchProps) {
       {
         onSuccess: () => {
         getLibraryRefetch();
-        setSearchResults(undefined);
-        setSearchTotalPages(0);
-        setSearchTotalResults(0);
-        setSearchTerm('');
-        setExternal(false);
-        setSearchPageNumber(1);
-        setSearchPageSize(5);
+        resetSearch();
         onClose();
       },
-        onError: (error) => {
-          console.error('Error adding book:', error);
+        onError: () => {
+          resetSearch();
+          showError();
         },
       }
     );
   }
 
+  // Handle the errors from the hook mutations and queries
   const handleErrors = () => {
     
     if (searchBooksError) {
@@ -126,26 +122,42 @@ export function BookSearch({ onClose }: BookSearchProps) {
     return null;
   };
 
-  // TODO: Finish this
+  // Handle the error messages from the API (localized)
   const handleError = (error: any) => {
     const status = (error as any)?.response?.status;
-    let errorMessage = (error as any)?.response?.data?.message || 'An unknown error occurred';
+    let errorMessage = (error as any)?.response?.data?.message || t('generic_unknown_error');
     console.log('Error:', status, errorMessage);
     if (status === 400) {
-      if (errorMessage === 'USER_NEW_PASSWORD_NOT_VALID') {
-        errorMessage = t('auth_password_not_valid_error');
-      } else if (errorMessage === 'USER_NEW_PASSWORD_CONFIRMATION_NOT_MATCH') {
-        errorMessage = t('auth_password_match_error');
-      } else if (errorMessage === 'USER_PASSWORD_INCORRECT') {
-        errorMessage = t('auth_password_incorrect_error');
+      if (errorMessage === 'BOOK_ALREADY_EXISTS_IN_SHELF') {
+        errorMessage = t('booksearch_book_already_exists_error');
       } else {
-        errorMessage = t('auth_generic_error');
+        errorMessage = t('generic_error');
       }
     }else if (status === 500) {
-      errorMessage = t('auth_server_error');
+      errorMessage = t('generic_server_error');
     }
 
     return errorMessage;
+  }
+
+  // Show error message for 5 seconds
+  const showError = () => {
+    setBookSearchError(true);
+    setTimeout(() => {
+      setBookSearchError(false);
+    }, 5000);
+  }
+
+  // Reset search state
+  const resetSearch = () => {
+    setSearchResults(undefined);
+    setSearchTotalPages(0);
+    setSearchTotalResults(0);
+    setSearchTerm('');
+    setExternal(false);
+    setSearchPageNumber(1);
+    setSearchPageSize(20);
+    setSearchTermError(false);
   }
 
   return (
@@ -224,8 +236,8 @@ export function BookSearch({ onClose }: BookSearchProps) {
                   <p>{t('booksearch_search_results_empty')}</p>
                 </div>
               )}
-              {searchResults && searchResults.results.map((result: SearchResultItem) => (
-                <SearchResult
+              {searchResults && searchResults.results.map((result: BookSearchResultItem) => (
+                <BookSearchResult
                   key={result.isbn[0]}
                   title={result.title}
                   isbn={result.isbn}
