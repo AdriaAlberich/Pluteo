@@ -3,8 +3,15 @@ import { notificationsApi } from '../services/api';
 import { useAppStore } from '../context/appStore';
 
 export function useNotifications() {
-  const { isAuthenticated, setNotifications, setNotificationsUnreadCount } = useAppStore();
 
+  // Global state to manage the notifications queries and mutations
+  const { 
+    isAuthenticated, 
+    setNotifications, 
+    setNotificationsUnreadCount 
+  } = useAppStore();
+
+  // Query to get notifications (this query is fetched every 30 seconds)
   const getNotifications = useQuery({
     queryKey: ['notifications'],
     queryFn: async () => {
@@ -19,6 +26,7 @@ export function useNotifications() {
     refetchOnWindowFocus: true
   });
 
+  // Mutations for manageing notifications
   const markAsRead = useMutation({
     mutationFn: notificationsApi.markAsRead
   });

@@ -8,12 +8,32 @@ import { useTranslation } from 'react-i18next';
 
 
 export function Notifications() {
-  const [isOpen, setIsOpen] = useState(false);
-  const { notifications, setNotifications, notificationsUnreadCount, setNotificationsUnreadCount } = useAppStore();
-  const { markAsRead, clearAll, getNotificationsRefetch } = useNotifications();
+
+  // State to manage notifications and unread count
+  const { 
+    notifications, 
+    setNotifications, 
+    notificationsUnreadCount, 
+    setNotificationsUnreadCount 
+  } = useAppStore();
+
+  // Hooks for the notification system
+  const { 
+    markAsRead, 
+    clearAll, 
+    getNotificationsRefetch 
+  } = useNotifications();
+
+  // Translation hooks
   const { t, i18n } = useTranslation();
+
+  // State to control the dropdown
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Ref to manage the dropdown menu
   const menuRef = useRef<HTMLDivElement | null>(null);
 
+  // Update the unread count when there are new notifications (red dot)
   useEffect(() => {
     if (notifications) {
       const unread = notifications.filter((notification: { markedAsRead: any; }) => !notification.markedAsRead);
@@ -21,6 +41,7 @@ export function Notifications() {
     }
   }, [notifications, setNotifications]);
 
+  // Handle the notification click event to mark it as read
   const handleNotificationClick = (notificationId: string) => {
     const notification = notifications.find((n) => n.notificationId === notificationId);
     if (notification) {
@@ -35,6 +56,7 @@ export function Notifications() {
       });
   };
 
+  // Handle clicks outside the dropdown to close it
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -47,7 +69,8 @@ export function Notifications() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-
+  
+  // Handle the delete all notifications button
   const handleClearAll = () => {
     clearAll();
   };

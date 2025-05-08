@@ -238,17 +238,8 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
   const handleError = (error: any) => {
     const status = (error as any)?.response?.status;
     let errorMessage = (error as any)?.response?.data?.message || t('generic_unknown_error');
-    console.log('Error:', status, errorMessage);
     if (status === 400) {
-      if (errorMessage === 'USER_NEW_PASSWORD_NOT_VALID') {
-        errorMessage = t('auth_password_not_valid_error');
-      } else if (errorMessage === 'USER_NEW_PASSWORD_CONFIRMATION_NOT_MATCH') {
-        errorMessage = t('auth_password_match_error');
-      } else if (errorMessage === 'USER_PASSWORD_INCORRECT') {
-        errorMessage = t('auth_password_incorrect_error');
-      } else {
-        errorMessage = t('generic_error');
-      }
+      errorMessage = t('generic_error');
     }else if (status === 500) {
       errorMessage = t('generic_server_error');
     }

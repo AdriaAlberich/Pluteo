@@ -1,6 +1,5 @@
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { ShelfBookPreview } from '../context/appStore';
-import { useState } from 'react';
 
 interface SortableBookProps {
   id: string;
@@ -8,6 +7,8 @@ interface SortableBookProps {
 }
 
 export function SortableBook({ id, book }: SortableBookProps) {
+
+  // Hooks for the drag and drop system
   const { attributes, listeners, setNodeRef: setDraggableRef } = useDraggable({ id });
   const { setNodeRef: setDroppableRef } = useDroppable({ id });
 

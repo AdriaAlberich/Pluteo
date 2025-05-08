@@ -9,16 +9,23 @@ interface UserProfileProps {
 }
 
 export function UserProfile({ onClose }: UserProfileProps) {
+
+  // State for the password form and errors
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [currentPasswordShowError, setCurrentPasswordShowError] = useState(false);
   const [newPasswordShowError, setNewPasswordShowError] = useState(false);
   const [newPasswordRepeatShowError, setNewPasswordRepeatShowError] = useState(false);
   const [newPasswordMatchShowError, setNewPasswordMatchShowError] = useState(false);
   const [passwordData, setPasswordData] = useState({ currentPassword: '', newPassword: '', newPasswordRepeat: '' });
+
+  // Global state and hooks for the user profile
   const { userSettings, setUserSettings } = useAppStore();
   const { updateSettings, changePassword, isChangePasswordLoading, isChangePasswordSuccess, isChangePasswordError, changePasswordError, resetPasswordError } = useProfile();
+  
+  // Hook for the translation
   const { t } = useTranslation();
 
+  // Handle the settings change event to update them
   const handleSettingsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
 
@@ -31,6 +38,7 @@ export function UserProfile({ onClose }: UserProfileProps) {
     updateSettings(updatedSettings);
   }
 
+  // Handle the password form visibility and reset errors
   const handleShowPasswordForm = () => {
     setShowPasswordForm(true);
     resetErrors();
@@ -38,6 +46,7 @@ export function UserProfile({ onClose }: UserProfileProps) {
     resetInputs();
   };
 
+  // Handle the password form submission and validation
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -52,6 +61,7 @@ export function UserProfile({ onClose }: UserProfileProps) {
     })
   };
 
+  // Handle the password form cancellation and reset errors
   const handlePasswordCancel = () => {
     setShowPasswordForm(false);
     resetErrors();
@@ -59,6 +69,7 @@ export function UserProfile({ onClose }: UserProfileProps) {
     resetInputs();
   };
 
+  // Validate the password form inputs and show errors if necessary
   const passwordFormValidation = () => {
 
     resetPasswordError();
@@ -94,9 +105,10 @@ export function UserProfile({ onClose }: UserProfileProps) {
     return true;
   };
 
+  // Handle the error messages from the API (localized)
   const handleErrors = () => {
     const status = (changePasswordError as any)?.response?.status;
-    let errorMessage = (changePasswordError as any)?.response?.data?.message || 'An unknown error occurred';
+    let errorMessage = (changePasswordError as any)?.response?.data?.message || t('generic_unknown_error');
     console.log('Error:', status, errorMessage);
     if (status === 400) {
       if (errorMessage === 'USER_NEW_PASSWORD_NOT_VALID') {
@@ -106,19 +118,21 @@ export function UserProfile({ onClose }: UserProfileProps) {
       } else if (errorMessage === 'USER_PASSWORD_INCORRECT') {
         errorMessage = t('auth_password_incorrect_error');
       } else {
-        errorMessage = t('auth_generic_error');
+        errorMessage = t('generic_error');
       }
     }else if (status === 500) {
-      errorMessage = t('auth_server_error');
+      errorMessage = t('generic_server_error');
     }
 
     return errorMessage;
   };
 
+  // Reset the password form inputs
   const resetInputs = () => {
     setPasswordData({ currentPassword: '', newPassword: '', newPasswordRepeat: '' });
   };
 
+  // Reset the error states
   const resetErrors = () => {
     setCurrentPasswordShowError(false);
     setNewPasswordShowError(false);
@@ -238,13 +252,13 @@ export function UserProfile({ onClose }: UserProfileProps) {
                 </div>
               )}
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">
+                <label className="block text-sm text-gray-400 mb-2">
                   { t('userprofile_current_password') }
                 </label>
                 <input
                   type="password"
                   name="currentPassword"
-                  className="w-full px-3 py-2 bg-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   value={passwordData.currentPassword}
                   onChange={(e) =>
                     setPasswordData({ ...passwordData, currentPassword: e.target.value })
@@ -258,7 +272,7 @@ export function UserProfile({ onClose }: UserProfileProps) {
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">
+                <label className="block text-sm text-gray-400 mb-2">
                   { t('userprofile_new_password') }
                 </label>
                 <input
@@ -268,7 +282,7 @@ export function UserProfile({ onClose }: UserProfileProps) {
                   onChange={(e) =>
                     setPasswordData({ ...passwordData, newPassword: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 />
                 {newPasswordShowError && (
                   <p className="text-red-500 text-xs mt-1">
@@ -282,7 +296,7 @@ export function UserProfile({ onClose }: UserProfileProps) {
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">
+                <label className="block text-sm text-gray-400 mb-2">
                   { t('userprofile_confirm_new_password') }
                 </label>
                 <input
@@ -292,7 +306,7 @@ export function UserProfile({ onClose }: UserProfileProps) {
                   onChange={(e) =>
                     setPasswordData({ ...passwordData, newPasswordRepeat: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 />
                 {newPasswordRepeatShowError && (
                   <p className="text-red-500 text-xs mt-1">
@@ -313,26 +327,13 @@ export function UserProfile({ onClose }: UserProfileProps) {
                   disabled={isChangePasswordLoading}
                 >
                   {isChangePasswordLoading ? (
-                    <svg
-                      className="animate-spin h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8v8H4z"
-                      ></path>
+                  <>
+                    <svg aria-hidden="true" className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                      <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
                     </svg>
+                    { t('userprofile_change_password_button_loading') }
+                  </>
                   ) : (
                     <>
                       <Save className="w-4 h-4" />

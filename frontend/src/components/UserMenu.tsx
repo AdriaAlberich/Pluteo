@@ -7,13 +7,20 @@ import { useNavigate } from 'react-router-dom';
 import { UserProfile } from './UserProfile';
 
 export function UserMenu() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [showProfile, setShowProfile] = useState(false);
+
+  // Hooks for the authentication system, translation and navigation
   const { logout } = useAuth();
   const { t } = useTranslation();
-  const menuRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
 
+  // State to control the dropdown and profile visibility
+  const [isOpen, setIsOpen] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+
+  // Ref to manage the dropdown menu
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  // Handle clicks outside the dropdown to close it
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -27,11 +34,13 @@ export function UserMenu() {
     };
   }, []);
 
+  // Handle the settings button click to show the profile modal
   const handleSettings = () => {
     setShowProfile(true);
     setIsOpen(false);
   };
 
+  // Handle the logout button click to log out the user and redirect to home
   const handleLogout = () => {
     logout();
     navigate('/');

@@ -3,6 +3,8 @@ import { libraryApi } from '../services/api';
 import { LibraryOverview, ShelfBook, useAppStore } from '../context/appStore';
 
 export function useLibrary() {
+
+  // Global state to manage the library queries and mutations
   const { 
     isAuthenticated, 
     setLibrary, 
@@ -14,10 +16,10 @@ export function useLibrary() {
     setSearchTotalPages, 
     setSearchTotalResults, 
     setSearchPageNumber,
-    filterTerm,
-    setFilterTerm
+    filterTerm
   } = useAppStore();
 
+  // Get the whole library overview (shelves with books)
   const getLibrary = useQuery<LibraryOverview>({
     queryKey: ['library', { filterTerm }],
     queryFn: async () => {
@@ -29,6 +31,7 @@ export function useLibrary() {
     retry: false
   });
 
+  // Search for books in the library (external or internal)
   const searchBooks = useQuery({
     queryKey: ['searchBooks', { searchTerm, searchPageNumber, searchPageSize, external }],
     queryFn: async () => {
@@ -43,10 +46,12 @@ export function useLibrary() {
     retry: false
   });
 
+  // Mutation for adding an existing book to the library (external or internal)
   const addBook = useMutation({
     mutationFn: ({ isbn, shelfId }: { isbn: string; shelfId?: string | undefined }) => libraryApi.addBook(isbn, shelfId),
   });
 
+  // Mutation for adding a book manually to the library (custom book)
   const addBookManually = useMutation({
     mutationFn: ({ shelfBook, shelfId }: { shelfBook: Partial<ShelfBook>; shelfId: string | undefined }) => libraryApi.addBookManually(shelfBook, shelfId)
   });

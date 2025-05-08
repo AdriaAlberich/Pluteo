@@ -1,8 +1,10 @@
 import axios from 'axios';
 import { ShelfBook, UserSettings } from '../context/appStore';
 
+// Define the API URL or use the default localhost one
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5299/api';
 
+// Initialize axios API instance
 const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -10,6 +12,7 @@ const api = axios.create({
   },
 });
 
+// Define a request interceptor to add the authorization header
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
 
@@ -33,6 +36,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Define a response interceptor to handle unauthorized errors
 api.interceptors.response.use(
   (response) => response,
   async (error) => {

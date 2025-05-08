@@ -7,9 +7,14 @@ import { UserMain } from './components/UserMain';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 export default function App() {
+
+  // Get the authentication state
   const { isAuthenticated, setIsAuthenticated } = useAppStore();
+
+  // Navigate hook for redirections
   const navigate = useNavigate();
 
+  // Check if the user is authenticated and redirect to mylibrary (main component) if they are
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token && !isAuthenticated) {

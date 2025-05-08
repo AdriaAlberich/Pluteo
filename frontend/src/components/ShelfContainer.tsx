@@ -7,10 +7,9 @@ import {
 } from '@dnd-kit/sortable';
 import { useEffect, useRef, useState } from 'react';
 import { SortableBook } from './SortableBook';
-import { Shelf, ShelfBookPreview } from '../context/appStore';
+import { Shelf } from '../context/appStore';
 import { Pencil, Trash, Trash2, ArrowUp, ArrowDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useAppStore } from '../context/appStore';
 import { useShelves } from '../hooks/useShelves';
 import { useLibrary } from '../hooks/useLibrary';
 
@@ -20,20 +19,29 @@ interface ShelfContainerProps {
 }
 
 export function ShelfContainer({ shelf, totalShelves }: ShelfContainerProps) {
+
+  // Hook for the shelves system
   const { reOrderShelf, updateShelf, deleteShelf } = useShelves();
   const { getLibraryRefetch } = useLibrary();
+
+  // Translation hooks
   const { t } = useTranslation();
+
+  // Local shelf state
   const [ editMode, setEditMode ] = useState(false);
   const [ safeDelete, setSafeDelete ] = useState(false);
   const [ isOverflowing, setIsOverflowing ] = useState(false);
 
+  // State for the droppable area
   const { setNodeRef } = useDroppable({
     id: shelf.id,
   });
 
+  // Refs for the scrollable area
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollIntervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Handle the window resize event for the scrollable area
   useEffect(() => {
     window.addEventListener('resize', checkOverflow);
     return () => {
@@ -41,10 +49,12 @@ export function ShelfContainer({ shelf, totalShelves }: ShelfContainerProps) {
     };
   }, []);
 
+  // Check if the scrollable area is overflowing when the books count changes
   useEffect(() => {
     checkOverflow();
   }, [shelf.books.length]);
 
+  // Handle move the shelf up or down (buttons)
   const handleMove = (direction: string) => {
     if (direction === 'up' && shelf.order > 3) {
       reOrderShelf({
@@ -68,6 +78,7 @@ export function ShelfContainer({ shelf, totalShelves }: ShelfContainerProps) {
     }
   }
 
+  // Handle edit the shelf name (input)
   const handleEdit = () => {
     if (editMode) {
       shelf.name = (document.getElementById('shelfName') as HTMLInputElement).value;
@@ -91,7 +102,9 @@ export function ShelfContainer({ shelf, totalShelves }: ShelfContainerProps) {
     }
   }
 
+  // Handle delete the shelf (trash icon)
   const handleDelete = () => {
+    // Safe delete (double click)
     if (!safeDelete) {
       setSafeDelete(true);
       setTimeout(() => {
@@ -112,6 +125,7 @@ export function ShelfContainer({ shelf, totalShelves }: ShelfContainerProps) {
     });
   }
 
+  // Handle the scroll control (left and right buttons)
   const startScroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
       scrollIntervalRef.current = setInterval(() => {
@@ -123,6 +137,7 @@ export function ShelfContainer({ shelf, totalShelves }: ShelfContainerProps) {
     }
   };
 
+  // Stop the scroll when mouse is released
   const stopScroll = () => {
     if (scrollIntervalRef.current) {
       clearInterval(scrollIntervalRef.current);
@@ -130,6 +145,7 @@ export function ShelfContainer({ shelf, totalShelves }: ShelfContainerProps) {
     }
   };
 
+  // Check if the scrollable area is overflowing
   const checkOverflow = () => {
     if (scrollRef.current) {
       setIsOverflowing(scrollRef.current.scrollWidth > scrollRef.current.clientWidth);

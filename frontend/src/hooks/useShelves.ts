@@ -3,6 +3,7 @@ import { shelfApi } from '../services/api';
 
 export function useShelves() {
 
+  // Mutations for managing shelves
   const createShelf = useMutation({
     mutationFn: ({ shelfName }: { shelfName: string }) => shelfApi.createShelf(shelfName)
   });

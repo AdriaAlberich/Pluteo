@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import i18n from '../i18n';
 
+// Define the global app state
 interface AppState {
   isAuthenticated: boolean;
   setIsAuthenticated: (auth: boolean) => void;
@@ -36,6 +37,7 @@ interface AppState {
   setFilterTerm: (term: string) => void;
 }
 
+// User settings interface
 export interface UserSettings {
   notifyByEmail: boolean;
   notifyLoan: string;
@@ -44,6 +46,7 @@ export interface UserSettings {
   locale: string;
 }
 
+// Shelf book preview interface
 export interface ShelfBookPreview {
   id: string;
   title: string;
@@ -51,6 +54,7 @@ export interface ShelfBookPreview {
   cover: string;
 }
 
+// Book loan interface
 export interface Loan {
   library: string;
   loanDate: Date;
@@ -59,6 +63,7 @@ export interface Loan {
   lastNotificationDate: Date;
 }
 
+// Shelf book interface
 export interface ShelfBook {
   id: string;
   title: string;
@@ -77,6 +82,7 @@ export interface ShelfBook {
   loan: Loan | null;
 }
 
+// Shelf interface
 export interface Shelf {
   id: string;
   name: string;
@@ -86,10 +92,12 @@ export interface Shelf {
   books: ShelfBookPreview[];
 }
 
+// Library overview interface
 export interface LibraryOverview {
   shelves: Shelf[];
 }
 
+// Book search result item interface
 export interface BookSearchResultItem { 
   title: string;
   isbn: string[];
@@ -102,6 +110,7 @@ export interface BookSearchResultItem {
   availableLanguages: string[];
 }
 
+// Book search result interface
 export interface BookSearchResult {
   totalResults: number;
   page: number;
@@ -109,6 +118,7 @@ export interface BookSearchResult {
   results: BookSearchResultItem[];
 }
 
+// Create the zustand store and initialize the global state
 export const useAppStore = create<AppState>((set) => ({
   isAuthenticated: false,
   setIsAuthenticated: (auth) => set({ isAuthenticated: auth }),

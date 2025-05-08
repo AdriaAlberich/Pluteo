@@ -8,13 +8,14 @@ import {
   useSensors,
   DragEndEvent,
   DragOverlay,
+  TouchSensor,
 } from '@dnd-kit/core';
 import {
   arrayMove,
 } from '@dnd-kit/sortable';
 
 import { ShelfContainer } from './ShelfContainer';
-import { LibraryOverview, Shelf, ShelfBookPreview, ShelfBook, useAppStore } from '../context/appStore';
+import { ShelfBookPreview, useAppStore } from '../context/appStore';
 import { useLibrary } from '../hooks/useLibrary';
 import { useShelfBooks } from '../hooks/useShelfBooks';
 import { useShelves } from '../hooks/useShelves';
@@ -25,12 +26,9 @@ import { Plus, Search } from 'lucide-react';
 
 export function Library() {
 
-  const [ showShelfBook, setShowShelfBook ] = useState(false);
-  const [ showSearch, setShowSearch ] = useState(false);
-  
+  // Global state for the library
   const { 
-    library, 
-    setLibrary, 
+    library,
     setSelectedShelfBookShelfId, 
     setSelectedShelfBookId, 
     setSelectedShelfBook,
@@ -38,15 +36,21 @@ export function Library() {
     setFilterTerm,
   } = useAppStore();
 
-  const { getLibrary, getLibraryRefetch } = useLibrary();
-  const { reOrderShelfBook, reOrderShelfBookError, moveShelfBook, moveShelfBookError } = useShelfBooks();
+  // Hooks needed for the library
+  const { getLibraryRefetch } = useLibrary();
+  const { reOrderShelfBook, moveShelfBook } = useShelfBooks();
   const { createShelf } = useShelves();
 
+  // Local state for the library
+  const [ showShelfBook, setShowShelfBook ] = useState(false);
+  const [ showSearch, setShowSearch ] = useState(false);
   const [ draggingBook, setDraggingBook ] = useState<ShelfBookPreview | null>(null);
   const [ hideEmptyShelves, setHideEmptyShelves ] = useState(false);
 
-  const sensors = useSensors(useSensor(PointerSensor));
+  // Sensors for the drag and drop
+  const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
 
+  // Handle drag start event
   const onDragStart = ({ active }: { active: any }) => {
     const [shelfId, bookId] = active.id.split('_');
     const shelf = library.shelves.find((shelf) => shelf.id === shelfId);
@@ -54,6 +58,7 @@ export function Library() {
     setDraggingBook(bookPreview || null);
   };
 
+  // Handle drag end event
   const onDragEnd = ({ active, over }: DragEndEvent) => {
     setDraggingBook(null);
 
@@ -72,7 +77,7 @@ export function Library() {
         const fromIndex = library.shelves[shelfIndex].books.findIndex((book) => book.id === draggingBookId);
         const overIndex = library.shelves[shelfIndex].books.findIndex((book) => book.id === overBookId);
         
-        // If the book is dropped on itself or the drop target is not found, show the book details
+        // If the book is dropped on itself or the drop target is not found, show the book details (acts like a click)
         if (fromIndex === overIndex || overIndex === -1) {
           setSelectedShelfBookShelfId(draggingFromShelfId);
           setSelectedShelfBookId(draggingBookId);
@@ -132,6 +137,7 @@ export function Library() {
     }
   };
 
+  // Handle create shelf button click
   const handleCreateShelf = () => {
     const shelfName = (document.getElementById('shelfName') as HTMLInputElement).value;
     (document.getElementById('shelfName') as HTMLInputElement).value = '';
@@ -154,12 +160,14 @@ export function Library() {
     });
   };
 
+  // Handle the create shelf book button click (custom books attached to the user)
   const handleCreateShelfBook = () => {
     setSelectedShelfBookShelfId(undefined);
     setSelectedShelfBookId(undefined);
     setShowShelfBook(true);
   };
 
+  // Handle the book details close click (modal close)
   const handleBookDetailsClose = () => {
     setShowShelfBook(false);
     setSelectedShelfBookShelfId(undefined);
@@ -167,14 +175,17 @@ export function Library() {
     setSelectedShelfBook(undefined);
   }
 
+  // Handle the search close click (modal close)
   const handleSearchClose = () => {
     setShowSearch(false);
   }
 
+  // Handle the search button click (open search modal, or add a book from the search)
   const handleSearch = () => {
     setShowSearch(true);
   }
 
+  // Filter and order the shelves based on the type of shelf, the order position and the filter term
   const filteredShelves = library.shelves
     .slice()
     .sort((a, b) => a.order - b.order)
