@@ -30,8 +30,8 @@
     "auth_password_not_valid_error": "La contrasenya no és vàlida (mínim 8 caràcters, 1 majúscula, 1 minúscula, 1 número i 1 caràcter especial)",
     "auth_password_incorrect_error": "La contrasenya és incorrecta",
     "auth_password_expired_error": "La contrasenya ha caducat. Si us plau, restableix-la.",
-    "auth_user_not_active_error": "El compte no està actiu. Si us plau, activa'l.",
-    "auth_user_already_activated_error": "El compte ja està activat.",
+    "auth_user_not_active_error": "El compte no està actiu. Si us plau, revisa el teu correu electrònic i activa'l.",
+    "auth_user_already_activated_error": "El compte ja està activat. Siusplau, inicia sessió.",
     "auth_resend_activation_link": "Reenviar correu d'activació",
     "auth_resend_activation_title": "Reenviar correu d'activació",
     "auth_resend_activation_button": "Reenviar",
@@ -45,15 +45,11 @@
     "auth_reset_password_title": "Restablir contrasenya",
     "auth_reset_password_button": "Restablir",
     "auth_reset_password_button_loading": "Restablint...",
-    "auth_reset_password_success": "La contrasenya s'ha restablert amb èxit.",
+    "auth_reset_password_success": "La contrasenya s'ha restablert amb èxit. Ja pots iniciar sessió amb la nova contrasenya.",
     "auth_reset_password_token_not_found_error": "El token de restabliment no és vàlid o ha caducat.",
     
     "usermenu_settings": "Configuració",
     "usermenu_logout": "Tancar sessió",
-
-    "languageselector_catalan": "Català",
-    "languageselector_spanish": "Castellà",
-    "languageselector_english": "Anglès",
 
     "notifications_title": "Notificacions",
     "notifications_clear_all": "Esborrar tot",
