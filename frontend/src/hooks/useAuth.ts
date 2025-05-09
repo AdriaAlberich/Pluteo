@@ -3,8 +3,11 @@ import { authApi } from '../services/api';
 import { useAppStore } from '../context/appStore';
 
 export function useAuth() {
+
+  // State to manage user authentication and settings
   const { setIsAuthenticated, setUserSettings, setNotifications } = useAppStore();
 
+  // Mutations for the authentication
   const registerMutation = useMutation({
     mutationFn: authApi.register
   });
@@ -33,6 +36,7 @@ export function useAuth() {
     mutationFn: authApi.resetPassword
   });
 
+  // We use JWT tokens so the only way to log out is clearing the token locally
   const logout = () => {
     setIsAuthenticated(false);
     setUserSettings(null);
@@ -40,6 +44,7 @@ export function useAuth() {
     localStorage.removeItem('token');
   };
 
+  // Return the authentication functions and states
   return {
     register: registerMutation.mutate,
     login: loginMutation.mutate,

@@ -6,6 +6,7 @@ using Pluteo.Domain.Models.Dto.ShelfBooks;
 using Pluteo.Domain.Models.Entities;
 using Pluteo.Domain.Models.Settings;
 using ILogger = Serilog.ILogger;
+using Pluteo.Domain.Enums;
 
 namespace Pluteo.Application.Systems;
 public class ShelfBookSystem(ApplicationSettings config, UserService userService, NotificationSystem notificationSystem, IResourceManager localizationManager, ILogger logger) : IShelfBookSystem
@@ -46,6 +47,32 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
         return shelfBook;
     }
 
+    public async Task<ShelfBookDetails> GetShelfBookDetails(string email, Guid shelfId, Guid shelfBookId)
+    {
+        var shelfBook = await GetShelfBook(email, shelfId, shelfBookId);
+        
+        var shelfBookDetails = new ShelfBookDetails
+        {
+            Id = shelfBook.Id,
+            Order = shelfBook.Order,
+            Title = shelfBook.Title,
+            ISBN = string.Join(" ", shelfBook.ISBN),
+            Authors = string.Join(" ", shelfBook.Authors),
+            Cover = shelfBook.CoverSmall,
+            FirstPublishYear = shelfBook.FirstPublishYear,
+            Publisher = string.Join(" ", shelfBook.Publisher),
+            PublishPlace = string.Join(" ", shelfBook.PublishPlace),
+            NumPages = shelfBook.NumPages,
+            AvailableLanguages = string.Join(" ", shelfBook.AvailableLanguages),
+            PhysicalLocation = shelfBook.PhysicalLocation,
+            Notes = shelfBook.Notes,
+            Status = ((int)shelfBook.Status).ToString(),
+            Loan = shelfBook.Loan,
+        };
+
+        return shelfBookDetails;
+    }
+
     public async Task MoveShelfBook(string email, Guid shelfId, Guid shelfBookId, Guid newShelfId)
     {
         if(shelfId == Guid.Empty)
@@ -63,6 +90,7 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
         var newShelf = user.Shelves.FirstOrDefault(s => s.Id == newShelfId) ?? throw new ServiceException("NEW_SHELF_NOT_EXISTS");
         var shelfBook = shelf.Books.FirstOrDefault(sb => sb.Id == shelfBookId) ?? throw new ServiceException("SHELF_BOOK_NOT_EXISTS");
 
+        shelfBook.Order = newShelf.Books.Count + 1;
         shelf.Books.Remove(shelfBook);
         newShelf.Books.Add(shelfBook);
 
@@ -121,7 +149,7 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
         _logger.Information("Shelf book {Name} ({Id}) has been reordered to position {NewOrder} in shelf {ShelfName} ({ShelfId}) for user {Email} ({Id}).", shelfBook.Title, shelfBook.Id, newOrder, shelf.Name, shelf.Id, user.Email, user.Id);
     }
 
-    public async Task UpdateShelfBook(string email, Guid shelfId, Guid shelfBookId, CreateUpdateShelfBook request)
+    public async Task UpdateShelfBook(string email, Guid shelfId, Guid shelfBookId, ShelfBookDetails request)
     {
         if(shelfId == Guid.Empty)
             throw new ServiceException("SHELF_CANNOT_BE_NULL");
@@ -138,13 +166,13 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
 
         bool isUpdated = false;
 
-        if(!string.IsNullOrWhiteSpace(request.Title))
+        if(request.Title != null)
         {
             shelfBook.Title = request.Title;
             isUpdated = true;
         }
 
-        if(!string.IsNullOrWhiteSpace(request.ISBN))
+        if(request.ISBN != null)
         {
             shelfBook.ISBN = [];
             shelfBook.ISBN.Add(request.ISBN);
@@ -152,7 +180,7 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
             isUpdated = true;
         }
 
-        if(!string.IsNullOrWhiteSpace(request.Authors))
+        if(request.Authors != null)
         {
             shelfBook.Authors = [];
             shelfBook.Authors.Add(request.Authors);
@@ -160,20 +188,20 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
             isUpdated = true;
         }
 
-        if(!string.IsNullOrWhiteSpace(request.Cover))
+        if(request.Cover != null)
         {
             shelfBook.CoverBig = request.Cover;
             shelfBook.CoverSmall = request.Cover;
             isUpdated = true;
         }
 
-        if(!string.IsNullOrWhiteSpace(request.FirstPublishYear))
+        if(request.FirstPublishYear != null)
         {
             shelfBook.FirstPublishYear = request.FirstPublishYear;
             isUpdated = true;
         }
         
-        if(!string.IsNullOrWhiteSpace(request.Publisher))
+        if(request.Publisher != null)
         {
             shelfBook.Publisher = [];
             shelfBook.Publisher.Add(request.Publisher);
@@ -181,7 +209,7 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
             isUpdated = true;
         }
 
-        if(!string.IsNullOrWhiteSpace(request.PublishPlace))
+        if(request.PublishPlace != null)
         {
             shelfBook.PublishPlace = [];
             shelfBook.PublishPlace.Add(request.PublishPlace);
@@ -195,7 +223,7 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
             isUpdated = true;
         }
 
-        if(!string.IsNullOrWhiteSpace(request.AvailableLanguages))
+        if(request.AvailableLanguages != null)
         {
             shelfBook.AvailableLanguages = [];
             shelfBook.AvailableLanguages.Add(request.AvailableLanguages);
@@ -203,16 +231,25 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
             isUpdated = true;
         }
 
-        if(!string.IsNullOrWhiteSpace(request.PhysicalLocation))
+        if(request.PhysicalLocation != null)
         {
             shelfBook.PhysicalLocation = request.PhysicalLocation;
             isUpdated = true;
         }
         
-        if(!string.IsNullOrWhiteSpace(request.Notes))
+        if(request.Notes != null)
         {
             shelfBook.Notes = request.Notes;
             isUpdated = true;
+        }
+
+        if(request.Status != null)
+        {
+            if(Enum.TryParse<ShelfBookStatus>(request.Status, true, out var status))
+            {
+                shelfBook.Status = status;
+                isUpdated = true;
+            }
         }
 
         if(isUpdated)
@@ -246,12 +283,12 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
         {
             Library = request.Library,
             LoanDate = DateTime.UtcNow,
-            DueDate = request.DueDate,
+            DueDate = request.DueDate.ToUniversalTime(),
             Notify = request.Notify,
             LastNotificationDate = DateTime.UtcNow,
         };
 
-        string message = _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanInitialNotificationMessage", shelfBook.Title, user.Settings.NotifyLoanBeforeDays, user.Settings.NotifyLoanBeforeDaysFrequency);
+        string message = _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanInitialNotificationMessage", shelfBook.Title);
         await _notificationSystem.AddNotification(user, _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanNotificationTitle", shelfBook.Title), message);
 
         await _userService.Update(user);
@@ -274,6 +311,9 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
             throw new ServiceException("SHELF_BOOK_LOAN_NOT_EXISTS");
 
         shelfBook.Loan = null;
+
+        string message = _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanDeactivationNotificationMessage", shelfBook.Title);
+        await _notificationSystem.AddNotification(user, _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanNotificationTitle", shelfBook.Title), message);
 
         await _userService.Update(user);
         _logger.Information("Shelf book {Name} ({Id}) has loan notifications deactivated for user {Email} ({Id}).", shelfBook.Title, shelfBook.Id, shelf.Name, shelf.Id, user.Email, user.Id);

@@ -1,3 +1,4 @@
+using System.Text;
 using Pluteo.Application.Services;
 using Pluteo.Domain.Enums;
 using Pluteo.Domain.Exceptions;
@@ -55,25 +56,6 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
         else
         {
             var externalBook = await _externalLibrary.GetBookDetails(isbn) ?? throw new ServiceException("BOOK_NOT_FOUND");
-            
-            shelfBook = new ShelfBook
-            {
-                Id = Guid.NewGuid(),
-                Title = externalBook.Title,
-                ISBN = externalBook.ISBN,
-                Authors = externalBook.Authors,
-                CoverSmall = externalBook.CoverSmall,
-                CoverBig = externalBook.CoverBig,
-                Publisher = externalBook.Publishers,
-                PublishPlace = externalBook.PublishPlaces,
-                FirstPublishYear = externalBook.FirstPublishYear,
-                AvailableLanguages = externalBook.AvailableLanguages,
-                NumPages = externalBook.NumPages,
-                PhysicalLocation = string.Empty,
-                Notes = string.Empty,
-                Status = ShelfBookStatus.None,
-                Order = 0
-            };
 
             await _bookService.Create(new CreateBookRequest
             {
@@ -88,6 +70,28 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
                 NumPages = externalBook.NumPages,
                 AvailableLanguages = externalBook.AvailableLanguages
             });
+
+            var newBookId = await _bookService.GetByISBN(isbn) ?? throw new ServiceException("BOOK_NOT_FOUND");
+
+            shelfBook = new ShelfBook
+            {
+                Id = Guid.NewGuid(),
+                Title = externalBook.Title,
+                ISBN = externalBook.ISBN,
+                Authors = externalBook.Authors,
+                Book = newBookId.Id,
+                CoverSmall = externalBook.CoverSmall,
+                CoverBig = externalBook.CoverBig,
+                Publisher = externalBook.Publishers,
+                PublishPlace = externalBook.PublishPlaces,
+                FirstPublishYear = externalBook.FirstPublishYear,
+                AvailableLanguages = externalBook.AvailableLanguages,
+                NumPages = externalBook.NumPages,
+                PhysicalLocation = string.Empty,
+                Notes = string.Empty,
+                Status = ShelfBookStatus.None,
+                Order = 0
+            };
         }
 
         Shelf? shelf = null;
@@ -127,7 +131,7 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
             NumPages = book.NumPages ?? 0,
             PhysicalLocation = book.PhysicalLocation ?? string.Empty,
             Notes = book.Notes ?? string.Empty,
-            Status = book.Status ?? ShelfBookStatus.None,
+            Status = Enum.Parse<ShelfBookStatus>(book.Status ?? string.Empty, true),
             Order = 0
         };
 
@@ -149,13 +153,17 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
         _logger.Information("Shelf book {Name} ({Id}) has been added to shelf {ShelfName} ({ShelfId}) for user {Email} ({Id}).", book.Title, shelfBook.Id, shelf.Name, shelf.Id, user.Email, user.Id);
     }
 
-    public async Task<LibraryOverview> GetLibrary(string email, string filterTerm)
+    public async Task<LibraryOverview> GetLibrary(string email, string? filterTerm)
     {
         var user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_EXISTS");
 
-        if(filterTerm == "all")
+        if(filterTerm == null || filterTerm == "all")
         {
             filterTerm = string.Empty;
+        }
+        else
+        {
+            filterTerm = Uri.UnescapeDataString(filterTerm);
         }
 
         List<string> filterTerms = string.IsNullOrWhiteSpace(filterTerm)
@@ -203,6 +211,7 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
         }
         else
         {
+            searchTerm = Uri.UnescapeDataString(searchTerm);
             searchTerms = [.. searchTerm.Split('+')];
         }
 

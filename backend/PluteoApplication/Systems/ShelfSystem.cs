@@ -52,6 +52,12 @@ public class ShelfSystem(ApplicationSettings config, UserService userService, IL
 
         user.Shelves.Remove(shelf);
 
+        for(int i = 0; i < user.Shelves.Count; i++)
+        {
+            if(user.Shelves[i].Order > shelf.Order)
+                user.Shelves[i].Order--;
+        }
+
         await _userService.Update(user);
         _logger.Information("Shelf {Name} ({Id}) has been removed for user {Email} ({Id}).", shelf.Name, shelf.Id, user.Email, user.Id);
     }
@@ -62,10 +68,35 @@ public class ShelfSystem(ApplicationSettings config, UserService userService, IL
 
         var shelf = user.Shelves.FirstOrDefault(s => s.Id == shelfId) ?? throw new ServiceException("SHELF_NOT_EXISTS");
 
-        if(newOrder < 1 || newOrder > user.Shelves.Count)
-            throw new ServiceException("INVALID_SHELF_ORDER");
+        if(newOrder == 1)
+        {
+            if(shelf.Order == 1)
+                throw new ServiceException("SHELF_ALREADY_FIRST");
 
-        shelf.Order = newOrder;
+            var previousShelf = user.Shelves.FirstOrDefault(s => s.Order == shelf.Order - 1) ?? throw new ServiceException("SHELF_NOT_EXISTS");
+
+            if(previousShelf.IsDefault || previousShelf.IsReadQueue)
+                throw new ServiceException("SHELF_CANNOT_BE_FIRST");
+
+            shelf.Order--;
+            previousShelf.Order++;
+        }
+        else if(newOrder == 2)
+        {
+            if(shelf.Order == user.Shelves.Count)
+                throw new ServiceException("SHELF_ALREADY_LAST");
+
+            var nextShelf = user.Shelves.FirstOrDefault(s => s.Order == shelf.Order + 1) ?? throw new ServiceException("SHELF_NOT_EXISTS");
+
+            shelf.Order++;
+            nextShelf.Order--;
+        }
+        else
+        {
+            throw new ServiceException("INVALID_ORDER");
+        }
+
+        _logger.Information("Shelf {Name} ({Id}) has been reordered for user {Email} ({Id}).", shelf.Name, shelf.Id, user.Email, user.Id);
 
         await _userService.Update(user);
     }

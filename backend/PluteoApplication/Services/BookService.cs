@@ -152,9 +152,12 @@ public class BookService(ApplicationSettings config, ILogger logger, IBaseReposi
 
         foreach(string term in searchTerms)
         {
-            Regex regex = new(term, RegexOptions.IgnoreCase);
-            filteredBooks.AddRange(books.Where(book => regex.IsMatch(book.Title) || regex.IsMatch(book.ISBN.FirstOrDefault() ?? string.Empty)));
+            var regex = new Regex(term, RegexOptions.IgnoreCase);
+            var matchingBooks = books.Where(book => regex.IsMatch(book.Title)).ToList();
+            filteredBooks.AddRange(matchingBooks);
         }
+
+        filteredBooks = [.. filteredBooks.Distinct()];
 
         int totalCount = filteredBooks.Count;
         int totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
@@ -181,7 +184,7 @@ public class BookService(ApplicationSettings config, ILogger logger, IBaseReposi
                 })]
         };
 
-        _logger.Information("Search for books with terms {SearchTerms} returned {TotalResults} results.", string.Join(", ", searchTerms), totalCount);
+        _logger.Information("Search for books with terms {SearchTerms} returned {TotalResults} results.", string.Join(" ", searchTerms), totalCount);
         
         return results;
     }

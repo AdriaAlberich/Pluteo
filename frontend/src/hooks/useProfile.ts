@@ -3,8 +3,10 @@ import { userApi } from '../services/api';
 import { useAppStore, UserSettings } from '../context/appStore';
 
 export function useProfile() {
+  // Global state to manage the profile queries and mutations
   const { isAuthenticated, setUserSettings } = useAppStore();
 
+  // Query to get user settings
   const getSettings = useQuery<UserSettings>({
     queryKey: ['userSettings'],
     queryFn: async () => {
@@ -17,14 +19,17 @@ export function useProfile() {
     retryDelay: 1000
   });
 
+  // Mutation to update user settings
   const updateSettings = useMutation({
     mutationFn: userApi.updateSettings
   });
 
+  // Mutation to update user language
   const updateLanguage = useMutation({
     mutationFn: userApi.updateLanguage
   });
 
+  // Mutation to change user password
   const changePasswordMutation = useMutation({
     mutationFn: userApi.changePassword
   });
