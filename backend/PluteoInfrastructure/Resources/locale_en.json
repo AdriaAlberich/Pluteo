@@ -1,5 +1,10 @@
 {
-    "UserActivationEmailSubject": "Pluteo Account Activation {1}",
-    "UserResetPasswordEmailSubject": "Pluteo Account Recovery {1}",
-    "UserNotificationEmailSubject": "Pluteo Notification {1}"
+    "UserActivationEmailSubject": "{0} Account Activation",
+    "UserResetPasswordEmailSubject": "{0} Account Recovery",
+    "UserNotificationEmailSubject": "{0} Notification",
+    "LoanNotificationTitle": "{0} Loan Notification",
+    "LoanInitialNotificationMessage": "Loan notifications activated for the book {0}.",
+    "LoanOverdueNotificationMessage": "The loan for the book {0} is overdue. Please return it as soon as possible.",
+    "LoanNotificationMessage": "The book {0} you have borrowed is due on {1}. Please return it as soon as possible.",
+    "LoanDeactivationNotificationMessage": "Loan notifications deactivated for the book {0}."
 }
