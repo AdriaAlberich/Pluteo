@@ -619,7 +619,7 @@ export function ShelfBookDetails({ onClose }: ShelfBookDetailsProps) {
             <button
               type="submit"
               onClick={ handleBookSubmit }
-              className={'flex-1 py-2 text-white rounded-lg bg-blue-700 hover:bg-blue-600 flex items-center justify-center gap-2'}
+              className="flex-1 py-2 text-white rounded-lg bg-blue-700 hover:bg-blue-600 flex items-center justify-center gap-2"
               disabled={isUpdateLoading || isAddBookManuallyLoading}
             >
               {(isUpdateLoading || isAddBookManuallyLoading) ? (
