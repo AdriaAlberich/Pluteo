@@ -1,4 +1,3 @@
-using System.Text;
 using Pluteo.Application.Services;
 using Pluteo.Domain.Enums;
 using Pluteo.Domain.Exceptions;
@@ -21,13 +20,25 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
     private readonly ILogger _logger = logger;
     private readonly ILibraryIntegration _externalLibrary = externalLibrary;
 
+    /// <summary>
+    /// Adds an existing book to the user's library.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="isbn"></param>
+    /// <param name="shelfId"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task AddBook(string email, string isbn, Guid? shelfId)
     {
         var user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_EXISTS");
 
+
+        // Check if the book already exists in the database
         Book? book = await _bookService.GetByISBN(isbn);
 
         ShelfBook? shelfBook = null;
+
+        // If exists, check if it is alredy in the user's library and if not create a new one as a shelf book
         if (book != null)
         {
             if (user.Shelves.All(s => s.Books.All(b => b.ISBN != book.ISBN)))
@@ -55,8 +66,10 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
         }
         else
         {
+            // If not, get the book details from the external source
             var externalBook = await _externalLibrary.GetBookDetails(isbn) ?? throw new ServiceException("BOOK_NOT_FOUND");
 
+            // Create a new book in the database
             await _bookService.Create(new CreateBookRequest
             {
                 Title = externalBook.Title,
@@ -71,8 +84,10 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
                 AvailableLanguages = externalBook.AvailableLanguages
             });
 
+            // Get the book from the database
             var newBookId = await _bookService.GetByISBN(isbn) ?? throw new ServiceException("BOOK_NOT_FOUND");
 
+            // Create a new shelf book
             shelfBook = new ShelfBook
             {
                 Id = Guid.NewGuid(),
@@ -94,6 +109,7 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
             };
         }
 
+        // Add the shelf book to the user's library
         Shelf? shelf = null;
         if(shelfId == null || shelfId == Guid.Empty)
         {
@@ -104,14 +120,24 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
             shelf = user.Shelves.FirstOrDefault(s => s.Id == shelfId) ?? throw new ServiceException("SHELF_NOT_EXISTS");
         }
 
+        // Put the new book to the end of the shelf
         shelfBook.Order = shelf.Books.Count + 1;
 
+        // Add the book to the shelf
         shelf.Books.Add(shelfBook);
 
         await _userService.Update(user);
         _logger.Information("Shelf book {Name} ({Id}) has been added to shelf {ShelfName} ({ShelfId}) for user {Email} ({Id}).", shelfBook.Title, shelfBook.Id, shelf.Name, shelf.Id, user.Email, user.Id);
     }
 
+    /// <summary>
+    /// Adds a book to the user's library manually (custom one).
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="book"></param>
+    /// <param name="shelfId"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task AddBookManually(string email, CreateUpdateShelfBook book, Guid? shelfId)
     {
         var user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_EXISTS");
@@ -153,10 +179,18 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
         _logger.Information("Shelf book {Name} ({Id}) has been added to shelf {ShelfName} ({ShelfId}) for user {Email} ({Id}).", book.Title, shelfBook.Id, shelf.Name, shelf.Id, user.Email, user.Id);
     }
 
+    /// <summary>
+    /// Gets the user's library overview.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="filterTerm"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task<LibraryOverview> GetLibrary(string email, string? filterTerm)
     {
         var user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_EXISTS");
 
+        // Normalize the filter
         if(filterTerm == null || filterTerm == "all")
         {
             filterTerm = string.Empty;
@@ -170,8 +204,8 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
             ? []
             : [.. filterTerm.Split('+')];
 
+        // Get the user's shelves with the filter applied, we also map the shelf books to a simple overview object
         var shelves = user.Shelves;
-
         var shelfOverviews = shelves.Select(shelf =>
         {
             var filteredBooks = shelf.Books
@@ -202,9 +236,19 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
         };
     }
 
+    /// <summary>
+    /// Searches for new books in the library (internal and external).
+    /// </summary>
+    /// <param name="searchTerm"></param>
+    /// <param name="page"></param>
+    /// <param name="pageSize"></param>
+    /// <param name="external"></param>
+    /// <returns></returns>
     public async Task<BookSearchResults> SearchNewBooks(string searchTerm, int page, int pageSize, bool external = false)
     {
         List<string> searchTerms = [];
+
+        // Normalize the search term
         if (string.IsNullOrEmpty(searchTerm))
         {
             searchTerms.Add(string.Empty);
@@ -215,6 +259,7 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
             searchTerms = [.. searchTerm.Split('+')];
         }
 
+        // Check if is external or internal search
         if (external)
         {
             return await _externalLibrary.Search(searchTerms, page, pageSize);

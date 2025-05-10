@@ -4,12 +4,10 @@ using AutoMapper;
 using ILogger = Serilog.ILogger;
 using Pluteo.Domain.Exceptions;
 using Pluteo.Infrastructure.Utils;
-using Pluteo.Domain.Models.Dto.Users;
 using Pluteo.Domain.Models.Settings;
 using System.Security.Claims;
 using Pluteo.Application.Systems;
 using Microsoft.Extensions.Options;
-using Pluteo.Domain.Models.Dto.ShelfBooks;
 using Pluteo.Domain.Models.Dto.Library;
 
 namespace Pluteo.Infrastructure.Controllers;
@@ -25,7 +23,7 @@ public class LibraryController(LibrarySystem librarySystem, IWebHostEnvironment 
     private readonly ApplicationSettings _config = config.Value;
 
     #region User Endpoints
-
+    
     [Authorize(Roles = "User")]
     [HttpGet()]
     public async Task<ActionResult> GetLibrary([FromQuery] string? filter = null)

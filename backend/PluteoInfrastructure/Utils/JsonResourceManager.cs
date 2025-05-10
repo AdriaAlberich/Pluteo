@@ -15,6 +15,10 @@ public class JsonResourceManager : IResourceManager
         _resources = LoadResources() ?? [];
     }
 
+    /// <summary>
+    /// Loads the resources from the JSON files.
+    /// </summary>
+    /// <returns></returns>
     private Dictionary<string, Dictionary<string, string>> LoadResources()
     {
         Dictionary<string, Dictionary<string,string>> resources = [];
@@ -35,6 +39,13 @@ public class JsonResourceManager : IResourceManager
         return resources;
     }
 
+    /// <summary>
+    /// Gets a string from the resources with custom format.
+    /// </summary>
+    /// <param name="locale"></param>
+    /// <param name="key"></param>
+    /// <param name="args"></param>
+    /// <returns></returns>
     public string GetStringFormatted(string locale, string key, params object[] args)
     {
         if (args.Length > 0)
@@ -45,6 +56,12 @@ public class JsonResourceManager : IResourceManager
         return GetString(locale, key);
     }
 
+    /// <summary>
+    /// Gets a simple string from the resources.
+    /// </summary>
+    /// <param name="locale"></param>
+    /// <param name="key"></param>
+    /// <returns></returns>
     public string GetString(string locale, string key)
     {
         if (_resources[locale].TryGetValue(key, out string? value))

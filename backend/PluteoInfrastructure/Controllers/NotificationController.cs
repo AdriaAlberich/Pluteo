@@ -4,7 +4,6 @@ using AutoMapper;
 using ILogger = Serilog.ILogger;
 using Pluteo.Domain.Exceptions;
 using Pluteo.Infrastructure.Utils;
-using Pluteo.Domain.Models.Dto.Users;
 using Pluteo.Domain.Models.Settings;
 using System.Security.Claims;
 using Pluteo.Application.Systems;

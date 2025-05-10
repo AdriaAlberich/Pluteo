@@ -9,7 +9,12 @@ public class LoanNotificationService(IServiceProvider serviceProvider, IOptions<
     private readonly IServiceProvider _serviceProvider = serviceProvider;
     private readonly ApplicationSettings _config = config.Value;
     private readonly ILogger _logger = logger;
-
+    
+    /// <summary>
+    /// Background service that sends loan notifications to users.
+    /// </summary>
+    /// <param name="stoppingToken"></param>
+    /// <returns></returns>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)

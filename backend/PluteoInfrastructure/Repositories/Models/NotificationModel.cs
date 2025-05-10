@@ -1,6 +1,5 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using Pluteo.Domain.Models.Entities;
 
 namespace Pluteo.Infrastructure.Repositories.Models;
 public class NotificationModel

@@ -10,6 +10,11 @@ public sealed class PasswordCipher(ApplicationSettings applicationSettings) : IP
 
     private readonly int _passwordIterations = applicationSettings.PasswordIterations;
 
+    /// <summary>
+    /// Encrypts a password.
+    /// </summary>
+    /// <param name="password"></param>
+    /// <returns></returns>
     public string Encrypt(string password)
     {
         using var algorithm = new Rfc2898DeriveBytes(
@@ -23,6 +28,13 @@ public sealed class PasswordCipher(ApplicationSettings applicationSettings) : IP
         return $"{_passwordIterations}.{salt}.{key}";
     }
 
+    /// <summary>
+    /// Checks if a password matches the hash.
+    /// </summary>
+    /// <param name="hash"></param>
+    /// <param name="password"></param>
+    /// <returns></returns>
+    /// <exception cref="FormatException"></exception>
     public (bool verified, bool needsUpgrade) Check(string hash, string password)
     {
         var parts = hash.Split('.', 3);
@@ -33,7 +45,7 @@ public sealed class PasswordCipher(ApplicationSettings applicationSettings) : IP
 
         var iterations = Convert.ToInt32(parts[0]);
         var salt = Convert.FromBase64String(parts[1]);
-        var _key = Convert.FromBase64String(parts[2]);
+        var key = Convert.FromBase64String(parts[2]);
 
         var needsUpgrade = iterations != _passwordIterations;
 
@@ -44,7 +56,7 @@ public sealed class PasswordCipher(ApplicationSettings applicationSettings) : IP
         HashAlgorithmName.SHA512);
         var keyToCheck = algorithm.GetBytes(KeySize);
 
-        var verified = keyToCheck.SequenceEqual(_key);
+        var verified = keyToCheck.SequenceEqual(key);
 
         return (verified, needsUpgrade);
     }

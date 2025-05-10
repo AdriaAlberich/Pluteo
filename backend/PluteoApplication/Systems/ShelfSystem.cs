@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using Pluteo.Application.Services;
 using Pluteo.Domain.Exceptions;
 using Pluteo.Domain.Interfaces.Systems;
@@ -13,6 +12,14 @@ public class ShelfSystem(ApplicationSettings config, UserService userService, IL
     private readonly UserService _userService = userService;
     private readonly ILogger _logger = logger;
 
+    /// <summary>
+    /// Adds a new shelf to the user.
+    /// </summary>
+    /// <param name="user"></param>
+    /// <param name="name"></param>
+    /// <param name="isDefault"></param>
+    /// <param name="IsReadQueue"></param>
+    /// <returns></returns>
     public async Task AddShelf(User user, string name, bool isDefault = false, bool IsReadQueue = false)
     {
         var shelf = new Shelf
@@ -31,6 +38,13 @@ public class ShelfSystem(ApplicationSettings config, UserService userService, IL
         _logger.Information("New shelf {Name} ({Id}) has been registered for user {Email} ({Id}).", name, shelf.Id, user.Email, user.Id);
     }
 
+    /// <summary>
+    /// Adds a new shelf to the user.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="name"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task AddUserShelf(string email, string name)
     {
         var user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_EXISTS");
@@ -41,6 +55,13 @@ public class ShelfSystem(ApplicationSettings config, UserService userService, IL
         await AddShelf(user, name, false, false);
     }
 
+    /// <summary>
+    /// Removes a shelf from the user.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="shelfId"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task RemoveUserShelf(string email, Guid shelfId)
     {
         var user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_EXISTS");
@@ -62,6 +83,14 @@ public class ShelfSystem(ApplicationSettings config, UserService userService, IL
         _logger.Information("Shelf {Name} ({Id}) has been removed for user {Email} ({Id}).", shelf.Name, shelf.Id, user.Email, user.Id);
     }
 
+    /// <summary>
+    /// Reorders a shelf for the user (move up or down)
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="shelfId"></param>
+    /// <param name="newOrder"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task ReOrderUserShelf(string email, Guid shelfId, int newOrder)
     {
         var user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_EXISTS");
@@ -101,6 +130,14 @@ public class ShelfSystem(ApplicationSettings config, UserService userService, IL
         await _userService.Update(user);
     }
 
+    /// <summary>
+    /// Updates a shelf for the user.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="shelfId"></param>
+    /// <param name="newName"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task UpdateUserShelf(string email, Guid shelfId, string newName)
     {
         var user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_EXISTS");
