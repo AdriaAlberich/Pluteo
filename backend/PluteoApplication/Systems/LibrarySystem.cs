@@ -41,7 +41,8 @@ public class LibrarySystem(ApplicationSettings config, UserService userService, 
         // If exists, check if it is alredy in the user's library and if not create a new one as a shelf book
         if (book != null)
         {
-            if (user.Shelves.All(s => s.Books.All(b => b.ISBN != book.ISBN)))
+            // Check if the book already exists in the user's library
+            if (!user.Shelves.All(s => s.Books.All(b => b.ISBN.FirstOrDefault() != book.ISBN.FirstOrDefault())))
                 throw new ServiceException("BOOK_ALREADY_EXISTS_IN_SHELF");
 
             shelfBook = new ShelfBook
