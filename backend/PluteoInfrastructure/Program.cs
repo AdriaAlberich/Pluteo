@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Options;
 using Pluteo.Domain.Models.Settings;
 using Pluteo.Infrastructure;
 using Serilog;

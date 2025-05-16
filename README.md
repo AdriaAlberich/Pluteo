@@ -13,13 +13,29 @@ Adrià Alberich Jaume - alberichjaumeadria@gmail.com
 
 ### How to install
 
-TODO
+#### Requirements
+
+- `.NET 9` or above.
+- `Node.js` and `npm` package manager.
+- `Docker` and `Docker Compose`.
+- `Mailgun` account with at least the developer tier.
+- `MongoDB Compass` to later connect with the database.
+
+#### Installation steps
+
+- Clone the repository.
+- Go to `backend/PluteoInfrastructure/appsettings.json` and configure at your liking.
+- Open a terminal and cd to repository root dir.
+- Launch the application using `docker-compose up --build`
+- Access the application at `http://localhost:5173` by default.
+
+Docker Compose will build and launch 3 containers, one for the backend, one for the frontend under nginx and another one for the MongoDB database.
+
+Note that the current setup is not recommended for production deployment.
 
 ### How to contribute
 
 Feel free to push a PR, open an issue, or fork the project if you want to use this project as the basis for your own.
-
-TODO
 
 ### License
 

@@ -1,0 +1,10 @@
+{
+    "UserActivationEmailSubject": "Activación de cuenta de {0}",
+    "UserResetPasswordEmailSubject": "Recuperación de cuenta de {0}",
+    "UserNotificationEmailSubject": "Notificación de {0}",
+    "LoanNotificationTitle": "Notificación de préstamo de {0}",
+    "LoanInitialNotificationMessage": "Activadas las notificaciones de préstamo para el libro {0}.",
+    "LoanOverdueNotificationMessage": "El préstamo del libro {0} ha vencido. Por favor, devuélvelo lo antes posible.",
+    "LoanNotificationMessage": "El libro {0} que has tomado prestado vence el {1}. Por favor, devuélvelo lo antes posible.",
+    "LoanDeactivationNotificationMessage": "Desactivadas las notificaciones de préstamo para el libro {0}."
+}

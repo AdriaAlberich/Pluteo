@@ -5,11 +5,18 @@ import { useProfile } from '../hooks/useProfile';
 import { useEffect, useRef } from 'react';
 
 export function LanguageSelector() {
-  const [isOpen, setIsOpen] = useState(false);
+
+  // Hook for updating the language
   const { updateLanguage } = useProfile();
-  const { t, i18n } = useTranslation();
+
+  // Hooks for the translation system
+  const { i18n } = useTranslation();
+
+  // State to control the dropdown
+  const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   
+  // Handle clicks outside the dropdown to close it
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -23,6 +30,7 @@ export function LanguageSelector() {
     };
   }, []);
 
+  // Handle change language click
   const changeLanguage = (lang: string) => {
     i18n.changeLanguage(lang);
     updateLanguage({ locale: lang });
@@ -46,7 +54,17 @@ export function LanguageSelector() {
             }}
             className="w-full px-4 py-2 text-right text-gray-300 hover:bg-gray-700 flex items-center gap-2"
           >
-            {t('languageselector_catalan')}
+            Català
+          </button>
+
+          <button
+            onClick={() => {
+              changeLanguage('es');
+              setIsOpen(false);
+            }}
+            className="w-full px-4 py-2 text-right text-gray-400 hover:bg-gray-700 flex items-center gap-2"
+          >
+            Castellano
           </button>
 
           <button
@@ -56,7 +74,7 @@ export function LanguageSelector() {
             }}
             className="w-full px-4 py-2 text-right text-gray-400 hover:bg-gray-700 flex items-center gap-2"
           >
-            {t('languageselector_english')}
+            English
           </button>
         </div>
       )}

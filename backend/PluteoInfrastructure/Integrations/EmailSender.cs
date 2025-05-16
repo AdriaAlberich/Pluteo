@@ -1,7 +1,5 @@
-
-
 using Pluteo.Domain.Exceptions;
-using Pluteo.Domain.Interfaces;
+using Pluteo.Domain.Interfaces.Integrations;
 using Pluteo.Domain.Models.Settings;
 using RestSharp;
 using RestSharp.Authenticators;
@@ -22,6 +20,15 @@ public class EmailSender(EmailSettings emailSettings) : IEmailSender
 
     private readonly string _fromEmail = emailSettings.EmailFromEmail;
 
+    /// <summary>
+    /// Sends an email using the specified subject, template, recipient and dynamic fields.
+    /// </summary>
+    /// <param name="subject"></param>
+    /// <param name="template"></param>
+    /// <param name="recipient"></param>
+    /// <param name="dynamicFields"></param>
+    /// <returns></returns>
+    /// <exception cref="EmailException"></exception>
     public async Task SendEmail(string subject, string template, string recipient, Dictionary<string,string>? dynamicFields = null)
     {
         string templateContent = await LoadTemplate(template);
@@ -35,6 +42,13 @@ public class EmailSender(EmailSettings emailSettings) : IEmailSender
         await Send(subject, recipient, templateContent);
     }
 
+    /// <summary>
+    /// Sends an email using the specified subject, recipient and template content.
+    /// </summary>
+    /// <param name="subject"></param>
+    /// <param name="recipient"></param>
+    /// <param name="templateContent"></param>
+    /// <returns></returns>
     private async Task Send(string subject, string recipient, string templateContent)
     {
         RestClientOptions options = new(_baseUri)
@@ -56,6 +70,12 @@ public class EmailSender(EmailSettings emailSettings) : IEmailSender
         await client.ExecuteAsync(request);
     }
 
+    /// <summary>
+    /// Loads the email template from the specified directory.
+    /// </summary>
+    /// <param name="template"></param>
+    /// <returns></returns>
+    /// <exception cref="EmailException"></exception>
     private async Task<string> LoadTemplate(string template) 
     {
         string templateContent = string.Empty;
@@ -76,6 +96,12 @@ public class EmailSender(EmailSettings emailSettings) : IEmailSender
         return templateContent;
     }
 
+    /// <summary>
+    /// Processes the template content by replacing dynamic fields with their values.
+    /// </summary>
+    /// <param name="templateContent"></param>
+    /// <param name="dynamicFields"></param>
+    /// <returns></returns>
     private static async Task<string> ProcessTemplate(string templateContent, Dictionary<string,string> dynamicFields)
     {
         await Task.Run(() => {

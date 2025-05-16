@@ -8,5 +8,9 @@ public class UserProfile : Profile
     public UserProfile()
     {
         CreateMap<User, UserModel>().ReverseMap();
+        CreateMap<UserSettings, UserSettingsModel>().ReverseMap();
+        CreateMap<Notification, NotificationModel>().ReverseMap();
+        CreateMap<Shelf, ShelfModel>().ReverseMap();
+        CreateMap<ShelfBook, ShelfBookModel>().ReverseMap();
     }
 }

@@ -3,13 +3,32 @@
     <head>
         <title>Email confirmation</title>
         <style>
-            
+            body {
+                font-family: Arial, sans-serif;
+                background-color: grey;
+                margin: 0;
+                padding: 20px;
+                color: white;
+            }
+            footer {
+                font-size: 10pt;
+            }
         </style>
     </head>
     <body>
-        <h1>Welcome to Pluteo!</h1>
-        <br/><br/>
-        <p><strong>Thank you for sign up with us!</strong></p>
-        <p>Please, proceed to the following link to activate your account: <a href="%activation_url%">%activation_url%</a></p>
+        <header>
+            <h2>Welcome to Pluteo!</h2>
+        </header>
+        <br/>
+        <main>
+            <p><strong>Thanks for registering an account in our platform!</strong></p>
+            <p>Click the following link to confirm your email address: <a href="%activation_url%">%activation_url%</a></p>
+        </main>
+        <hr/>
+        <footer>
+            <p>If you do not know the reason of this message, please just ignore it.</p>
+            <p>Thank you!</p>
+            <p>Pluteo</p>
+        </footer>
     </body>
 </html>
