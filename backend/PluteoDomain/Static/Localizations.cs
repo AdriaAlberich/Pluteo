@@ -3,6 +3,7 @@ public static class Localizations
 {
     public static readonly List<string> Locales = [
         "en",
-        "ca"
+        "ca",
+        "es"
     ];
 }

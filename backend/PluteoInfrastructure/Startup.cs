@@ -176,6 +176,8 @@ public class Startup(IConfiguration configuration)
             return librarySystem;
         });
 
+        // Start the background notification job
+        Console.WriteLine($"Adding LoanNotificationService...");
         services.AddHostedService<LoanNotificationService>();
     }
 }

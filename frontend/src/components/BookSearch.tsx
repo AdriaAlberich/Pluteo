@@ -63,9 +63,6 @@ export function BookSearch({ onClose }: BookSearchProps) {
       showError();
       return;
     }
-    else {
-      resetSearch();
-    }
 
     setSearchPageNumber(1);
     setSearchPageSize(20);
@@ -98,9 +95,9 @@ export function BookSearch({ onClose }: BookSearchProps) {
       },
       {
         onSuccess: () => {
-        getLibraryRefetch();
-        resetSearch();
-        onClose();
+          getLibraryRefetch();
+          resetSearch();
+          onClose();
       },
         onError: () => {
           resetSearch();
@@ -158,6 +155,14 @@ export function BookSearch({ onClose }: BookSearchProps) {
     setSearchPageNumber(1);
     setSearchPageSize(20);
     setSearchTermError(false);
+    const searchTermInput = document.getElementById('searchTerm') as HTMLInputElement;
+    if (searchTermInput) {
+      searchTermInput.value = '';
+    }
+    const externalInput = document.getElementById('external') as HTMLInputElement;
+    if (externalInput) {
+      externalInput.checked = false;
+    }
   }
 
   return (

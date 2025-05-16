@@ -36,7 +36,7 @@ public class UserController(UserService userService, IWebHostEnvironment env, IL
         }
         catch (ServiceException se)
         {
-            return StatusCode(StatusCodes.Status406NotAcceptable, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
+            return StatusCode(StatusCodes.Status400BadRequest, ExceptionControl.ProcessException(se, _logger, _env.IsDevelopment(), true));
         }
         catch (Exception e)
         {

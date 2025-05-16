@@ -17,6 +17,14 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
     private readonly IResourceManager _localizationManager = localizationManager;
     private readonly ILogger _logger = logger;
 
+    /// <summary>
+    /// Adds a new shelf book to the user's shelf.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="shelfId"></param>
+    /// <param name="shelfBook"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task AddShelfBook(string email, Guid shelfId, ShelfBook shelfBook)
     {
         if(shelfId == Guid.Empty)
@@ -34,6 +42,14 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
         _logger.Information("Shelf book {Name} ({Id}) has been added to shelf {ShelfName} ({ShelfId}) for user {Email} ({Id}).", shelfBook.Title, shelfBook.Id, shelf.Name, shelf.Id, user.Email, user.Id);
     }
 
+    /// <summary>
+    /// Gets a shelf book from the user's shelf.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="shelfId"></param>
+    /// <param name="shelfBookId"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task<ShelfBook> GetShelfBook(string email, Guid shelfId, Guid shelfBookId)
     {
         if(shelfId == Guid.Empty)
@@ -47,6 +63,13 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
         return shelfBook;
     }
 
+    /// <summary>
+    /// Gets the details of a shelf book from the user's shelf.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="shelfId"></param>
+    /// <param name="shelfBookId"></param>
+    /// <returns></returns>
     public async Task<ShelfBookDetails> GetShelfBookDetails(string email, Guid shelfId, Guid shelfBookId)
     {
         var shelfBook = await GetShelfBook(email, shelfId, shelfBookId);
@@ -73,6 +96,15 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
         return shelfBookDetails;
     }
 
+    /// <summary>
+    /// Moves a shelf book from one shelf to another.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="shelfId"></param>
+    /// <param name="shelfBookId"></param>
+    /// <param name="newShelfId"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task MoveShelfBook(string email, Guid shelfId, Guid shelfBookId, Guid newShelfId)
     {
         if(shelfId == Guid.Empty)
@@ -99,6 +131,14 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
         _logger.Information("Shelf book {Name} ({Id}) has been moved from shelf {ShelfName} ({ShelfId}) to shelf {NewShelfName} ({NewShelfId}) for user {Email} ({Id}).", shelfBook.Title, shelfBook.Id, shelf.Name, shelf.Id, newShelf.Name, newShelf.Id, user.Email, user.Id);
     }
 
+    /// <summary>
+    /// Removes a shelf book from the user's shelf.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="shelfId"></param>
+    /// <param name="shelfBookId"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task RemoveShelfBook(string email, Guid shelfId, Guid shelfBookId)
     {
         if(shelfId == Guid.Empty)
@@ -117,6 +157,15 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
         _logger.Information("Shelf book {Name} ({Id}) has been removed from shelf {ShelfName} ({ShelfId}) for user {Email} ({Id}).", shelfBook.Title, shelfBook.Id, shelf.Name, shelf.Id, user.Email, user.Id);
     }
 
+    /// <summary>
+    /// Reorders a shelf book in the user's shelf.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="shelfId"></param>
+    /// <param name="shelfBookId"></param>
+    /// <param name="newOrder"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task ReOrderShelfBook(string email, Guid shelfId, Guid shelfBookId, int newOrder)
     {
         if(shelfId == Guid.Empty)
@@ -149,6 +198,15 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
         _logger.Information("Shelf book {Name} ({Id}) has been reordered to position {NewOrder} in shelf {ShelfName} ({ShelfId}) for user {Email} ({Id}).", shelfBook.Title, shelfBook.Id, newOrder, shelf.Name, shelf.Id, user.Email, user.Id);
     }
 
+    /// <summary>
+    /// Updates a shelf book in the user's shelf.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="shelfId"></param>
+    /// <param name="shelfBookId"></param>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task UpdateShelfBook(string email, Guid shelfId, Guid shelfBookId, ShelfBookDetails request)
     {
         if(shelfId == Guid.Empty)
@@ -261,6 +319,15 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
             _logger.Information("No changes were made to shelf book {Name} ({Id}) in shelf {ShelfName} ({ShelfId}) for user {Email} ({Id}).", shelfBook.Title, shelfBook.Id, shelf.Name, shelf.Id, user.Email, user.Id);
     }
 
+    /// <summary>
+    /// Activates the loan notifications for a shelf book.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="shelfId"></param>
+    /// <param name="shelfBookId"></param>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task ActivateShelfBookLoan(string email, Guid shelfId, Guid shelfBookId, ActivateShelfBookLoanRequest request)
     {
         if(shelfId == Guid.Empty)
@@ -279,6 +346,7 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
         if(shelfBook.Loan != null)
             throw new ServiceException("SHELF_BOOK_LOAN_ALREADY_EXISTS");
 
+        // Add the loan info
         shelfBook.Loan = new LibraryLoan
         {
             Library = request.Library,
@@ -288,13 +356,25 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
             LastNotificationDate = DateTime.UtcNow,
         };
 
-        string message = _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanInitialNotificationMessage", shelfBook.Title);
-        await _notificationSystem.AddNotification(user, _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanNotificationTitle", shelfBook.Title), message);
+        // Send a notification if the user has enabled it
+        if(user.Settings.NotifyLoan)
+        {
+            string message = _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanInitialNotificationMessage", shelfBook.Title);
+            await _notificationSystem.AddNotification(user, _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanNotificationTitle", shelfBook.Title), message);
+        }
 
         await _userService.Update(user);
         _logger.Information("Shelf book {Name} ({Id}) has loan notifications activated for user {Email} ({Id}).", shelfBook.Title, shelfBook.Id, shelf.Name, shelf.Id, user.Email, user.Id);
     }
 
+    /// <summary>
+    /// Deactivates the loan notifications for a shelf book.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="shelfId"></param>
+    /// <param name="shelfBookId"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task DeactivateShelfBookLoan(string email, Guid shelfId, Guid shelfBookId)
     {
         if(shelfId == Guid.Empty)
@@ -312,13 +392,25 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
 
         shelfBook.Loan = null;
 
-        string message = _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanDeactivationNotificationMessage", shelfBook.Title);
-        await _notificationSystem.AddNotification(user, _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanNotificationTitle", shelfBook.Title), message);
+        // Send a notification if the user has enabled it
+        if(user.Settings.NotifyLoan)
+        {
+            string message = _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanDeactivationNotificationMessage", shelfBook.Title);
+            await _notificationSystem.AddNotification(user, _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanNotificationTitle", shelfBook.Title), message);
+        }
 
         await _userService.Update(user);
         _logger.Information("Shelf book {Name} ({Id}) has loan notifications deactivated for user {Email} ({Id}).", shelfBook.Title, shelfBook.Id, shelf.Name, shelf.Id, user.Email, user.Id);
     }
 
+    /// <summary>
+    /// Checks if the loan is active for a shelf book.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="shelfId"></param>
+    /// <param name="shelfBookId"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task<bool> IsShelfBookLoanActive(string email, Guid shelfId, Guid shelfBookId)
     {
         if(shelfId == Guid.Empty)
@@ -334,12 +426,19 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
         return shelfBook.Loan != null;
     }
 
+    /// <summary>
+    /// Sends loan notifications to users.
+    /// </summary>
+    /// <returns></returns>
     public async Task SendLoanNotifications()
     {
         var users = await _userService.ListWithLoans();
 
         foreach(var user in users)
         {
+            if(user.Settings.NotifyLoan == false)
+                continue;
+
             foreach(var shelf in user.Shelves)
             {
                 foreach(var shelfBook in shelf.Books)
@@ -353,13 +452,21 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
         }
     }
 
+    /// <summary>
+    /// Sends a loan notification to a user.
+    /// </summary>
+    /// <param name="user"></param>
+    /// <param name="shelfBook"></param>
+    /// <returns></returns>
     public async Task SendLoanNotification(User user, ShelfBook shelfBook)
     {
         if(shelfBook.Loan == null)
             return;
             
         // Loan is active and overdue
-        if(shelfBook.Loan.DueDate > DateTime.UtcNow && shelfBook.Loan.LastNotificationDate <= DateTime.UtcNow.AddDays(-user.Settings.NotifyLoanBeforeDaysFrequency))
+        if(user.Settings.NotifyLoanBeforeDaysFrequency > 0 && 
+           shelfBook.Loan.DueDate < DateTime.UtcNow && 
+           shelfBook.Loan.LastNotificationDate <= DateTime.UtcNow.AddDays(-user.Settings.NotifyLoanBeforeDaysFrequency))
         {
             string message = _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanOverdueNotificationMessage", shelfBook.Title);
             await _notificationSystem.AddNotification(user, _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanNotificationTitle", shelfBook.Title), message);
@@ -368,8 +475,11 @@ public class ShelfBookSystem(ApplicationSettings config, UserService userService
 
             await _userService.Update(user);
         }
+        
         // Loan is active and not overdue, notify before days
-        else if(shelfBook.Loan.DueDate <= DateTime.UtcNow.AddDays(user.Settings.NotifyLoanBeforeDays) && shelfBook.Loan.LastNotificationDate <= DateTime.UtcNow.AddDays(-user.Settings.NotifyLoanBeforeDaysFrequency))
+        else if(user.Settings.NotifyLoanBeforeDays > 0 && user.Settings.NotifyLoanBeforeDaysFrequency > 0 &&
+                shelfBook.Loan.DueDate <= DateTime.UtcNow.AddDays(user.Settings.NotifyLoanBeforeDays) && 
+                shelfBook.Loan.LastNotificationDate <= DateTime.UtcNow.AddDays(-user.Settings.NotifyLoanBeforeDaysFrequency))
         {
             string message = _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanNotificationMessage", shelfBook.Title, shelfBook.Loan.DueDate.ToString("dd/MM/yyyy"));
             await _notificationSystem.AddNotification(user, _localizationManager.GetStringFormatted(user.Settings.Locale, "LoanNotificationTitle", shelfBook.Title), message);

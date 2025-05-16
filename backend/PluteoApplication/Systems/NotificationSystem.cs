@@ -16,8 +16,17 @@ public class NotificationSystem(ApplicationSettings config, UserService userServ
     private readonly IEmailSender _emailSender = emailSender;
     private readonly IResourceManager _localizationManager = localizationManager;
 
+    /// <summary>
+    /// Adds a new notification to the user.
+    /// </summary>
+    /// <param name="user"></param>
+    /// <param name="title"></param>
+    /// <param name="content"></param>
+    /// <param name="markAsRead"></param>
+    /// <returns></returns>
     public async Task AddNotification(User user, string title, string content, bool markAsRead = false)
     {
+        // Check if the user has reached the max notification number and remove the oldest
         if(user.Notifications.Count >= _config.UserMaxNotifications)
             user.Notifications.Remove(user.Notifications.Last());
 
@@ -36,6 +45,7 @@ public class NotificationSystem(ApplicationSettings config, UserService userServ
 
         await _userService.Update(user);
 
+        // Send email notification depending on the user's settings
         if(user.Settings.NotifyByEmail && !markAsRead)
         {
             Dictionary<string,string> dynamicFields = new()
@@ -50,6 +60,11 @@ public class NotificationSystem(ApplicationSettings config, UserService userServ
         _logger.Information("User {Email} ({Id}) has received a new notification: {Title}", user.Email, user.Id, title);
     }
 
+    /// <summary>
+    /// Returns the list of notifications for a user.
+    /// </summary>
+    /// <param name="user"></param>
+    /// <returns></returns>
     public async Task<List<Notification>> GetNotificationList(User user)
     {
         await SortNotifications(user);
@@ -57,6 +72,12 @@ public class NotificationSystem(ApplicationSettings config, UserService userServ
         return user.Notifications;
     }
 
+    /// <summary>
+    /// Handles the click on a notification.
+    /// </summary>
+    /// <param name="user"></param>
+    /// <param name="notificationId"></param>
+    /// <returns></returns>
     public async Task NotificationClick(User user, Guid notificationId)
     {
         Notification? notification = user.Notifications.Find(x => x.NotificationId == notificationId);
@@ -71,6 +92,12 @@ public class NotificationSystem(ApplicationSettings config, UserService userServ
         _logger.Information("User {Email} ({Id}) has clicked on notification: {Title}", user.Email, user.Id, notification.Title);
     }
 
+    /// <summary>
+    /// Removes a notification from the user.
+    /// </summary>
+    /// <param name="user"></param>
+    /// <param name="notificationId"></param>
+    /// <returns></returns>
     public async Task RemoveNotification(User user, Guid notificationId)
     {
         await Task.Run(() => {
@@ -88,6 +115,12 @@ public class NotificationSystem(ApplicationSettings config, UserService userServ
         });
     }
 
+    /// <summary>
+    /// Removes all notifications from the user (controller call).
+    /// </summary>
+    /// <param name="email"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task<List<Notification>> GetUserNotifications(string email)
     {
         User? user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_FOUND");
@@ -95,6 +128,13 @@ public class NotificationSystem(ApplicationSettings config, UserService userServ
         return await GetNotificationList(user);
     }
 
+    /// <summary>
+    /// Handles the click on a notification (controller call).
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="notificationId"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task NotificationUserClick(string email, Guid notificationId)
     {
         User? user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_FOUND");
@@ -102,6 +142,13 @@ public class NotificationSystem(ApplicationSettings config, UserService userServ
         await NotificationClick(user, notificationId);
     }
 
+    /// <summary>
+    /// Removes a notification from the user (controller call).
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="notificationId"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task RemoveUserNotification(string email, Guid notificationId)
     {
         User? user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_FOUND");
@@ -109,6 +156,12 @@ public class NotificationSystem(ApplicationSettings config, UserService userServ
         await RemoveNotification(user, notificationId);
     }
 
+    /// <summary>
+    /// Removes all notifications from the user (controller call).
+    /// </summary>
+    /// <param name="email"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task RemoveUserNotifications(string email)
     {
         User? user = await _userService.GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_FOUND");
@@ -116,12 +169,22 @@ public class NotificationSystem(ApplicationSettings config, UserService userServ
         await RemoveAllNotifications(user);
     }
     
+    /// <summary>
+    /// Removes all notifications from the user.
+    /// </summary>
+    /// <param name="user"></param>
+    /// <returns></returns>
     public async Task RemoveAllNotifications(User user)
     {
         user.Notifications.Clear(); 
         await _userService.Update(user);
     }
 
+    /// <summary>
+    /// Sorts the notifications of a user by timestamp (latest first).
+    /// </summary>
+    /// <param name="user"></param>
+    /// <returns></returns>
     public async Task SortNotifications(User user)
     {
         await Task.Run(() => { user.Notifications.Sort((x, y) => y.Timestamp.CompareTo(x.Timestamp)); });

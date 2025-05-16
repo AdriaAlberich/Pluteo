@@ -22,6 +22,12 @@ public class UserService(ApplicationSettings config, ILogger logger, IUserReposi
     private readonly IResourceManager _localizationManager = localizationManager;
     private readonly IEmailSender _emailSender = emailSender;
 
+    /// <summary>
+    /// Creates a new user in the database.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="password"></param>
+    /// <returns></returns>
     public async Task<User> Create(string email, string password)
     {
         User newUser = new()
@@ -31,6 +37,7 @@ public class UserService(ApplicationSettings config, ILogger logger, IUserReposi
             Password = _passwordCipher.Encrypt(password),
             Roles = [UserRoles.Roles[0]], // Default role is User
             Notifications = [],
+            // Default settings
             Settings = new()
             {
                 NotifyByEmail = _config.DefaultNotifyByEmail,
@@ -39,6 +46,7 @@ public class UserService(ApplicationSettings config, ILogger logger, IUserReposi
                 NotifyLoanBeforeDaysFrequency = _config.DefaultNotifyLoanBeforeDaysFrequency,
                 Locale = _config.DefaultLocale
             },
+            // Default shelves
             Shelves = [
                 new Shelf
                 {
@@ -70,6 +78,11 @@ public class UserService(ApplicationSettings config, ILogger logger, IUserReposi
         return newUser;
     }
 
+    /// <summary>
+    /// Updates an existing user in the database.
+    /// </summary>
+    /// <param name="user"></param>
+    /// <returns></returns>
     public async Task Update(User user)
     {
         await _userRepository.Update(user);
@@ -77,6 +90,13 @@ public class UserService(ApplicationSettings config, ILogger logger, IUserReposi
         _logger.Information("User {Email} ({Id}) has been updated.", user.Email, user.Id);
     }
 
+    /// <summary>
+    /// Updates an existing user in the database from a request.
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="userUpdateRequest"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task UpdateFromRequest(Guid userId, UserUpdateRequest userUpdateRequest)
     {
         if(userUpdateRequest == null)
@@ -100,6 +120,11 @@ public class UserService(ApplicationSettings config, ILogger logger, IUserReposi
             _logger.Information("User {Email} ({Id}) has no changes to update.", user.Email, user.Id);
     }
 
+    /// <summary>
+    /// Deletes an existing user from the database.
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task Delete(Guid userId)
     {
         await _userRepository.Delete(userId);
@@ -107,21 +132,39 @@ public class UserService(ApplicationSettings config, ILogger logger, IUserReposi
         _logger.Information("User with ID ({Id}) has been deleted from database", userId);
     }
 
+    /// <summary>
+    /// Gets a user by ID from the database.
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<User> GetById(Guid userId)
     {
         return await _userRepository.GetById(userId);
     }
 
+    /// <summary>
+    /// Gets a user by email from the database.
+    /// </summary>
+    /// <returns></returns>
     public async Task<List<User>> List()
     {
         return await _userRepository.List();
     }
 
+    /// <summary>
+    /// Gets a list of users with their loans from the database.
+    /// </summary>
+    /// <returns></returns>
     public async Task<List<User>> ListWithLoans()
     {
         return await _userRepository.ListWithLoans();
     }
 
+    /// <summary>
+    /// Gets a user by email from the database.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <returns></returns>
     public async Task<User?> GetUserByEmail(string email)
     {
         List<User> users = await _userRepository.List();
@@ -129,6 +172,14 @@ public class UserService(ApplicationSettings config, ILogger logger, IUserReposi
         return users.Find(x => x.Email == email);
     }
 
+    /// <summary>
+    /// Registers a new user in the database.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="password"></param>
+    /// <param name="passwordRepeat"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task Register(string email, string password, string passwordRepeat)
     {
         await CheckEmail(email);
@@ -144,6 +195,13 @@ public class UserService(ApplicationSettings config, ILogger logger, IUserReposi
         await SendUserActivation(newUser.Email);
     }
 
+    /// <summary>
+    /// Logs in a user by email and password.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="password"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task<string> Login(string email, string password)
     {
         List<User> users = await _userRepository.List();
@@ -173,6 +231,12 @@ public class UserService(ApplicationSettings config, ILogger logger, IUserReposi
         return accessToken;
     }
 
+    /// <summary>
+    /// Sends an activation email to the user.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task SendUserActivation(string email)
     {
         var user = await GetUserByEmail(email);
@@ -196,6 +260,12 @@ public class UserService(ApplicationSettings config, ILogger logger, IUserReposi
         _logger.Information("Sent activation email to {Email} ({Id})", user.Email, user.Id);
     }
 
+    /// <summary>
+    /// Activates a user by token.
+    /// </summary>
+    /// <param name="token"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task ActivateUser(string token)
     {
         User user = List().Result.Find(x => x.ActivationToken == Uri.UnescapeDataString(token)) ?? throw new ServiceException("USER_ACTIVATION_TOKEN_NOT_FOUND");
@@ -207,6 +277,13 @@ public class UserService(ApplicationSettings config, ILogger logger, IUserReposi
         _logger.Information("User {Email} ({Id}) has been activated by token", user.Email, user.Id);
     }
 
+    /// <summary>
+    /// Adds a role to a user.
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="role"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task AddRole(Guid userId, string role)
     {
         if(!UserRoles.Roles.Contains(role))
@@ -222,6 +299,13 @@ public class UserService(ApplicationSettings config, ILogger logger, IUserReposi
         _logger.Information("User {Email} ({Id}) has been assigned role {Role}", user.Email, user.Id, role);
     }
 
+    /// <summary>
+    /// Removes a role from a user.
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="role"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task RemoveRole(Guid userId, string role)
     {
         if(!UserRoles.Roles.Contains(role))
@@ -237,6 +321,15 @@ public class UserService(ApplicationSettings config, ILogger logger, IUserReposi
         _logger.Information("User {Email} ({Id}) has been removed role {Role}", user.Email, user.Id, role);
     }
 
+    /// <summary>
+    /// Changes the password of a user.
+    /// </summary>
+    /// <param name="user"></param>
+    /// <param name="currentPassword"></param>
+    /// <param name="newPassword"></param>
+    /// <param name="newPasswordRepeat"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task ChangePassword(User user, string currentPassword, string newPassword, string newPasswordRepeat)
     {
         if(string.IsNullOrWhiteSpace(user.Password))
@@ -260,18 +353,41 @@ public class UserService(ApplicationSettings config, ILogger logger, IUserReposi
         _logger.Information("{Email} ({Id}) changed his password", user.Email, user.Id);
     }
 
+    /// <summary>
+    /// Changes the password of a user by email.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="currentPassword"></param>
+    /// <param name="newPassword"></param>
+    /// <param name="newPasswordRepeat"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task ChangePasswordByEmail(string email, string currentPassword, string newPassword, string newPasswordRepeat)
     {
         var user = await GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_EXISTS");
         await ChangePassword(user, currentPassword, newPassword, newPasswordRepeat);
     }
 
+    /// <summary>
+    /// Changes the password of a user by ID.
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="currentPassword"></param>
+    /// <param name="newPassword"></param>
+    /// <param name="newPasswordRepeat"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task ChangePasswordById(Guid userId, string currentPassword, string newPassword, string newPasswordRepeat)
     {
         var user = await GetById(userId) ?? throw new ServiceException("USER_NOT_EXISTS");
         await ChangePassword(user, currentPassword, newPassword, newPasswordRepeat);
     }
 
+    /// <summary>
+    /// Sends a password reset email to the user.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <returns></returns>
     public async Task SendUserResetPassword(string email)
     {
         var user = await GetUserByEmail(email);
@@ -292,6 +408,14 @@ public class UserService(ApplicationSettings config, ILogger logger, IUserReposi
         _logger.Information("Sent password reset email to {Email} ({Id})", user.Email, user.Id);
     }
 
+    /// <summary>
+    /// Resets the password of a user by token.
+    /// </summary>
+    /// <param name="token"></param>
+    /// <param name="newPassword"></param>
+    /// <param name="newPasswordRepeat"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task ResetPassword(string token, string newPassword, string newPasswordRepeat)
     {
         var user = List().Result.Find(x => x.ResetPasswordToken == Uri.UnescapeDataString(token)) ?? throw new ServiceException("USER_RESET_PASSWORD_TOKEN_NOT_FOUND");
@@ -311,6 +435,12 @@ public class UserService(ApplicationSettings config, ILogger logger, IUserReposi
         _logger.Information("Password reset for user {Email} ({Id})", user.Email, user.Id);
     }
 
+    /// <summary>
+    /// Checks if the email is valid and does not exist in the database.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task CheckEmail(string email)
     {
         if(!await CheckEmailValid(email))
@@ -324,6 +454,11 @@ public class UserService(ApplicationSettings config, ILogger logger, IUserReposi
             throw new ServiceException("USER_EMAIL_EXISTS");
     }
 
+    /// <summary>
+    /// Checks if the email is valid.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <returns></returns>
     public async Task<bool> CheckEmailValid(string email)
     {
         Regex pattern = new(_config.EmailPattern);
@@ -331,11 +466,22 @@ public class UserService(ApplicationSettings config, ILogger logger, IUserReposi
         return await Task.Run(() => email.Length <= _config.EmailLimit && pattern.Match(email).Success);
     }
 
+    /// <summary>
+    /// Checks if the password is valid.
+    /// </summary>
+    /// <param name="password"></param>
+    /// <returns></returns>
     public async Task<bool> CheckPasswordValid(string password)
     {
         return await Task.Run(() => _passwordValidator.IsValid(password));
     }
 
+    /// <summary>
+    /// Gets the user settings by email.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task<UserSettingsResponse> GetUserSettings(string email)
     {
         var user = await GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_EXISTS");
@@ -351,9 +497,18 @@ public class UserService(ApplicationSettings config, ILogger logger, IUserReposi
         };
     }
 
+    /// <summary>
+    /// Updates the user settings by email.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task UpdateUserSettings(string email, UserSettingsUpdateRequest request)
     {
         var user = await GetUserByEmail(email) ?? throw new ServiceException("USER_NOT_EXISTS");
+
+        // Update only if at least one field is changed
         bool isUpdated = false;
 
         if(request.NotifyByEmail.HasValue)

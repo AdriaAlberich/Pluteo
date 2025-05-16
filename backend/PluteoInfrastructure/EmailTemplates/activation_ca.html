@@ -3,13 +3,32 @@
     <head>
         <title>Confirmació de email</title>
         <style>
-            
+            body {
+                font-family: Arial, sans-serif;
+                background-color: grey;
+                margin: 0;
+                padding: 20px;
+                color: white;
+            }
+            footer {
+                font-size: 10pt;
+            }
         </style>
     </head>
     <body>
-        <h1>Benvingut/da a Pluteo!</h1>
-        <br/><br/>
-        <p><strong>Gràcies per registrar-te amb nosaltres!</strong></p>
-        <p>Fes clic al següent enllaç per confirmar el teu correu electrònic: <a href="%activation_url%">%activation_url%</a></p>
+        <header>
+            <h2>Benvingut/da a Pluteo!</h2>
+        </header>
+        <br/>
+        <main>
+            <p><strong>Gràcies per registrar-te amb nosaltres!</strong></p>
+            <p>Fes clic al següent enllaç per confirmar el teu correu electrònic: <a href="%activation_url%">%activation_url%</a></p>
+        </main>
+        <hr/>
+        <footer>
+            <p>Si no saps el motiu d'aquest correu electrònic, siusplau ignora'l.</p>
+            <p>Gràcies!</p>
+            <p>Pluteo</p>
+        </footer>
     </body>
 </html>

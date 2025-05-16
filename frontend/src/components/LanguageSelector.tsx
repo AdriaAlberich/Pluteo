@@ -10,7 +10,7 @@ export function LanguageSelector() {
   const { updateLanguage } = useProfile();
 
   // Hooks for the translation system
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
 
   // State to control the dropdown
   const [isOpen, setIsOpen] = useState(false);

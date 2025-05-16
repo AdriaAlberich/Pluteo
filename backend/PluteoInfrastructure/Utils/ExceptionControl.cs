@@ -5,6 +5,14 @@ using ILogger = Serilog.ILogger;
 namespace Pluteo.Infrastructure.Utils;
 public static class ExceptionControl
 {
+    /// <summary>
+    /// Processes an exception and logs it.
+    /// </summary>
+    /// <param name="e"></param>
+    /// <param name="logger"></param>
+    /// <param name="isDevelopment"></param>
+    /// <param name="isWarning"></param>
+    /// <returns></returns>
     public static ExceptionResponse ProcessException(Exception e, ILogger logger, bool isDevelopment, bool isWarning) 
     {
         StackTrace trace = new(e, true);

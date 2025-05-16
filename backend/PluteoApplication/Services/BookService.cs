@@ -6,7 +6,6 @@ using Pluteo.Domain.Models.Entities;
 using Pluteo.Domain.Exceptions;
 using System.Text.RegularExpressions;
 using Pluteo.Domain.Models.Dto.Books;
-using System.Linq;
 
 namespace Pluteo.Application.Services;
 public class BookService(ApplicationSettings config, ILogger logger, IBaseRepository<Book, Guid> bookRepository) : IBookService
@@ -15,6 +14,11 @@ public class BookService(ApplicationSettings config, ILogger logger, IBaseReposi
     private readonly ILogger _logger = logger;
     private readonly IBaseRepository<Book, Guid> _bookRepository = bookRepository;
 
+    /// <summary>
+    /// Creates a new book in the database.
+    /// </summary>
+    /// <param name="request">CreateBookRequest</param>
+    /// <returns>Book</returns>
     public async Task<Book> Create(CreateBookRequest request)
     {
         Book newBook = new()
@@ -39,6 +43,11 @@ public class BookService(ApplicationSettings config, ILogger logger, IBaseReposi
         return newBook;
     }
 
+    /// <summary>
+    /// Updates an existing book in the database.
+    /// </summary>
+    /// <param name="book">Book</param>
+    /// <returns></returns>
     public async Task Update(Book book)
     {
         await _bookRepository.Update(book);
@@ -46,13 +55,23 @@ public class BookService(ApplicationSettings config, ILogger logger, IBaseReposi
         _logger.Information("Book {Title} ({Id}) has been updated.", book.Title, book.Id);
     }
 
+    /// <summary>
+    /// Updates an existing book in the database from a request.
+    /// </summary>
+    /// <param name="bookId">Guid of the book</param>
+    /// <param name="updateBookRequest"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task UpdateFromRequest(Guid bookId, UpdateBookRequest updateBookRequest)
     {
         if(updateBookRequest == null)
             throw new ServiceException("BOOK_UPDATE_REQUEST_NULL");
 
         Book book = await GetById(bookId) ?? throw new ServiceException("BOOK_NOT_EXISTS");
+
+        // Update only if at least one field is changed
         bool isUpdated = false;
+
         if(!string.IsNullOrWhiteSpace(updateBookRequest.Title))
         {
             book.Title = updateBookRequest.Title;
@@ -119,6 +138,11 @@ public class BookService(ApplicationSettings config, ILogger logger, IBaseReposi
             _logger.Information("Book {Title} ({Id}) has no changes to update.", book.Title, book.Id);
     }
 
+    /// <summary>
+    /// Deletes a book from the database.
+    /// </summary>
+    /// <param name="bookId"></param>
+    /// <returns></returns>
     public async Task Delete(Guid bookId)
     {
         await _bookRepository.Delete(bookId);
@@ -126,22 +150,44 @@ public class BookService(ApplicationSettings config, ILogger logger, IBaseReposi
         _logger.Information("Book with ID ({Id}) has been deleted from database", bookId);
     }
 
+    /// <summary>
+    /// Gets a book by its ID.
+    /// </summary>
+    /// <param name="bookId"></param>
+    /// <returns></returns>
     public async Task<Book> GetById(Guid bookId)
     {
         return await _bookRepository.GetById(bookId);
     }
 
+    /// <summary>
+    /// Gets a book by its ISBN.
+    /// </summary>
+    /// <param name="isbn"></param>
+    /// <returns></returns>
     public async Task<Book?> GetByISBN(string isbn)
     {
         var books = await _bookRepository.List();
         return books.FirstOrDefault(b => b.ISBN.Contains(isbn));
     }
 
+    /// <summary>
+    /// Lists all books in the database.
+    /// </summary>
+    /// <returns></returns>
     public async Task<List<Book>> List()
     {
         return await _bookRepository.List();
     }
 
+    /// <summary>
+    /// Searches for books in the database by their title.
+    /// </summary>
+    /// <param name="searchTerms"></param>
+    /// <param name="page"></param>
+    /// <param name="pageSize"></param>
+    /// <returns></returns>
+    /// <exception cref="ServiceException"></exception>
     public async Task<BookSearchResults> Search(List<string> searchTerms, int page = 1, int pageSize = 10)
     {
         if(searchTerms == null || searchTerms.Count == 0)
@@ -150,6 +196,8 @@ public class BookService(ApplicationSettings config, ILogger logger, IBaseReposi
         List<Book> books = await _bookRepository.List();
         List<Book> filteredBooks = [];
 
+
+        // Filter bookks with the search terms
         foreach(string term in searchTerms)
         {
             var regex = new Regex(term, RegexOptions.IgnoreCase);
@@ -157,13 +205,16 @@ public class BookService(ApplicationSettings config, ILogger logger, IBaseReposi
             filteredBooks.AddRange(matchingBooks);
         }
 
+        // Remove duplicates
         filteredBooks = [.. filteredBooks.Distinct()];
 
+        // Paginate the results
         int totalCount = filteredBooks.Count;
         int totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
         int skip = (page - 1) * pageSize;
         List<Book> paginatedBooks = [.. filteredBooks.Skip(skip).Take(pageSize)];
 
+        // Create the response object
         BookSearchResults results = new()
         {
             TotalResults = totalCount,

@@ -85,7 +85,7 @@ export function Library() {
           return;
         }
 
-        const updatedBooks = arrayMove(
+        arrayMove(
           library.shelves[shelfIndex].books,
           fromIndex,
           overIndex

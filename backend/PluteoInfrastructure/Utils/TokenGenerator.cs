@@ -13,6 +13,12 @@ public class TokenGenerator(ApplicationSettings applicationSettings) : ITokenGen
 
     private readonly int _accessTokenExpireMinutes = applicationSettings.AccessTokenExpireMinutes;
 
+    /// <summary>
+    /// Generates a JWT access token for the user.
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="roles"></param>
+    /// <returns></returns>
     public string GenerateAccessToken(string email, List<string> roles)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -48,6 +54,10 @@ public class TokenGenerator(ApplicationSettings applicationSettings) : ITokenGen
         return tokenHandler.WriteToken(token);
     }
 
+    /// <summary>
+    /// Generates a random token for multiple purposes.
+    /// </summary>
+    /// <returns></returns>
     public string GenerateRandomToken()
     {
         return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));

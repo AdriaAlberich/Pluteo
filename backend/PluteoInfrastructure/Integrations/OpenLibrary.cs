@@ -1,7 +1,5 @@
 
-
 using Newtonsoft.Json;
-using Pluteo.Domain.Exceptions;
 using Pluteo.Domain.Interfaces.Integrations;
 using Pluteo.Domain.Models.Dto.Books;
 using Pluteo.Domain.Models.Dto.Integrations.OpenLibrary;
@@ -15,6 +13,14 @@ public class OpenLibrary(OpenLibrarySettings openLibrarySettings) : ILibraryInte
     private readonly string _apiUrl = openLibrarySettings.ApiUrl;
     private readonly string _coverApiUrl = openLibrarySettings.CoverApiUrl;
 
+    /// <summary>
+    /// Searches for books in the Open Library API using the provided search terms.
+    /// </summary>
+    /// <param name="searchTerms"></param>
+    /// <param name="page"></param>
+    /// <param name="pageSize"></param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
     public async Task<BookSearchResults> Search(List<string> searchTerms, int page = 1, int pageSize = 10)
     {
         RestClient client = new(_apiUrl + "/search.json");
@@ -64,6 +70,12 @@ public class OpenLibrary(OpenLibrarySettings openLibrarySettings) : ILibraryInte
         throw new Exception("Error fetching data from Open Library API.");
     }
 
+    /// <summary>
+    /// Fetches book details from the Open Library API using the provided ISBN.
+    /// </summary>
+    /// <param name="isbn"></param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
     public async Task<CreateBookRequest> GetBookDetails(string isbn)
     {
         RestClient client = new(_apiUrl + "/search.json");
@@ -106,6 +118,12 @@ public class OpenLibrary(OpenLibrarySettings openLibrarySettings) : ILibraryInte
         throw new Exception("Error fetching data from Open Library API.");
     }
 
+    /// <summary>
+    /// Fetches the cover image from the provided URL and converts it to a base64 string.
+    /// </summary>
+    /// <param name="imageUrl"></param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
     private static async Task<string> GetBase64FromUrl(string imageUrl)
     {
         RestClient client = new(imageUrl);
